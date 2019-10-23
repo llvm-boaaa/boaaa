@@ -51,10 +51,21 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 #===# LLVM #===#
 
-configure_file(llvm/CMakeLists.txt.in llvm/CMakeLists.txt)
+configure_file(llvm/CMakeLists.txt.in llvm/bin/llvm/CMakeLists.txt)
+find_package(LLVM REQUIRED CONFIG)
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
+llvm_map_components_to_libnames(llvm_libs core)
 
 #===# Include #===#
 
 
 
 #===# BOAAA #===#
+
+target_link_options(boaaa ${llvm_libs})
