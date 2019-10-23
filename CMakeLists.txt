@@ -51,7 +51,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 #===# LLVM #===#
 
-configure_file(llvm/CMakeLists.txt.in llvm/bin/llvm/CMakeLists.txt)
 find_package(LLVM REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
