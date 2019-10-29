@@ -1,0 +1,9 @@
+[submodule "cmake/nicemake"]
+	path = cmake/nicemake
+	url = https://github.com/fkutzner/NiceMake.git
+[submodule "llvm/current"]
+	path = llvm/current
+	url = https://github.com/llvm-mirror/llvm.git
+[submodule "libraries/llvm/current"]
+	path = libraries/llvm/current
+	url = https://github.com/llvm-mirror/llvm.git
