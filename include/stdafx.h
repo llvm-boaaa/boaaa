@@ -1,6 +1,9 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
-#include <gtest/gtest.h>
+#include "llvm/Analysis/AliasAnalysis.h"
+
+
+
 
 #endif
