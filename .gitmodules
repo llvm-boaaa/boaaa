@@ -7,3 +7,6 @@
 [submodule "libraries/llvm/current"]
 	path = libraries/llvm/current
 	url = https://github.com/llvm-mirror/llvm.git
+[submodule "libraries/clang"]
+	path = libraries/clang
+	url = https://github.com/llvm-mirror/clang.git
