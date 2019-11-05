@@ -13,6 +13,3 @@
 [submodule "analysis/sfs"]
 	path = analysis/sfs
 	url = https://github.com/hotpeperoncino/sfs.git
-[submodule "whole-program-llvm"]
-	path = whole-program-llvm
-	url = https://github.com/SRI-CSL/whole-program-llvm.git
