@@ -16,3 +16,6 @@
 [submodule "repos/fmt"]
 	path = repos/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "source/llvmir-gen"]
+	path = source/llvmir-gen
+	url = https://github.com/compor/llvm-ir-cmake-utils.git
