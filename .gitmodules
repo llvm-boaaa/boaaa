@@ -13,3 +13,6 @@
 [submodule "analysis/sfs"]
 	path = analysis/sfs
 	url = https://github.com/hotpeperoncino/sfs.git
+[submodule "source/llvmir-gen"]
+	path = source/llvmir-gen
+	url = https://github.com/compor/llvm-ir-cmake-utils.git
