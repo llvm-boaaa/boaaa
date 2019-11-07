@@ -1,0 +1,10 @@
+https://stackoverflow.com/questions/29222703/pointer-analysis-in-llvm
+
+$ opt -load ../Release+Asserts/lib/libAnders.so -anders-aa -aa-eval -print-all-alias-modref-info -disable-output < test.bc
+
+pointer analysis
+
+opt path in llvm: tools/opt/opt.cpp
+find pointeranalysis and all needed for running aa on .bc files
+
+code must be configurable 
