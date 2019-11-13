@@ -9,11 +9,11 @@ include(cmake/nicemake/NiceMake.cmake)
 
 set(NM_CONF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(LLVM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libraries/llvm/current/cmake/modules/)
+set(LLVM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/llvm/900/cmake/modules/")
 
 
 find_package(LLVM REQUIRED CONFIG)
-
+message(STATUS "LLVM_DIR: ${LLVM_DIR}")
 message(STATUS "================LLVM==================")
 message(STATUS "Found LLVM Version ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVM libs: ${LLVM_AVAILABLE_LIBS} ")
