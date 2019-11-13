@@ -19,3 +19,6 @@
 [submodule "source/llvmir-gen"]
 	path = source/llvmir-gen
 	url = https://github.com/compor/llvm-ir-cmake-utils.git
+[submodule "libraries/llvm/llvm_build"]
+	path = libraries/llvm/llvm_build
+	url = https://github.com/llvm-mirror/llvm.git
