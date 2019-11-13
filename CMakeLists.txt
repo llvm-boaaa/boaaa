@@ -7,26 +7,23 @@ include(cmake/nicemake/NiceMake.cmake)
 
 # include llvm
 
-set(NM_CONF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+#set(NM_CONF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(LLVM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/llvm/900/cmake/modules/")
+set(LLVM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/llvm/llvm_build/cmake/modules/CMakeFiles/")
 
 
 find_package(LLVM REQUIRED CONFIG)
-message(STATUS "LLVM_DIR: ${LLVM_DIR}")
 message(STATUS "================LLVM==================")
+message(STATUS "LLVM_DIR: ${LLVM_DIR}")
 message(STATUS "Found LLVM Version ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVM libs: ${LLVM_AVAILABLE_LIBS} ")
-message(STATUS "LLVM include dirs: ${LLVM_AVAILABLE_LIBS} ")
+message(STATUS "LLVM include dirs: ${LLVM_INCLUDE_DIRS} ")
 message(STATUS "======================================")
 
 nm_add_thirdparty_libs(NAME LLVM_CURRENT 
 					   LIBS ${LLVM_AVAILABLE_LIBS} 
 					   INTERFACE_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS}
 					   INTERFACE_COMPILE_OPTIONS -D_DEBUG
-					   -D__STDC_CONSTANT_MACROS
-					   -D__STDC_FORMAT_MACROS
-					   -D__STDC_LIMIT_MACROS
 					   )
 
 add_definitions(${LLVM_DEFINITIONS})
