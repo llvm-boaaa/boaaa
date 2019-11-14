@@ -42,8 +42,16 @@
 #include <algorithm>
 #include <memory>
 
+using namespace llvm;
+
+//command line arg variables
+
+
+
 void main() {
 	
+	//init llvm and register needed passes
+
 	LLVMContext Context;
 
 	InitializeAllTargets();
@@ -92,5 +100,15 @@ void main() {
 	initializeHardwareLoopsPass(Registry);
 	*/
 
-	llvm::SMDiagnostic Err;
+	SMDiagnostic Err;
+
+	//maybe needed notur
+	Context.setDiscardValueNames(false);
+	//read imput file
+
+
+	//load module
+
+
+
 }
