@@ -9,7 +9,7 @@ include(cmake/nicemake/NiceMake.cmake)
 
 #set(NM_CONF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(LLVM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/llvm/llvm_build/cmake/modules/CMakeFiles/")
+set(LLVM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/llvm/900/cmake/modules/CMakeFiles/")
 
 
 find_package(LLVM REQUIRED CONFIG)

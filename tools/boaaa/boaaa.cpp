@@ -46,11 +46,12 @@ using namespace llvm;
 
 //command line arg variables
 
+static cl::opt<std::string> OutputFilename("o", cl::desc("Specify output filename"), cl::value_desc("filename"));
 
-
-void main() {
+int main(int argc, char** argv) {
 	
 	//init llvm and register needed passes
+	InitLLVM X(argc, argv);
 
 	LLVMContext Context;
 
@@ -102,6 +103,10 @@ void main() {
 
 	SMDiagnostic Err;
 
+	const char* args[] = { "boaaa", "-help" };
+	//parse command line
+	cl::ParseCommandLineOptions(2, args);
+
 	//maybe needed notur
 	Context.setDiscardValueNames(false);
 	//read imput file
@@ -110,5 +115,5 @@ void main() {
 	//load module
 
 
-
+	return 0;
 }
