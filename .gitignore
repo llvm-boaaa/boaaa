@@ -2,3 +2,13 @@
 out/
 cmake-build/
 .github/
+
+#build files
+**/*.o
+**/*.o.bc
+**/*.log
+**/*.0
+**/*.1
+**/*.lo
+**/*.Plo
+**/*.Po
