@@ -23,7 +23,7 @@ do
     if [[ "$entry" == "CMakeLists.txt" ]] 
     then
         CMAKE=$true
-    elif [[ "$entry" == "" ]] 
+    elif [[ "$entry" == "MakeFile" ]] && [[ "$entry" == "makefile"]]
     then
         MAKE=$true
     fi
