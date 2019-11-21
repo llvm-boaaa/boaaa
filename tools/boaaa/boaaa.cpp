@@ -25,6 +25,8 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/YAMLTraits.h"
 #include "llvm/Target/TargetMachine.h"
+//boaaa
+#include "boaaa/lvm/LLVMVersionManager.h"
 #include <algorithm>
 #include <memory>
 

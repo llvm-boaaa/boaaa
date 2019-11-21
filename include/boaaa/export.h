@@ -2,13 +2,13 @@
 #define __EXPORT_H
 
 #ifdef _WIN32
-	#if defined BUILD_SHARED_LIBS
+	#if defined BUILD_SHARED_LIB    //export
 		#define __export __declspec(dllexport)
-	#else
-#define __export __declspec(dllimport)
+	#else						    //import
+		#define __export __declspec(dllimport)
 	#endif
-#else
+#else // MAC / Linux
 	#define __export
-#endif 
+#endif // _WIN32
 
-#endif
+#endif // __EXPORT_H

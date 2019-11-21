@@ -1,7 +1,6 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
-
 // llvm common includes
 #include "llvm/ADT/Triple.h"
 #include "llvm/ADT/StringRef.h"
@@ -14,7 +13,4 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ToolOutputFile.h"
 
-
-
-
-#endif
+#endif // STDAFX_H
