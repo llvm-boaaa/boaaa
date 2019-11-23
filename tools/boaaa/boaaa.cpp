@@ -29,6 +29,7 @@
 #include "boaaa/lvm/LLVMVersionManager.h"
 #include <algorithm>
 #include <memory>
+#include <iostream>
 
 using namespace llvm;
 #define DEBUG_COMMAND_LINE
@@ -87,8 +88,17 @@ int main(int argc, char** argv) {
 	
 	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, Context);
 
+	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
+	std::unique_ptr<boaaa::DLInterface> inst = man.loadDL("boaaa.lv_90");
 
+	if (!inst) {
+		return 1;
+	}
 
+	inst->onLoad();
+
+	int i;
+	std::cin >> i;
 
 	return 0;
 }

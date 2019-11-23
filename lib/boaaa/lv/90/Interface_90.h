@@ -5,7 +5,7 @@
 
 namespace boaaa {
 
-	class __export DLInterface90 : public DLInterface {
+	class DLInterface90 : public DLInterface {
 
 	public:
 		DLInterface90();
@@ -13,7 +13,6 @@ namespace boaaa {
 
 		void onLoad();
 		void onUnload();
-
 		
 	};
 

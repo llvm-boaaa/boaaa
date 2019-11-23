@@ -29,6 +29,9 @@ function(boaa_add_llvm_library NAME FOULDER_NAME KIND)
   endif()
 
   add_library(${NAME} ${simple_kind} ${LIBRARY_HEADERS} ${ARGN})
+
+  LIST(APPEND dll_dependecies ${NAME})
+
   set_property(TARGET "${NAME}" PROPERTY FOLDER "Libraries/${FOLDER_NAME}")
   set_property(TARGET "${NAME}" PROPERTY PROJECT_LABEL "Library")
 

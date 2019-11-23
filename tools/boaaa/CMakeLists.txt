@@ -6,7 +6,9 @@ file(GLOB SourceFilesBoaaa
 	"*.cpp"
 )
 
-add_definitions(${LLVM_DEFINITIONS})
-
 nm_add_tool(boaaa ${SourceFilesBoaaa})
+target_link_libraries(boaaa PUBLIC boaaa.lvm)
+foreach(dep ${dll_dependecies})
+add_dependencies(boaaa dep)
+endforeach()
 message(STATUS "||added tool boaaa")

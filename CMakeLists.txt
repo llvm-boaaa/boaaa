@@ -61,6 +61,8 @@ nm_add_thirdparty_libs(NAME LLVM_BOAAA_VERSION
 					   INTERFACE_COMPILE_OPTIONS -D_DEBUG
 					   )
 
+add_definitions(${LLVM_DEFINITIONS})
+
 #add libs
 	# googletests, remove googletest error of some kind, but currently not important
 	#nm_add_gtest()
@@ -71,4 +73,4 @@ add_subdirectory(lib)
 #add tools
 add_subdirectory(tools)
 
-message(STATUS "||========BOAAA generation done========||")
+message(STATUS "||=========BOAAA generation done========||")

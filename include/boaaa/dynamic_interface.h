@@ -9,13 +9,11 @@
 #include <Windows.h>
 #endif
 
-
-#define STRINGIFY(MACRO) #MACRO
-#define GETDL_INFO getDL_INFO
-
 namespace boaaa {
 
+	struct DL_Info;
 	class DLInterface;
+
 	//Dynamic LIbrary InterFace pointer
 	typedef std::unique_ptr<DLInterface> DLIFp;
 
@@ -25,15 +23,23 @@ namespace boaaa {
 
 	typedef uint8_t llvm_version;
 
-	struct DL_Info {
+	struct DL_Info 
+	{
 		llvm_version version;
 		generateInterfaceFunc gen;
 		deleteInterfaceFunc del;
 	};
 
+	//defile macro GETDL_INFO and GETDL_INFOFUNC
+	#define INCLUDE_HEADER "GETDL_INFO.inc"
+	#include "boaaa/MacroHelp.inc"
+
+	typedef DL_Info(*GETDL_INFOFUNC)();
+
 	extern "C" __export DL_Info GETDL_INFO();
 
-	class __export DLInterface {
+	class __export DLInterface 
+	{
 
 	public:
 		virtual void onLoad() = 0;
@@ -41,5 +47,7 @@ namespace boaaa {
 
 	};
 }
+
+#include "minwindef_undef.inc"
 
 #endif
