@@ -84,7 +84,9 @@ int main(int argc, char** argv) {
 	//parse command line
 	cl::ParseCommandLineOptions(argc, argv);
 #endif
-	
+	// maybe use to reset commandline args 
+	//cl::getRegisteredOptions().begin()->getValue()->reset();
+
 	
 	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, Context);
 

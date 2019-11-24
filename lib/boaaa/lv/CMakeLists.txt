@@ -1,6 +1,7 @@
 message(STATUS "||=============llvm_versions============||")
 message(STATUS "||")
 
+include(ExternalProject)
 #set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 
@@ -28,6 +29,8 @@ function(boaa_add_llvm_library NAME FOULDER_NAME KIND)
     set(simple_kind ${KIND})
   endif()
 
+
+
   add_library(${NAME} ${simple_kind} ${LIBRARY_HEADERS} ${ARGN})
 
   LIST(APPEND dll_dependecies ${NAME})
@@ -51,11 +54,43 @@ file(GLOB DL_files
 set(tmp_FOLDER_NAME ${FOULDER_NAME})
 
 foreach(version_ ${build_llvm_version} )
+	if (${version_} STREQUAL "master")
+	set(branche ${version_})
+	else()
+	set(branche "release_${version_}")
+	endif()
+
+	set(_path "${BOAAA_SOURCE_DIR}/llvm_version/${branche}")
+
+	ExternalProject_Add(${branche}
+		PREFIX			= "${_path}"
+		SOURCE_DIR		= "${_path}"
+		STAMP_DIR		= "${_path}"
+		BINARY_DIR		= "${_path}"
+		GIT_REPOSITORY	= "https://github.com/llvm-mirror/llvm.git"
+		GIT_TAG			= "origin/${branche}"
+		)
+
+	add_subdirectory(${_path} ${_path} EXCLUDE_FROM_ALL)
+
+	set(LLVM_DIR "${_path}/cmake/modules/CMakeFiles/")
+	find_package(LLVM REQUIRED CONFIG)
+	message(STATUS "||========LLVM used for ${branche}=========")
+	message(STATUS "||LLVM_DIR: ${LLVM_DIR}")
+	message(STATUS "||Found LLVM Version ${LLVM_PACKAGE_VERSION}")
+	message(STATUS "||LLVM libs: ${LLVM_AVAILABLE_LIBS} ")
+	message(STATUS "||LLVM include dirs: ${LLVM_INCLUDE_DIRS} ")
+	message(STATUS "||======================================")
+	message(STATUS "||")
+
 	file(GLOB _dl_files
 		"${version_}/*.h"
 		"${version_}/*.cpp"
 	)
 	boaa_add_llvm_library(boaaa.lv_${version_} "boaaa/lv" MODULE ${DL_files} ${_dl_files})
+	target_include_directories(${LLVM_INCLUDE_DIRS})
+	target_link_libraries(${LLVM_AVAILABLE_LIBS})
+
 	target_compile_definitions(boaaa.lv_${version_} 
 	PRIVATE 
 		LLVM_VERSION=${version_}
