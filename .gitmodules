@@ -16,6 +16,6 @@
 [submodule "repos/fmt"]
 	path = repos/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "libraries/llvm/llvm_build"]
-	path = libraries/llvm/llvm_build
+[submodule "libraries/llvm/900"]
+	path = libraries/llvm/900
 	url = https://github.com/llvm-mirror/llvm.git
