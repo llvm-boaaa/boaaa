@@ -41,11 +41,15 @@ endif()
 
 # include Nicemake https://github.com/fkutzner/NiceMake
 include(cmake/nicemake/NiceMake.cmake)
+#include cmake_git_clone https://github.com/tschuchortdev/cmake_git_clone
+include(cmake/cmake_git_clone/cmake/GitUtils.cmake)
+
+
 # set include dir
 #set(NM_CONF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 #add llvm
-set(LLVM_DIR "${BOAAA_SOURCE_DIR}/libraries/llvm/900/cmake/modules/CMakeFiles/")
+set(LLVM_DIR "${BOAAA_SOURCE_DIR}/libraries/llvm/current/cmake/modules/CMakeFiles/")
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "||=========LLVM used for BOAAA==========")
 message(STATUS "||LLVM_DIR: ${LLVM_DIR}")
@@ -58,8 +62,7 @@ message(STATUS "||")
 nm_add_thirdparty_libs(NAME LLVM_BOAAA_VERSION 
 					   LIBS ${LLVM_AVAILABLE_LIBS} 
 					   INTERFACE_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS}
-					   INTERFACE_COMPILE_OPTIONS -D_DEBUG
-					   )
+					   INTERFACE_COMPILE_OPTIONS -D_DEBUG)
 
 add_definitions(${LLVM_DEFINITIONS})
 

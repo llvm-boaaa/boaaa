@@ -53,34 +53,95 @@ file(GLOB DL_files
 
 set(tmp_FOLDER_NAME ${FOULDER_NAME})
 
+find_package(Git)
+if(NOT GIT_FOUND)
+    message(FATAL_ERROR "git not found!")
+endif()
+
+#############################################################
+#						start foreach						#
+#															#
+
 foreach(version_ ${build_llvm_version} )
+
+	message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
+
 	if (${version_} STREQUAL "master")
-	set(branche ${version_})
+	set(branch ${version_})
 	else()
-	set(branche "release_${version_}")
+	set(branch "release_${version_}")
 	endif()
 
-	set(_path "${BOAAA_SOURCE_DIR}/llvm_version/${branche}")
+	set(_path "${BOAAA_SOURCE_DIR}/llvm_version/")
 
-	ExternalProject_Add(${branche}
-		PREFIX			= "${_path}"
-		SOURCE_DIR		= "${_path}"
-		STAMP_DIR		= "${_path}"
-		BINARY_DIR		= "${_path}"
-		GIT_REPOSITORY	= "https://github.com/llvm-mirror/llvm.git"
-		GIT_TAG			= "origin/${branche}"
-		)
+	if (EXISTS "${_path}/${branch}")
+		message(STATUS "|| pulling from branch ${branch} ...")
+		execute_process(
+			COMMAND ${GIT_EXECUTABLE} pull origin ${branch}
+			WORKING_DIRECTORY "${_path}/${branch}"
+			RESULT_VARIABLE   result)
+	else()
+		message(STATUS "|| clone from branch ${branch} ...")
+		execute_process(
+			COMMAND ${GIT_EXECUTABLE} clone --branch ${branch} https://github.com/llvm-mirror/llvm.git ${branch}
+			WORKING_DIRECTORY ${_path}
+			RESULT_VARIABLE   result)
+	endif()
 
-	add_subdirectory(${_path} ${_path} EXCLUDE_FROM_ALL)
+	if(WIN32)
+		if(EXISTS "${_path}/${branch}/LLVM.sln") #skip generate for existing .sln
+			message(STATUS "|| skip cmake generation...")
+		else()
+		execute_process( #clean repo
+			COMMAND git clean -d -f -x
+			WORKING_DIRECTORY "${_path}/${branch}"
+			OUTPUT_VARIABLE   o)
+		message(STATUS "|| generating cmake ...")
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		message(STATUS "|| using x64 generator")
+		execute_process(
+			COMMAND cmake "." -G "Visual Studio 16 2019" -Thost=x64
+			WORKING_DIRECTORY "${_path}/${branch}"
+			OUTPUT_VARIABLE   o)
+		else()
+		message(STATUS "|| using x32 generator")
+		execute_process(
+			COMMAND cmake "." -G "Visual Studio 16 2019" -A Win32
+			WORKING_DIRECTORY "${_path}/${branch}"
+			OUTPUT_VARIABLE   o)
+		endif()	
+		endif()
+	else()
+		message(STATUS "|| generating cmake ...")
+		execute_process(
+			COMMAND cmake .
+			WORKING_DIRECTORY "${_path}/${branch}"
+			OUTPUT_VARIABLE   o)
+	endif()
+	
+	set(LLVM_NAME "LLVM_${branch}")
+	set(LLVM_NAME_DIR "${LLVM_NAME}_DIR")
 
-	set(LLVM_DIR "${_path}/cmake/modules/CMakeFiles/")
-	find_package(LLVM REQUIRED CONFIG)
-	message(STATUS "||========LLVM used for ${branche}=========")
+	set(${LLVM_NAME_DIR} "${_path}/${branch}/cmake/modules/CMakeFiles")
+
+	if(EXISTS ${${LLVM_NAME_DIR}}/${LLVM_NAME}Config.cmake)
+		message(STATUS "|| No renaming to do file: ${LLVM_NAME}.cmake already exists.")
+	else()
+		if(EXISTS ${${LLVM_NAME_DIR}}/LLVMConfig.cmake)
+			message(STATUS "|| renaming LLVMConfig.cmake to ${LLVM_NAME}Config.cmake")
+			file(RENAME ${${LLVM_NAME_DIR}}/LLVMConfig.cmake ${${LLVM_NAME_DIR}}/${LLVM_NAME}Config.cmake)
+		else()
+		message(STATUS "ERROR: llvm_version: ${ver} of branch: {branch} is not properly configured")
+		endif()
+	endif()
+
+	find_package(${LLVM_NAME} CONFIG REQUIRED)
+	message(STATUS "||>>=====LLVM used for ${branch}=======")
 	message(STATUS "||LLVM_DIR: ${LLVM_DIR}")
 	message(STATUS "||Found LLVM Version ${LLVM_PACKAGE_VERSION}")
 	message(STATUS "||LLVM libs: ${LLVM_AVAILABLE_LIBS} ")
 	message(STATUS "||LLVM include dirs: ${LLVM_INCLUDE_DIRS} ")
-	message(STATUS "||======================================")
+	message(STATUS "||>>====================================")
 	message(STATUS "||")
 
 	file(GLOB _dl_files
@@ -88,8 +149,8 @@ foreach(version_ ${build_llvm_version} )
 		"${version_}/*.cpp"
 	)
 	boaa_add_llvm_library(boaaa.lv_${version_} "boaaa/lv" MODULE ${DL_files} ${_dl_files})
-	target_include_directories(${LLVM_INCLUDE_DIRS})
-	target_link_libraries(${LLVM_AVAILABLE_LIBS})
+	target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
+	target_link_libraries(boaaa.lv_${version_} ${LLVM_AVAILABLE_LIBS})
 
 	target_compile_definitions(boaaa.lv_${version_} 
 	PRIVATE 
@@ -98,6 +159,11 @@ foreach(version_ ${build_llvm_version} )
 		BUILD_SHARED_LIB)
 	message(STATUS "||added dynamic lib with llvm_version ${version_}: lv_${version_}")
 endforeach(version_)
+
+#															#
+#						end foreach							#
+#############################################################
+
 
 set(FOLDER_NAME ${tmp_FOLDER_NAME})
 

@@ -16,6 +16,6 @@
 [submodule "repos/fmt"]
 	path = repos/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "libraries/llvm/900"]
-	path = libraries/llvm/900
-	url = https://github.com/llvm-mirror/llvm.git
+[submodule "cmake/cmake_git_clone"]
+	path = cmake/cmake_git_clone
+	url = https://github.com/tschuchortdev/cmake_git_clone.git
