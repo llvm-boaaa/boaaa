@@ -28,9 +28,7 @@ function(boaa_add_llvm_library NAME FOULDER_NAME KIND)
   else()
     set(simple_kind ${KIND})
   endif()
-
-
-
+  
   add_library(${NAME} ${simple_kind} ${LIBRARY_HEADERS} ${ARGN})
 
   LIST(APPEND dll_dependecies ${NAME})
@@ -144,6 +142,12 @@ foreach(version_ ${build_llvm_version} )
 	message(STATUS "||>>====================================")
 	message(STATUS "||")
 
+	add_custom_target(${LLVM_NAME})
+
+	LIST(APPEND LLVM_VERSION_TARGETS "${branch}")
+
+	#add_subdirectory(${_path}/${branch} ${_path}/${branch} EXCLUDE_FROM_ALL)
+
 	file(GLOB _dl_files
 		"${version_}/*.h"
 		"${version_}/*.cpp"
@@ -157,6 +161,7 @@ foreach(version_ ${build_llvm_version} )
 		LLVM_VERSION=${version_}
 		LLVM_VERSION_${version_}=${version_} 
 		BUILD_SHARED_LIB)
+	add_dependencies(boaaa.lv_${version_} ${LLVM_NAME})
 	message(STATUS "||added dynamic lib with llvm_version ${version_}: lv_${version_}")
 endforeach(version_)
 

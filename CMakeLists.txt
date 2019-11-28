@@ -8,7 +8,7 @@ set(BOAA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 #descripes all release_XX version of the repo https://github.com/llvm-mirror/llvm
 set(all_llvm_versions "10;16;20;21;22;23;24;25;27;28;29;30;31;32;33;34;35;36;37;38;39;40;50;60;70;80;90;master")
-set(build_llvm_version "90")
+set(build_llvm_version "50;90")
 
 message(STATUS "||===========generating BOAAA===========||")
 message(STATUS "||")
