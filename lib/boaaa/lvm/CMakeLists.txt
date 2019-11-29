@@ -6,5 +6,21 @@ file(GLOB LLVM_VERSION_MANAGER_Files
 	"*.cpp"
 )
 
+if(WIN32)
+file(GLOB OS_SPECIFIC_MANAGER_files
+	"UNIXDLHandle.h"
+	"UNIXDLHandle.cpp"
+)
+else()
+file(GLOB OS_SPECIFIC_MANAGER_files
+	"WindowsDLHandle.h"
+	"WindowsDLHandle.cpp"
+)
+endif()
+
+foreach(item ${OS_SPECIFIC_MANAGER_files})
+LIST(REMOVE_ITEM LLVM_VERSION_MANAGER_Files ${item})
+endforeach()
+
 nm_add_library(boaaa.lvm STATIC ${LLVM_VERSION_MANAGER_Files})
 message(STATUS "||added lib: llvm_version_manager")

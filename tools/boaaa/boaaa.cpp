@@ -96,12 +96,7 @@ int main(int argc, char** argv) {
 	if (!inst) {
 		return 1;
 	}
-
-	inst->onLoad();
-
-	int i;
-	std::cin >> i;
-
+	
 	return 0;
 }
 

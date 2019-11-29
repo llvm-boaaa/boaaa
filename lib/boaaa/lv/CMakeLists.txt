@@ -1,14 +1,39 @@
 message(STATUS "||=============llvm_versions============||")
 message(STATUS "||")
 
-include(ExternalProject)
 #set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+
+function(cmake_global_list LIST ADD IDENT)
+set(${LIST} "${${LIST}};${ADD}" CACHE STRING ${IDENT} FORCE)
+endfunction()
+
+function(boaaa_add_llvm_version)
+	cmake_parse_arguments(
+    P_ARGS
+    ""
+    "NAME"
+    "LIBS;INTERFACE_INCLUDE_DIRS;INTERFACE_COMPILE_OPTIONS"
+    ${ARGN}
+  )
+  if(NOT P_ARGS_NAME)
+    message(FATAL "boaaa_add_llvm_version: NAME must be specified")
+  endif()
+  if(NOT P_ARGS_LIBS)
+    message(FATAL "boaaa_add_llvm_version: LIBS must be specified")
+  endif()
+  
+  set(nm_dummy_target_name ${P_ARGS_NAME})
+  add_library(${nm_dummy_target_name} INTERFACE)
+  target_link_libraries(${nm_dummy_target_name} INTERFACE ${P_ARGS_LIBS})
+  target_include_directories(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_INCLUDE_DIRS})
+  target_compile_options(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_COMPILE_OPTIONS})
+endfunction()
 
 #coppied from nicemake/TargetCreation.cmake::nm_add_library
 #moddified, so every file in FOULDER_NAME get linked to the lib.
 #all individual source files have to be added by the cmake-function target_source
-function(boaa_add_llvm_library NAME FOULDER_NAME KIND)
+function(boaaa_add_llvm_library NAME FOULDER_NAME BRANCH KIND)
   if((KIND MATCHES "OBJECT") AND (CMAKE_VERSION VERSION_LESS "3.12"))
     # Pre-3.12 CMake has incomplete support for object libraries, e.g.
     # no way of importing compile options and include dirs via
@@ -31,7 +56,8 @@ function(boaa_add_llvm_library NAME FOULDER_NAME KIND)
   
   add_library(${NAME} ${simple_kind} ${LIBRARY_HEADERS} ${ARGN})
 
-  LIST(APPEND dll_dependecies ${NAME})
+  cmake_global_list(dll_dependecies ${NAME} "VAR0")
+  cmake_global_list(llvm_dependencies ${BRANCH} "VAR1")
 
   set_property(TARGET "${NAME}" PROPERTY FOLDER "Libraries/${FOLDER_NAME}")
   set_property(TARGET "${NAME}" PROPERTY PROJECT_LABEL "Library")
@@ -134,6 +160,15 @@ foreach(version_ ${build_llvm_version} )
 	endif()
 
 	find_package(${LLVM_NAME} CONFIG REQUIRED)
+
+	#wrong configuration of cmake in release_50, not needed, so dependencie get removed
+	if(${version_} STREQUAL "50")
+	set(REMOVE_LIST "LLVMAArch64AsmPrinter;LLVMAMDGPUAsmPrinter;LLVMARMAsmPrinter;LLVMBPFAsmPrinter;LLVMLanaiAsmPrinter;LLVMMipsAsmPrinter;LLVMMSP430AsmPrinter;LLVMNVPTXAsmPrinter;LLVMPowerPCAsmPrinter;LLVMSparcAsmPrinter;LLVMSystemZAsmPrinter;LLVMX86AsmPrinter;LLVMXCoreAsmPrinter")
+	foreach(rem ${REMOVE_LIST})
+	list(REMOVE_ITEM LLVM_AVAILABLE_LIBS ${rem})
+	endforeach()
+	endif()
+
 	message(STATUS "||>>=====LLVM used for ${branch}=======")
 	message(STATUS "||LLVM_DIR: ${LLVM_DIR}")
 	message(STATUS "||Found LLVM Version ${LLVM_PACKAGE_VERSION}")
@@ -144,17 +179,21 @@ foreach(version_ ${build_llvm_version} )
 
 	add_custom_target(${LLVM_NAME})
 
-	LIST(APPEND LLVM_VERSION_TARGETS "${branch}")
-
-	#add_subdirectory(${_path}/${branch} ${_path}/${branch} EXCLUDE_FROM_ALL)
-
 	file(GLOB _dl_files
 		"${version_}/*.h"
 		"${version_}/*.cpp"
 	)
-	boaa_add_llvm_library(boaaa.lv_${version_} "boaaa/lv" MODULE ${DL_files} ${_dl_files})
-	target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
-	target_link_libraries(boaaa.lv_${version_} ${LLVM_AVAILABLE_LIBS})
+
+	boaaa_add_llvm_version(NAME LLVM_${version_}
+					   LIBS ${LLVM_AVAILABLE_LIBS} 
+					   INTERFACE_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS}
+					   INTERFACE_COMPILE_OPTIONS -D_DEBUG)
+
+	boaaa_add_llvm_library(boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${_dl_files})
+	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
+	target_link_libraries(boaaa.lv_${version_} LLVM_${version_})
+
+
 
 	target_compile_definitions(boaaa.lv_${version_} 
 	PRIVATE 
@@ -168,7 +207,6 @@ endforeach(version_)
 #															#
 #						end foreach							#
 #############################################################
-
 
 set(FOLDER_NAME ${tmp_FOLDER_NAME})
 

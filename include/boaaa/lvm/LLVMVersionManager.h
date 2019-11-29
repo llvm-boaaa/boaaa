@@ -6,15 +6,6 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringMap.h"
 
-
-#ifdef _WIN32
-#include "boaaa/lvm/WindowsDLHandle.h"
-using _DLHandle = boaaa::WindowsDLHandle;
-#else
-#include "boaaa/lvm/UnixDLHandle.h"
-using _DLHandle = boaaa::UnixDLHandle;
-#endif
-
 using namespace llvm;
 
 namespace boaaa {
@@ -27,9 +18,9 @@ namespace boaaa {
 		StringRef filename;
 		std::unique_ptr<DLInterface> inst;
 		uint8_t ref_counter;
-		std::unique_ptr<_DLHandle> handle;
+		std::unique_ptr<DLHandle> handle;
 
-		LLVM_Info(StringRef filename, std::unique_ptr<DLInterface> inst, std::unique_ptr<_DLHandle> handle, DL_Info info) 
+		LLVM_Info(StringRef filename, std::unique_ptr<DLInterface> inst, std::unique_ptr<DLHandle> handle, DL_Info info) 
 			: info(info), filename(filename), inst(std::move(inst)), ref_counter(0), handle(std::move(handle)) { };
 
 		~LLVM_Info() { inst.release(); handle.release(); };

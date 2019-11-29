@@ -24,7 +24,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 #endif
 
 #ifdef LLVM_VERSION_50
-#include "50/Interface50.h"
+#include "50/Interface_50.h"
 #endif // !LLVM_VERSION_50
 #ifdef LLVM_VERSION_90
 #include "90/Interface_90.h"

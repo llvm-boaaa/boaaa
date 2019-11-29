@@ -1,5 +1,13 @@
 #include "boaaa/lvm/LLVMVersionManager.h"
 
+#ifdef _WIN32
+#include "WindowsDLHandle.h"
+using _DLHandle = boaaa::WindowsDLHandle;
+#else
+#include "UNIXDLHandle.h"
+using _DLHandle = boaaa::UNIXDLHandle;
+#endif
+
 using namespace boaaa;
 /*
 auto LLVMVersionManager::getInstance() -> LLVMVersionManager& {

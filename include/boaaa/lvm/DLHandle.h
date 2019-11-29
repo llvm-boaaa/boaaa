@@ -27,6 +27,7 @@ namespace boaaa {
 	public:
 		DLError(llvm::StringRef error) {
 			error_string = error;
+			error_flag = !error.str().empty();
 		}
 
 		void setError(llvm::StringRef error) {

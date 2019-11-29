@@ -15,6 +15,9 @@ message(STATUS "||")
 message(STATUS "|| BOAAA is generated with following")
 message(STATUS "|| supported versions:")
 
+unset(dll_dependecies CACHE)
+unset(llvm_dependencies CACHE)
+
 #prints supported and build versions
 set(ver_string "")
 set(ver_list "")
@@ -41,8 +44,6 @@ endif()
 
 # include Nicemake https://github.com/fkutzner/NiceMake
 include(cmake/nicemake/NiceMake.cmake)
-#include cmake_git_clone https://github.com/tschuchortdev/cmake_git_clone
-include(cmake/cmake_git_clone/cmake/GitUtils.cmake)
 
 
 # set include dir
