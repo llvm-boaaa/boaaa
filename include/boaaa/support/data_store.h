@@ -3,6 +3,7 @@
 
 #include "LLVMErrorOr.h"
 #include "boaaa/support/version_error.h"
+#include "boaaa/support/xxhash.h"
 
 namespace boaaa 
 {
@@ -19,7 +20,11 @@ namespace boaaa
 	struct data_store
 	{
 	public:
-		data_store(Tail... tail) : data(tail...) { size = get_helper<Tail...>::count(tail...); };
+		data_store(Tail&... tail) : data(_data_store<Tail...>(tail...)) 
+		{ 
+			size = get_helper<Tail...>::count(tail...);
+			bytes = get_helper<Tail...>::countBytes();
+		};
 		template<typename type, size_t idx>
 		ErrorOr<type> get()
 		{
@@ -30,8 +35,17 @@ namespace boaaa
 
 			return ErrorOr<type>(static_cast<type>(data.get<idx>()));
 		}
+
+		uint64_t hash(uint64_t seed = 0)
+		{
+			uint8_t* bytep = (uint8_t*) malloc(bytes);
+			get_helper<size, _data_store<Tail...>>::writeBytes(data, bytep);
+			return xxhash(bytep, bytes, seed);
+		}
+
 	private:
 		const size_t size;
+		const size_t bytes;
 		_data_store<Tail...> data;
 	};
 
@@ -46,14 +60,14 @@ namespace boaaa
 		template<size_t idx>
 		auto get()
 		{
-			return get_helper<idx, _data_store<T, Tail>>::get(*this);
+			return get_helper<idx, _data_store<T, Tail...>>::get(*this);
 		}
 	};
 
 	template<typename T, typename... Tail>
-	struct get_helper<0, data_store<T, Tail...>>
+	struct get_helper<0, _data_store<T, Tail...>>
 	{
-		static T get(_data_store < T, Tail...>& data) {
+		static T get(_data_store<T, Tail...>& data) {
 			return data.first;
 		}
 
@@ -66,6 +80,16 @@ namespace boaaa
 		static size_t count(_data_store<T, Tail...>& data)
 		{
 			return 1;
+		}
+
+		static size_t countBytes(_data_store<T, Tail...>& data)
+		{
+			return sizeof(T);
+		}
+
+		static void writeBytes(_data_store<T, Tail...>& data, uint8_t* mem)
+		{
+			std::memcpy(mem, &data.first, sizeof(T));
 		}
 	};
 
@@ -85,6 +109,17 @@ namespace boaaa
 		static size_t count(_data_store<T, Tail...>& data)
 		{
 			return 1 + get_helper<idx - 1, _data_store<Tail...>>::count(data.rest);
+		}
+
+		static size_t countBytes(_data_store<T, Tail...>& data)
+		{
+			return sizeof(T) + get_helper<idx - 1, _data_store<Tail...>>::countBytes(data.rest);
+		}
+
+		static void writeBytes(_data_store<T, Tail...>& data, uint8_t* mem)
+		{
+			std::memcpy(mem, &data.first, sizeof(T));
+			get_helper<idx - 1, _data_store<Tail...>>::writeBytes(data.rest, mem + sizeof(T));
 		}
 	};
 } //boaaa

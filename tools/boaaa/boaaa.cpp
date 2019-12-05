@@ -60,6 +60,8 @@ PassList(cl::desc("Optimizations available:"), cl::cat(BoaaaCat));
 
 void registerPasses(PassRegistry& Registry);
 
+void test();
+
 int main(int argc, char** argv) {
 	
 	//init llvm and register needed passes
@@ -98,8 +100,19 @@ int main(int argc, char** argv) {
 	if (!inst2) {
 		return 1;
 	}
-	
+	test();
 	return 0;
+}
+
+#include "boaaa/support/data_store.h"
+
+//tea dsa branch of sea dsa
+//svf
+
+void test()
+{
+	boaaa::data_store<int, std::string> bla(567, std::string("bar"));
+	std::cout << bla.hash() << std::endl;
 }
 
 void registerPasses(PassRegistry& Registry) 
