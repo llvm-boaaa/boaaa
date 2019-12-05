@@ -1,6 +1,3 @@
-#include "boaaa/stdafx.h"
-#include "ModuleReader.h"
-
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/Analysis/CallGraphSCCPass.h"
 #include "llvm/Analysis/LoopPass.h"
@@ -26,7 +23,11 @@
 #include "llvm/Support/YAMLTraits.h"
 #include "llvm/Target/TargetMachine.h"
 //boaaa
+#include "boaaa/stdafx.h"
 #include "boaaa/lvm/LLVMVersionManager.h"
+#include "boaaa/support/LLVMErrorOr.h"
+#include "ModuleReader.h"
+
 #include <algorithm>
 #include <memory>
 #include <iostream>
@@ -92,8 +93,9 @@ int main(int argc, char** argv) {
 
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
 	std::unique_ptr<boaaa::DLInterface> inst = man.loadDL("boaaa.lv_90");
+	std::unique_ptr<boaaa::DLInterface> inst2 = man.loadDL("boaaa.lv_50");
 
-	if (!inst) {
+	if (!inst2) {
 		return 1;
 	}
 	
