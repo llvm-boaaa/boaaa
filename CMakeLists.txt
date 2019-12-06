@@ -4,11 +4,11 @@ project(BOAAA)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(BOAA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(BOAAA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 #descripes all release_XX version of the repo https://github.com/llvm-mirror/llvm
 set(all_llvm_versions "10;16;20;21;22;23;24;25;27;28;29;30;31;32;33;34;35;36;37;38;39;40;50;60;70;80;90;master")
-set(build_llvm_version "50;90")
+set(build_llvm_version "40;50;90")
 
 message(STATUS "||===========generating BOAAA===========||")
 message(STATUS "||")
@@ -48,6 +48,37 @@ include(cmake/nicemake/NiceMake.cmake)
 
 # set include dir
 #set(NM_CONF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+	message(STATUS "|| configure cmake for boaaa")
+	if(WIN32)
+		if(EXISTS "${BOAAA_SOURCE_DIR}/libraries/llvm/current/LLVM.sln") #skip generate for existing .sln
+			message(STATUS "|| skip cmake generation...")
+		else()
+		execute_process( #clean repo
+			COMMAND git clean -d -f -x
+			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/current/"
+			OUTPUT_VARIABLE   o)
+		message(STATUS "|| generating cmake ...")
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		message(STATUS "|| using x64 generator")
+		execute_process(
+			COMMAND cmake "." -G "Visual Studio 16 2019" -Thost=x64
+			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/current/"
+			OUTPUT_VARIABLE   o)
+		else()
+		message(STATUS "|| using x32 generator")
+		execute_process(
+			COMMAND cmake "." -G "Visual Studio 16 2019"
+			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/current/"
+			OUTPUT_VARIABLE   o)
+		endif()	
+		endif()
+	else()
+		message(STATUS "|| generating cmake ...")
+		execute_process(
+			COMMAND cmake .
+			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/current/"
+			OUTPUT_VARIABLE   o)
+	endif()
 
 #add llvm
 set(LLVM_DIR "${BOAAA_SOURCE_DIR}/libraries/llvm/current/cmake/modules/CMakeFiles/")

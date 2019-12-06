@@ -1,7 +1,7 @@
-#include "boaaa/dynamic_interface.h"
-
 #ifndef BOAAA_LV_INTERFACE_90_H
 #define BOAAA_LV_INTERFACE_90_H
+
+#include "boaaa/dynamic_interface.h"
 
 namespace boaaa {
 

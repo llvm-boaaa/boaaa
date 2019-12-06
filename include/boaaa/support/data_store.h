@@ -13,8 +13,8 @@ namespace boaaa
 	enum class VersionError;
 	struct version_error_category;
 
-	template<typename ...Tail>
-	struct _data_store {};
+	template<typename T, typename ...Tail>
+	struct _data_store;
 
 	template<typename ...Tail>
 	struct data_store
