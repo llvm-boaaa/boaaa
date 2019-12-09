@@ -162,8 +162,8 @@ foreach(version_ ${build_llvm_version} )
 	find_package(${LLVM_NAME} CONFIG REQUIRED)
 
 	#wrong configuration of cmake in release_50, not needed, so dependencie get removed
-	if(${version_} STREQUAL "50")
-	set(REMOVE_LIST "LLVMAArch64AsmPrinter;LLVMAMDGPUAsmPrinter;LLVMARMAsmPrinter;LLVMBPFAsmPrinter;LLVMLanaiAsmPrinter;LLVMMipsAsmPrinter;LLVMMSP430AsmPrinter;LLVMNVPTXAsmPrinter;LLVMPowerPCAsmPrinter;LLVMSparcAsmPrinter;LLVMSystemZAsmPrinter;LLVMX86AsmPrinter;LLVMXCoreAsmPrinter")
+	if((${version_} STREQUAL "50") OR (${version_} STREQUAL "40"))
+	set(REMOVE_LIST "LLVMAArch64AsmPrinter;LLVMAMDGPUAsmPrinter;LLVMARMAsmPrinter;LLVMBPFAsmPrinter;LLVMLanaiAsmPrinter;LLVMMipsAsmPrinter;LLVMMSP430AsmPrinter;LLVMNVPTXAsmPrinter;LLVMPowerPCAsmPrinter;LLVMSparcAsmPrinter;LLVMSystemZAsmPrinter;LLVMX86AsmPrinter;LLVMXCoreAsmPrinter;LLVMLanaiInstPrinter")
 	foreach(rem ${REMOVE_LIST})
 	list(REMOVE_ITEM LLVM_AVAILABLE_LIBS ${rem})
 	endforeach()

@@ -7,7 +7,7 @@ file(GLOB SourceFilesBoaaa
 )
 
 nm_add_tool(boaaa ${SourceFilesBoaaa})
-target_link_libraries(boaaa PUBLIC boaaa.lvm)
+target_link_libraries(boaaa PUBLIC boaaa.support boaaa.vp boaaa.lvm)
 foreach(dep ${dll_dependecies})
 	message(STATUS "|| boaaa dll dep: ${dep}")
 	add_dependencies(boaaa ${dep})

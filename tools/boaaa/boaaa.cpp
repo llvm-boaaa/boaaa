@@ -111,8 +111,10 @@ int main(int argc, char** argv) {
 
 void test()
 {
-	boaaa::data_store<int, std::string> bla(567, std::string("bar"));
+	boaaa::data_store<2, int, std::string> bla(567, std::string("bar"));
 	std::cout << bla.hash() << std::endl;
+	boaaa::data_store<2, int, std::string> bla2(657, "foo");
+	std::cout << bla2.hash() << std::endl;
 }
 
 void registerPasses(PassRegistry& Registry) 

@@ -7,6 +7,7 @@
 
 namespace boaaa
 {
+	/*
 	template<typename... Tail>
 	class VersionParseManager;
 
@@ -68,7 +69,7 @@ namespace boaaa
 
 		void registerVP(VersionParser p)
 	};
-
+	*/
 }
 
 #endif // !BOAAA_VERSION_PARSER_H

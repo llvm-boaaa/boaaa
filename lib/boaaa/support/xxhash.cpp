@@ -12,31 +12,31 @@ static const uint64_t PRIME64_3 = 1609587929392839161ULL;
 static const uint64_t PRIME64_4 = 9650029242287828579ULL;
 static const uint64_t PRIME64_5 = 2870177450012600261ULL;
 
-static uint64_t round(uint64_t Acc, uint64_t Input) {
+uint64_t round(uint64_t Acc, uint64_t Input) {
 	Acc += Input * PRIME64_2;
 	Acc = rotl64(Acc, 31);
 	Acc *= PRIME64_1;
 	return Acc;
 }
 
-static uint64_t mergeRound(uint64_t Acc, uint64_t Val) {
+uint64_t mergeRound(uint64_t Acc, uint64_t Val) {
 	Val = round(0, Val);
 	Acc ^= Val;
 	Acc = Acc * PRIME64_1 + PRIME64_4;
 	return Acc;
 }
 
-static uint32_t read32(const uint8_t* p)
+uint32_t read32(const uint8_t* p)
 {
 	return *((uint32_t*)p);
 }
 
-static uint64_t read64(const uint8_t* p)
+uint64_t read64(const uint8_t* p)
 {
 	return *((uint64_t*)p);
 }
 
-uint64_t xxhash(const uint8_t* beg, size_t len, uint64_t Seed)
+uint64_t boaaa::xxhash(const uint8_t* beg, size_t len, uint64_t Seed)
 {
 	const uint8_t* P = beg;
 	const uint8_t* const BEnd = beg + len;

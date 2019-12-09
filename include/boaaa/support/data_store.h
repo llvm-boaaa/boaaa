@@ -10,49 +10,21 @@ namespace boaaa
 	//https://riptutorial.com/cplusplus/example/19276/variadic-template-data-structures
 	template<size_t idx, typename T>
 	struct get_helper;
+
 	enum class VersionError;
 	struct version_error_category;
 
-	template<typename T, typename ...Tail>
-	struct _data_store;
-
 	template<typename ...Tail>
-	struct data_store
+	struct _data_store
 	{
-	public:
-		data_store(Tail&... tail) : data(_data_store<Tail...>(tail...)) 
-		{ 
-			size = get_helper<Tail...>::count(tail...);
-			bytes = get_helper<Tail...>::countBytes();
-		};
-		template<typename type, size_t idx>
-		ErrorOr<type> get()
-		{
-			if (idx >= size)
-				return ErrorOr<type>(version_error_category(version_error_code::IndexOutOfBounds));
-			if (!get_helper<idx, _data_store<Tail...>>::checkType<type>())
-				return ErrorOr<type>(version_error_category(version_error_code::TypeError));
-
-			return ErrorOr<type>(static_cast<type>(data.get<idx>()));
-		}
-
-		uint64_t hash(uint64_t seed = 0)
-		{
-			uint8_t* bytep = (uint8_t*) malloc(bytes);
-			get_helper<size, _data_store<Tail...>>::writeBytes(data, bytep);
-			return xxhash(bytep, bytes, seed);
-		}
-
-	private:
-		const size_t size;
-		const size_t bytes;
-		_data_store<Tail...> data;
 	};
 
 	template<typename T, typename... Tail>
-	struct _data_store
+	struct _data_store<T, Tail...>
 	{
-		_data_store(const T& first, const Tail&... tail) : first(first), tail(tail...) {}
+		//using ref_t = typename may_ref<T>::type;
+
+		_data_store(const T& head, const Tail&... tail) : head(head), tail(tail...) {}
 
 		T head;
 		_data_store<Tail...> tail;
@@ -68,7 +40,7 @@ namespace boaaa
 	struct get_helper<0, _data_store<T, Tail...>>
 	{
 		static T get(_data_store<T, Tail...>& data) {
-			return data.first;
+			return data.head;
 		}
 
 		template<typename T2>
@@ -77,10 +49,10 @@ namespace boaaa
 			return std::is_same<T, T2>() && std::is_same<T2, T>();
 		}
 
-		static size_t count(_data_store<T, Tail...>& data)
+		/*static size_t count(_data_store<T, Tail...>& data)
 		{
 			return 1;
-		}
+		}*/
 
 		static size_t countBytes(_data_store<T, Tail...>& data)
 		{
@@ -89,7 +61,7 @@ namespace boaaa
 
 		static void writeBytes(_data_store<T, Tail...>& data, uint8_t* mem)
 		{
-			std::memcpy(mem, &data.first, sizeof(T));
+			std::memcpy(mem, &data.head, sizeof(T));
 		}
 	};
 
@@ -98,30 +70,65 @@ namespace boaaa
 	{
 		static auto get(_data_store<T, Tail...>& data)
 		{
-			return get_helper<idx - 1, _data_store<Tail...>>::get(data.rest);
+			return get_helper<idx - 1, _data_store<Tail...>>::get(data.tail);
 		}
 
+		template<typename T2>
 		static bool checkType(_data_store<T, Tail...>& data)
 		{
-			return get_helper<idx - 1, _data_store<Tail...>>::checkType(data.rest);
+			return get_helper<idx - 1, _data_store<Tail...>>::checkType<T2>(data.tail);
 		}
 
-		static size_t count(_data_store<T, Tail...>& data)
+		/*static size_t count(_data_store<T, Tail...>& data)
 		{
-			return 1 + get_helper<idx - 1, _data_store<Tail...>>::count(data.rest);
-		}
+			return 1 + get_helper<idx - 1, _data_store<Tail...>>::count(data.tail);
+		}*/
 
 		static size_t countBytes(_data_store<T, Tail...>& data)
 		{
-			return sizeof(T) + get_helper<idx - 1, _data_store<Tail...>>::countBytes(data.rest);
+			return sizeof(T) + get_helper<idx - 1, _data_store<Tail...>>::countBytes(data.tail);
 		}
 
 		static void writeBytes(_data_store<T, Tail...>& data, uint8_t* mem)
 		{
-			std::memcpy(mem, &data.first, sizeof(T));
-			get_helper<idx - 1, _data_store<Tail...>>::writeBytes(data.rest, mem + sizeof(T));
+			std::memcpy(mem, &data.head, sizeof(T));
+			get_helper<idx - 1, _data_store<Tail...>>::writeBytes(data.tail, mem + sizeof(T));
 		}
 	};
+
+	template<size_t n, typename ...Tail>
+	struct data_store
+	{
+	public:
+		using store = _data_store<Tail...>;
+
+		data_store(const Tail&... tail) : data(tail...)
+		{
+		};
+
+		template<size_t idx, typename type>
+		type get()
+		{
+			if (idx >= n - 1)
+				return ErrorOr<type>(std::error_code(version_error_code::IndexOutOfBounds, version_error_category));
+			if (!get_helper<idx, store>::checkType<type>())
+				return ErrorOr<type>(std::error_code(version_error_code::TypeError, version_error_category));
+
+			return (type)data.get<idx>();
+		}
+
+		uint64_t hash(uint64_t seed = 0)
+		{
+			uint8_t* bytep = (uint8_t*)malloc(bytes);
+			get_helper<n - 1, store>::writeBytes(data, bytep);
+			return xxhash(bytep, bytes, seed);
+		}
+
+	private:
+		const size_t bytes = sizeof...(Tail);
+		store data;
+	};
+
 } //boaaa
 
 #endif //!BOAAA_DATA_STORE_H
