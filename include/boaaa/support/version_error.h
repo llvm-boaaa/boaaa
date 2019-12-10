@@ -36,6 +36,7 @@ namespace boaaa
 			case version_error_code::TypeError:
 				return "overhanded type is not the same as stored";
 			}
+			return "unknown error";
 		}
 	} version_error_category;
 

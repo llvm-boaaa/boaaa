@@ -2,74 +2,77 @@
 #define BOAAA_VERSION_PARSER_H
 
 #include "boaaa/support/data_store.h"
+#include <cstdlib>
 #include <system_error>
 #include <memory>
+#include <unordered_map>
 
 namespace boaaa
 {
-	/*
-	template<typename... Tail>
-	class VersionParseManager;
 
-	template<typename Type, typename...Tail>
-	class VersionParserImpl;
-
-	template<typename Type, typename...Tail>
-	using container 
-		= VersionParseManager<Tail...>::container;
-	template<typename Type, typename...Tail>
-	using parseFunc 
-		= VersionParseManager<Tail...>::parseFuncType<Type>;
-	template<typename Type, typename...Tail>
-	using generateFunc 
-		= VersionParseManager<Tail...>::generateFuncType<Type>;
-
-	template<typename Type, typename...Tail>
-	class VersionParser
-	{
-	public:
-
-		VersionParser(std::unique_ptr<VersionParserImpl<Type, Tail...>> imp) : imp(imp) {};
-
-		container parse(const Type& data)
-		{
-			return imp->parse(data);
-		}
-
-		Type generate(const container& data) = 0;
-	private:
-		std::unique_ptr<VersionParserImpl<Type, Tail...>> imp;
-	};
-
-	template<typename Type, typename...Tail>
-	class VersionParserImpl
-	{
-	public:
-
-		virtual container parse(const Type& data) = 0;
-		virtual Type generate(const container& data) = 0;
-
-	private:
-	};
-
-	template<typename... Tail>
+	template<size_t N, typename... Tail>
 	class VersionParseManager
 	{
 	public:
-		using container = data_store<Tail...>;
-		template<typename Type>
-		typedef container (*parseFunc_t(Type));
-		template<typename Type>
-		typedef Type (*generateFunc_t(container));
+		typedef data_store<N, Tail...> container;
 
-		template<typename Type>
-		using parseFuncType = parseFunc_t<Type>;
-		template<typename Type>
-		using generateFuncType = generateFunc_t<Type>;
+		VersionParseManager() {
+			m_store = std::unordered_map<uint64_t, container>();
+		}
 
-		void registerVP(VersionParser p)
+		uint64_t registerContainer(container& data)
+		{
+			uint64_t hash = data.hash();
+			m_store[hash] = container;
+			return hash;
+		}
+
+		container getContainer(const uint64_t hash)
+		{
+			return m_store[hash];
+		}
+
+	private:
+		std::unordered_map<uint64_t, container> m_store;
 	};
-	*/
+
+	template<typename Type, size_t N, typename...Tail>
+	class VersionParser
+	{
+	public:
+		using VPM = VersionParseManager<N, Tail...>;
+		using container = typename VPM::container;
+
+		VersionParser() { m_manager = nullptr; }
+
+		virtual container parse(Type& data) = 0;
+		virtual Type generate(container& data) = 0;
+		virtual Type parseRegistered(uint64_t hash) 
+		{
+			return parse(m_manager->getContainer(hash));
+		}
+
+		virtual uint64_t registerData(Type& data)
+		{
+			if (!m_manager) return 0;
+			return m_manager->registerContainer(parse(data));
+		}
+
+		virtual uint64_t registerContainer(container& data)
+		{
+			if (!m_manager) return 0;
+			return m_manager->registerContainer(data);
+		}
+
+		void registerVPM(std::shared_ptr<VPM> manager) {
+			if (!m_manager) return;
+			m_manager = manager;
+		}
+
+	private:
+		std::shared_ptr<VPM> m_manager;
+	};
+	
 }
 
 #endif // !BOAAA_VERSION_PARSER_H

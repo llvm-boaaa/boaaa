@@ -11,8 +11,9 @@ namespace boaaa {
 		DLInterface90();
 		~DLInterface90();
 
-		void onLoad();
-		void onUnload();
+		void onLoad() override;
+		void onUnload() override;
+		void registerStringRefVPM(std::unique_ptr<StringRefVPM> manager) override;
 		
 	};
 

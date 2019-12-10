@@ -1,7 +1,8 @@
 #ifndef LLVM_DYN_INTERFACE_H
 #define LLVM_DYN_INTERFACE_H
 
-#include "export.h"
+#include "boaaa/vp/StringRefVersionParser.h"
+#include "boaaa/export.h"
 #include <inttypes.h>
 #include <memory>
 #ifdef _WIN32
@@ -44,6 +45,7 @@ namespace boaaa {
 	public:
 		virtual void onLoad() = 0;
 		virtual void onUnload() = 0;
+		virtual void registerStringRefVPM(std::unique_ptr<StringRefVPM> manager) = 0;
 
 	};
 }

@@ -21,3 +21,7 @@ void DLInterface90::onUnload()
 {
 
 }
+
+void boaaa::DLInterface90::registerStringRefVPM(std::unique_ptr<StringRefVPM> manager)
+{
+}

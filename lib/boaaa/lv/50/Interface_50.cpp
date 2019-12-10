@@ -1,4 +1,5 @@
 #include "Interface_50.h"
+#include "Interface_50.h"
 
 using namespace boaaa;
 
@@ -20,4 +21,8 @@ void DLInterface50::onLoad()
 void DLInterface50::onUnload()
 {
 
+}
+
+void boaaa::DLInterface50::registerStringRefVPM(std::unique_ptr<StringRefVPM> manager)
+{
 }
