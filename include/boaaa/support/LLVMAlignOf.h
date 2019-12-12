@@ -10,8 +10,8 @@
  //
  //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_SUPPORT_ALIGNOF_H
-#define LLVM_SUPPORT_ALIGNOF_H
+#ifndef BOAAA_SUPPORT_ALIGNOF_H
+#define BOAAA_SUPPORT_ALIGNOF_H
 
 //#include "llvm/Support/Compiler.h"
 #include <cstddef>
@@ -52,4 +52,4 @@ namespace boaaa {
 
 } // end namespace llvm
 
-#endif // LLVM_SUPPORT_ALIGNOF_H
+#endif // BOAAA_SUPPORT_ALIGNOF_H

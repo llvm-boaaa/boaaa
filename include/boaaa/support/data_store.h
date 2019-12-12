@@ -22,7 +22,7 @@ namespace boaaa
 	template<typename T, typename... Tail>
 	struct _data_store<T, Tail...>
 	{
-		//using ref_t = typename may_ref<T>::type;
+		_data_store() = default;
 
 		_data_store(const T& head, const Tail&... tail) : head(head), tail(tail...) {}
 
@@ -41,6 +41,11 @@ namespace boaaa
 	{
 		static T get(_data_store<T, Tail...>& data) {
 			return data.head;
+		}
+
+		static void set(_data_store<T, Tail...>& data, const T& value)
+		{
+			data.head = value;
 		}
 
 		template<typename T2>
@@ -74,6 +79,17 @@ namespace boaaa
 		}
 
 		template<typename T2>
+		static void set(_data_store<T, Tail...>& data, const T2& value)
+		{
+			get_helper<idx - 1, _data_store<Tail...>>::set<T2>(data.tail, value);
+		}
+
+		static void set(_data_store<T, Tail...>& data, const T& value)
+		{
+			get_helper<idx - 1, _data_store<Tail...>>::set<T>(data.tail, value);
+		}
+
+		template<typename T2>
 		static bool checkType(_data_store<T, Tail...>& data)
 		{
 			return get_helper<idx - 1, _data_store<Tail...>>::checkType<T2>(data.tail);
@@ -102,19 +118,31 @@ namespace boaaa
 	public:
 		using store = _data_store<Tail...>;
 
+		data_store() = default;
+
 		data_store(const Tail&... tail) : data(tail...)
 		{
 		};
 
 		template<size_t idx, typename type>
-		type get()
+		ErrorOr<type> get()
 		{
 			if (idx >= n - 1)
-				return ErrorOr<type>(std::error_code(version_error_code::IndexOutOfBounds, version_error_category));
-			if (!get_helper<idx, store>::checkType<type>())
-				return ErrorOr<type>(std::error_code(version_error_code::TypeError, version_error_category));
+				return make_error_code(version_error_code::IndexOutOfBounds);
+			if (!get_helper<idx, store>::template checkType<type>(data))
+				return make_error_code(version_error_code::TypeError);
 
-			return (type)data.get<idx>();
+			return (type) data.get<idx>();
+		}
+
+		template<size_t idx, typename type>
+		bool set(const type& value)
+		{
+			if (idx >= n - 1) return false;
+			if (!get_helper<idx, store>::template checkType<type>(data))
+				return false;
+
+			get_helper<idx, store>::set<type>(data, value);
 		}
 
 		uint64_t hash(uint64_t seed = 0)

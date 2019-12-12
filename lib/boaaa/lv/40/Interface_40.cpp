@@ -22,6 +22,6 @@ void DLInterface40::onUnload()
 
 }
 
-void boaaa::DLInterface40::registerStringRefVPM(std::unique_ptr<StringRefVPM> manager)
+void DLInterface40::registerStringRefVPM(std::unique_ptr<StringRefVPM> manager)
 {
 }

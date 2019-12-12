@@ -1,5 +1,5 @@
-#ifndef STRING_REF_VERSION_PARSER_H
-#define STRING_REF_VERSION_PARSER_H
+#ifndef BOAAA_VP_STRING_REF_VERSION_PARSER_H
+#define BOAAA_VP_STRING_REF_VERSION_PARSER_H
 
 #include "VersionParser.h"
 
@@ -11,6 +11,8 @@ namespace boaaa
 	};
 
 	typedef VersionParseManager<1, std::string> StringRefVPM;
+	template<typename type>
+	using StringRefVP = VersionParser<type, 1, std::string>;
 }
 
-#endif //!STRING_REF_VERSION_PARSER_H
+#endif //!BOAAA_VP_STRING_REF_VERSION_PARSER_H

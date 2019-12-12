@@ -1,7 +1,8 @@
-#ifndef BOAAA_VERSION_PARSER_H
-#define BOAAA_VERSION_PARSER_H
+#ifndef BOAAA_VP_VERSION_PARSER_H
+#define BOAAA_VP_VERSION_PARSER_H
 
 #include "boaaa/support/data_store.h"
+
 #include <cstdlib>
 #include <system_error>
 #include <memory>
@@ -23,7 +24,7 @@ namespace boaaa
 		uint64_t registerContainer(container& data)
 		{
 			uint64_t hash = data.hash();
-			m_store[hash] = container;
+			m_store.insert({ hash, data });
 			return hash;
 		}
 
@@ -49,10 +50,10 @@ namespace boaaa
 		virtual Type generate(container& data) = 0;
 		virtual Type parseRegistered(uint64_t hash) 
 		{
-			return parse(m_manager->getContainer(hash));
+			return generate(m_manager->getContainer(hash));
 		}
 
-		virtual uint64_t registerData(Type& data)
+		virtual uint64_t registerData(Type data)
 		{
 			if (!m_manager) return 0;
 			return m_manager->registerContainer(parse(data));
@@ -75,4 +76,4 @@ namespace boaaa
 	
 }
 
-#endif // !BOAAA_VERSION_PARSER_H
+#endif // !BOAAA_VP_VERSION_PARSER_H

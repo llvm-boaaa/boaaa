@@ -2,6 +2,8 @@
 #define BOAAA_LV_INTERFACE_50_H
 
 #include "boaaa/dynamic_interface.h"
+#include "boaaa/vp/StringRefVersionParser.h"
+#include "StringRefVersionParser50.h"
 
 namespace boaaa {
 

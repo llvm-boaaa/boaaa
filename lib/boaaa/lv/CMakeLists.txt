@@ -28,6 +28,7 @@ function(boaaa_add_llvm_version)
   target_link_libraries(${nm_dummy_target_name} INTERFACE ${P_ARGS_LIBS})
   target_include_directories(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_INCLUDE_DIRS})
   target_compile_options(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_COMPILE_OPTIONS})
+  #target_link_options(${nm_dummy_target_name} INTERFACE "/FORCE:MULTIPLE")
 endfunction()
 
 #coppied from nicemake/TargetCreation.cmake::nm_add_library
@@ -191,7 +192,7 @@ foreach(version_ ${build_llvm_version} )
 
 	boaaa_add_llvm_library(boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${_dl_files})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
-	target_link_libraries(boaaa.lv_${version_} LLVM_${version_})
+	target_link_libraries(boaaa.lv_${version_} LLVM_${version_} boaaa.support boaaa.vp boaaa.lvm)
 
 
 
