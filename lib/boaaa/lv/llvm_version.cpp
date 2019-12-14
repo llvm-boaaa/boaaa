@@ -22,7 +22,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 }
 
 #endif
-
+#ifdef LLVM_VERSION_40
+#include "40/Interface_40.h"
+#endif // LLVM_VERSION_40
 #ifdef LLVM_VERSION_50
 #include "50/Interface_50.h"
 #endif // !LLVM_VERSION_50
@@ -35,6 +37,10 @@ DLIFp genDLIF() {
 #ifdef NOT_SUPPORTED_LLVM_VERSION
 		nullptr //nullpointer return if unsupported llvm version
 #else //init DLInterfaceXX
+#ifdef LLVM_VERSION_40
+		new DLInterface40()
+#endif // LLVM_VERSION_40
+
 #ifdef LLVM_VERSION_50
 		new DLInterface50()
 #endif
@@ -46,7 +52,8 @@ DLIFp genDLIF() {
 }
 
 void delDLFI(DLIFp dlfip) {
-	delete dlfip.release();
+	dlfip.reset();
+		
 }
 
 extern "C" __export DL_Info GETDL_INFO() {

@@ -1,13 +1,13 @@
-#include "StringRefVersionParser40.h"
+#include "boaaa/lvm/StringRefVersionParserCurrent.h"
 
 using namespace boaaa;
 
-StringRefVPM::container StringRefVP40::parse(llvm::StringRef& data)
+StringRefVPM::container StringRefVPCur::parse(llvm::StringRef& data)
 {
 	return container(data.str());
 }
 
-llvm::StringRef StringRefVP40::generate(StringRefVPM::container& data)
+llvm::StringRef StringRefVPCur::generate(StringRefVPM::container& data)
 {
 	ErrorOr<std::string> StringOrError = data.get<0>();
 	if (!StringOrError)

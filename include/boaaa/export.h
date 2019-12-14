@@ -1,7 +1,7 @@
 #ifndef __EXPORT_H
 #define __EXPORT_H
 
-#ifdef _WIN32
+#if (defined _WIN32) && (!defined NO_EXPORT)
 	#if defined BUILD_SHARED_LIB    //export
 		#define __export __declspec(dllexport)
 	#else						    //import

@@ -10,9 +10,9 @@ namespace boaaa
 		STRING_PARAM = 0
 	};
 
-	typedef VersionParseManager<1, std::string> StringRefVPM;
+	typedef VersionParseManager<std::string> StringRefVPM;
 	template<typename type>
-	using StringRefVP = VersionParser<type, 1, std::string>;
+	using StringRefVP = VersionParser<type, std::string>;
 }
 
 #endif //!BOAAA_VP_STRING_REF_VERSION_PARSER_H

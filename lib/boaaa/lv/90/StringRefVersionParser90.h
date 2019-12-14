@@ -8,6 +8,7 @@ namespace boaaa
 {
 	class StringRefVP90 : public StringRefVP<llvm::StringRef>
 	{
+	public:
 		StringRefVP90() = default;
 
 		virtual container parse(llvm::StringRef& data) override;

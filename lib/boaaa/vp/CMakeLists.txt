@@ -1,4 +1,4 @@
-message(STATUS "||====================vp==================||")
+message(STATUS "||===================vp=================||")
 message(STATUS "||")
 
 file(GLOB VERSION_PARSER_Files

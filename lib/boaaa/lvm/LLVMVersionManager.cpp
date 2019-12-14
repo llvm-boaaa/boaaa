@@ -18,7 +18,7 @@ auto LLVMVersionManager::getInstance() -> LLVMVersionManager& {
 }
 */
 
-std::unique_ptr<DLInterface>
+std::shared_ptr<DLInterface>
 LLVMVersionManager::loadDL(StringRef filename, StringRef folder) {
 	LLVM_Info* info;
 	if (m_dl_map->count(filename)) { //count 0 or 1 so first item of it from find is the only object
@@ -48,7 +48,7 @@ LLVMVersionManager::loadDL(StringRef filename, StringRef folder) {
 	return info->info.gen();
 }
 
-void LLVMVersionManager::mayUnload(std::unique_ptr<DLInterface> inst, StringRef filename) {
+void LLVMVersionManager::mayUnload(std::shared_ptr<DLInterface> inst, StringRef filename) {
 	if (!inst) return;
 	LLVM_Info* info;
 	if (!m_dl_map->count(filename)) { //count 0 or 1 so first item of it from find is the only object
@@ -66,6 +66,35 @@ void LLVMVersionManager::mayUnload(std::unique_ptr<DLInterface> inst, StringRef 
 		info->inst->onUnload();
 		info->handle->unload();
 	}
+}
+
+void LLVMVersionManager::onLoad()
+{
+
+}
+
+void LLVMVersionManager::onUnload()
+{
+
+}
+
+void LLVMVersionManager::registerStringRefVPM(std::shared_ptr<StringRefVPM> manager)
+{
+	registerVPM(manager);
+}
+
+void LLVMVersionManager::setBasicOStream(std::ostream& ostream, bool del)
+{
+	if (context.del_strm_after_use)
+		delete context.basic_ostream;
+	context.del_strm_after_use = del;
+	context.basic_ostream = &ostream;
+}
+
+
+void LLVMVersionManager::test(uint64_t* hash, uint8_t num)
+{
+	//never called
 }
 
 

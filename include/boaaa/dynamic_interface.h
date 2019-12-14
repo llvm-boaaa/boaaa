@@ -1,13 +1,14 @@
 #ifndef LLVM_DYN_INTERFACE_H
 #define LLVM_DYN_INTERFACE_H
 
-#include "boaaa/vp/StringRefVersionParser.h"
 #include "boaaa/export.h"
+#include "boaaa/vp/StringRefVersionParser.h"
 #include <inttypes.h>
 #include <memory>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <iostream>
 #endif
 
 namespace boaaa {
@@ -16,7 +17,7 @@ namespace boaaa {
 	class DLInterface;
 
 	//Dynamic LIbrary InterFace pointer
-	typedef std::unique_ptr<DLInterface> DLIFp;
+	typedef std::shared_ptr<DLInterface> DLIFp;
 
 	typedef void* (*parseAAResult)();
 	typedef DLIFp(*generateInterfaceFunc)();
@@ -41,12 +42,23 @@ namespace boaaa {
 
 	class __export DLInterface 
 	{
-
+	protected:
+		DLInterface() {}
 	public:
+
 		virtual void onLoad() = 0;
 		virtual void onUnload() = 0;
-		virtual void registerStringRefVPM(std::unique_ptr<StringRefVPM> manager) = 0;
 
+		virtual void registerStringRefVPM(std::shared_ptr<StringRefVPM> manager) = 0;
+		virtual void setBasicOStream(std::ostream& ostream, bool del = false) = 0;
+
+
+		//only defined in tool, so test ist allways public, 
+		//but only callable from outside, when DEBUG_DLL_Test is defined
+#ifdef DEBUG_DLL_TEST
+	private:
+#endif
+		virtual void test(uint64_t* hash = nullptr, uint8_t num = 0) = 0;
 	};
 }
 

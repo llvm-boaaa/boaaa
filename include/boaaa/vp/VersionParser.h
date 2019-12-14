@@ -11,11 +11,11 @@
 namespace boaaa
 {
 
-	template<size_t N, typename... Tail>
+	template<typename... Tail>
 	class VersionParseManager
 	{
 	public:
-		typedef data_store<N, Tail...> container;
+		typedef data_store<Tail...> container;
 
 		VersionParseManager() {
 			m_store = std::unordered_map<uint64_t, container>();
@@ -37,11 +37,11 @@ namespace boaaa
 		std::unordered_map<uint64_t, container> m_store;
 	};
 
-	template<typename Type, size_t N, typename...Tail>
+	template<typename Type, typename...Tail>
 	class VersionParser
 	{
 	public:
-		using VPM = VersionParseManager<N, Tail...>;
+		using VPM = VersionParseManager<Tail...>;
 		using container = typename VPM::container;
 
 		VersionParser() { m_manager = nullptr; }

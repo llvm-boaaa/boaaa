@@ -1,3 +1,12 @@
+//debug flags
+#define DEBUG 1
+
+#ifdef DEBUG
+#define DEBUG_COMMAND_LINE
+#define DEBUG_DLL_TEST
+
+#endif
+
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/Analysis/CallGraphSCCPass.h"
 #include "llvm/Analysis/LoopPass.h"
@@ -24,6 +33,9 @@
 #include "llvm/Target/TargetMachine.h"
 //boaaa
 #include "boaaa/stdafx.h"
+#define NO_EXPORT //defines __export as nothing, to fix import problem of LLVMVersionManager
+#include "boaaa/dynamic_interface.h"
+#undef NO_EXPORT
 #include "boaaa/lvm/LLVMVersionManager.h"
 #include "boaaa/support/LLVMErrorOr.h"
 #include "ModuleReader.h"
@@ -33,7 +45,7 @@
 #include <iostream>
 
 using namespace llvm;
-#define DEBUG_COMMAND_LINE
+
 
 //command line arg variables
 
@@ -79,7 +91,7 @@ int main(int argc, char** argv) {
 	registerPasses(Registry);
 
 #ifdef DEBUG_COMMAND_LINE
-	int _argc = 2;
+	const int _argc = 2;
 	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc" };
 	//const char* _argv[] = { "boaaa", "-help" };
 	cl::ParseCommandLineOptions(_argc, _argv, "");	
@@ -94,13 +106,30 @@ int main(int argc, char** argv) {
 	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, Context);
 
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
-	std::unique_ptr<boaaa::DLInterface> inst = man.loadDL("boaaa.lv_90");
-	std::unique_ptr<boaaa::DLInterface> inst2 = man.loadDL("boaaa.lv_50");
+	
+	std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
+	std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
+	std::shared_ptr<boaaa::DLInterface> llvm90 = man.loadDL("boaaa.lv_90");
 
-	if (!inst2) {
-		return 1;
-	}
-	test();
+	llvm40->setBasicOStream(std::cout);
+	llvm50->setBasicOStream(std::cout);
+	llvm90->setBasicOStream(std::cout);
+
+	std::shared_ptr<boaaa::StringRefVPM> manager = std::make_shared<boaaa::StringRefVPM>(*(new boaaa::StringRefVPM()));
+	man.registerStringRefVPM(manager);
+	llvm40->registerStringRefVPM(manager);
+	llvm50->registerStringRefVPM(manager);
+	llvm90->registerStringRefVPM(manager);
+
+
+	StringRef ref = "this is a test string";
+
+	uint64_t str_test_hash = man.registerData(ref);
+
+
+	
+
+	//test();
 	return 0;
 }
 
@@ -111,10 +140,16 @@ int main(int argc, char** argv) {
 
 void test()
 {
-	boaaa::data_store<2, int, std::string> bla(567, std::string("bar"));
+	LLVMContext con;
+	boaaa::data_store<int, std::string> bla(567, std::string("bar"));
 	std::cout << bla.hash() << std::endl;
-	boaaa::data_store<2, int, std::string> bla2(657, "foo");
+
+	boaaa::data_store<int, std::string> bla2(657, "foo");
 	std::cout << bla2.hash() << std::endl;
+
+	boaaa::data_store<std::string, llvm::LLVMContext> bla3;
+	bla3.set<0>("a really long string to test the capability of the hash algorithm");
+	std::cout << bla3.hash() << " " << bla3.get<0>().get() << std::endl;
 }
 
 void registerPasses(PassRegistry& Registry) 

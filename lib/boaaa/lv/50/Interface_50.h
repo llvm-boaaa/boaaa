@@ -4,6 +4,7 @@
 #include "boaaa/dynamic_interface.h"
 #include "boaaa/vp/StringRefVersionParser.h"
 #include "StringRefVersionParser50.h"
+#include "../version_context.h"
 
 namespace boaaa {
 
@@ -15,8 +16,13 @@ namespace boaaa {
 
 		void onLoad() override;
 		void onUnload() override;
-		void registerStringRefVPM(std::unique_ptr<StringRefVPM> manager) override;
-
+		void registerStringRefVPM(std::shared_ptr<StringRefVPM> manager) override;
+		void setBasicOStream(std::ostream& ostream, bool del = false) override;
+	
+	
+		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
+	private:
+		version_context context;
 	};
 
 }

@@ -29,20 +29,19 @@ namespace boaaa
 		T head;
 		_data_store<Tail...> tail;
 
-		template<size_t idx>
-		auto get()
-		{
-			return get_helper<idx, _data_store<T, Tail...>>::get(*this);
-		}
 	};
 
 	template<typename T, typename... Tail>
 	struct get_helper<0, _data_store<T, Tail...>>
 	{
+		using type = T;
+
+		template<typename T>
 		static T get(_data_store<T, Tail...>& data) {
 			return data.head;
 		}
 
+		template<typename T>
 		static void set(_data_store<T, Tail...>& data, const T& value)
 		{
 			data.head = value;
@@ -51,42 +50,47 @@ namespace boaaa
 		template<typename T2>
 		static bool checkType(_data_store<T, Tail...>& data)
 		{
-			return std::is_same<T, T2>() && std::is_same<T2, T>();
+			return std::is_same<T, T2>();
 		}
-
-		/*static size_t count(_data_store<T, Tail...>& data)
-		{
-			return 1;
-		}*/
 
 		static size_t countBytes(_data_store<T, Tail...>& data)
 		{
-			return sizeof(T);
+			return sizeof data.head;
 		}
 
 		static void writeBytes(_data_store<T, Tail...>& data, uint8_t* mem)
 		{
-			std::memcpy(mem, &data.head, sizeof(T));
+			std::memcpy(mem, &data.head, sizeof data.head);
 		}
 	};
 
 	template<size_t idx, typename T, typename... Tail>
 	struct get_helper<idx, _data_store<T, Tail...>>
 	{
-		static auto get(_data_store<T, Tail...>& data)
+		using type = typename get_helper<idx - 1, _data_store<Tail...>>::type;
+
+		template<typename T>
+		static T get(_data_store<T, Tail...>& data)
 		{
-			return get_helper<idx - 1, _data_store<Tail...>>::get(data.tail);
+			return get_helper<idx - 1, _data_store<Tail...>>::template get<T>(data.tail);
+		}
+
+		template<typename T2>
+		static T2 get(_data_store<T, Tail...>& data)
+		{
+			return get_helper<idx - 1, _data_store<Tail...>>::template get<T2>(data.tail);
+		}
+
+		template<typename T>
+		static void set(_data_store<T, Tail...>& data, const T& value)
+		{
+			get_helper<idx - 1, _data_store<Tail...>>::template set<T>(data.tail, value);
 		}
 
 		template<typename T2>
 		static void set(_data_store<T, Tail...>& data, const T2& value)
 		{
-			get_helper<idx - 1, _data_store<Tail...>>::set<T2>(data.tail, value);
-		}
-
-		static void set(_data_store<T, Tail...>& data, const T& value)
-		{
-			get_helper<idx - 1, _data_store<Tail...>>::set<T>(data.tail, value);
+			get_helper<idx - 1, _data_store<Tail...>>::template set<T2>(data.tail, value);
 		}
 
 		template<typename T2>
@@ -95,28 +99,28 @@ namespace boaaa
 			return get_helper<idx - 1, _data_store<Tail...>>::checkType<T2>(data.tail);
 		}
 
-		/*static size_t count(_data_store<T, Tail...>& data)
-		{
-			return 1 + get_helper<idx - 1, _data_store<Tail...>>::count(data.tail);
-		}*/
-
 		static size_t countBytes(_data_store<T, Tail...>& data)
 		{
-			return sizeof(T) + get_helper<idx - 1, _data_store<Tail...>>::countBytes(data.tail);
+			return (sizeof data.head) + get_helper<idx - 1, _data_store<Tail...>>::countBytes(data.tail);
 		}
 
 		static void writeBytes(_data_store<T, Tail...>& data, uint8_t* mem)
 		{
-			std::memcpy(mem, &data.head, sizeof(T));
-			get_helper<idx - 1, _data_store<Tail...>>::writeBytes(data.tail, mem + sizeof(T));
+			std::memcpy(mem, &data.head, sizeof data.head);
+			get_helper<idx - 1, _data_store<Tail...>>::writeBytes(data.tail, mem + sizeof data.head);
 		}
 	};
 
-	template<size_t n, typename ...Tail>
+
+#define __n sizeof...(Tail)
+
+	template<typename ...Tail>
 	struct data_store
 	{
 	public:
 		using store = _data_store<Tail...>;
+		template<size_t N>
+		using type = typename get_helper<N, store>::type;
 
 		data_store() = default;
 
@@ -124,39 +128,44 @@ namespace boaaa
 		{
 		};
 
-		template<size_t idx, typename type>
-		ErrorOr<type> get()
+		template<size_t idx>
+		ErrorOr<type<idx>> get()
 		{
-			if (idx >= n - 1)
+			if (idx >= __n - 1)
 				return make_error_code(version_error_code::IndexOutOfBounds);
-			if (!get_helper<idx, store>::template checkType<type>(data))
+			if (!get_helper<idx, store>::template checkType<type<idx>>(data))
 				return make_error_code(version_error_code::TypeError);
 
-			return (type) data.get<idx>();
+			return get_helper<idx, store>::template get<type<idx>>(data);
 		}
 
-		template<size_t idx, typename type>
-		bool set(const type& value)
+		template<size_t idx>
+		bool set(const type<idx>& value)
 		{
-			if (idx >= n - 1) return false;
-			if (!get_helper<idx, store>::template checkType<type>(data))
+			if (idx >= __n - 1) return false;
+			if (!get_helper<idx, store>::template checkType<type<idx>>(data))
 				return false;
 
-			get_helper<idx, store>::set<type>(data, value);
+			get_helper<idx, store>::template set<type<idx>>(data, value);
+			return true;
 		}
 
 		uint64_t hash(uint64_t seed = 0)
 		{
-			uint8_t* bytep = (uint8_t*)malloc(bytes);
-			get_helper<n - 1, store>::writeBytes(data, bytep);
-			return xxhash(bytep, bytes, seed);
+			size_t const size = get_helper<__n - 1, _data_store<Tail...>>::countBytes(data);
+			uint8_t* bytep = new uint8_t[size + 1];
+			bytep[size] = 0;
+			get_helper<__n - 1, store>::writeBytes(data, bytep);
+			return xxhash(bytep, size, seed);
 		}
 
 	private:
-		const size_t bytes = sizeof...(Tail);
+		const size_t n = __n;
 		store data;
 	};
 
 } //boaaa
+
+#undef __n
 
 #endif //!BOAAA_DATA_STORE_H

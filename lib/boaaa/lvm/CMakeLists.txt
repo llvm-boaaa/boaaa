@@ -23,4 +23,5 @@ LIST(REMOVE_ITEM LLVM_VERSION_MANAGER_Files ${item})
 endforeach()
 
 nm_add_library(boaaa.lvm STATIC ${LLVM_VERSION_MANAGER_Files})
+target_link_libraries(boaaa.lvm boaaa.support boaaa.vp)
 message(STATUS "||added lib: llvm_version_manager")
