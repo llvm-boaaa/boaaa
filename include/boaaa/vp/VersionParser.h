@@ -18,23 +18,23 @@ namespace boaaa
 		typedef data_store<Tail...> container;
 
 		VersionParseManager() {
-			m_store = std::unordered_map<uint64_t, container>();
+			m_store = new std::unordered_map<uint64_t, container>();
 		}
 
 		uint64_t registerContainer(container& data)
 		{
 			uint64_t hash = data.hash();
-			m_store.insert({ hash, data });
+			(*m_store).insert({ hash, data });
 			return hash;
 		}
 
 		container getContainer(const uint64_t hash)
 		{
-			return m_store[hash];
+			return (*m_store)[hash];
 		}
 
 	private:
-		std::unordered_map<uint64_t, container> m_store;
+		std::unordered_map<uint64_t, container>* m_store;
 	};
 
 	template<typename Type, typename...Tail>
@@ -65,13 +65,13 @@ namespace boaaa
 			return m_manager->registerContainer(data);
 		}
 
-		void registerVPM(std::shared_ptr<VPM> manager) {
+		void registerVPM(VPM* manager) {
 			if (!m_manager) return;
 			m_manager = manager;
 		}
 
 	private:
-		std::shared_ptr<VPM> m_manager;
+		VPM* m_manager;
 	};
 	
 }

@@ -32,7 +32,7 @@
 #include "llvm/Support/YAMLTraits.h"
 #include "llvm/Target/TargetMachine.h"
 //boaaa
-#include "boaaa/stdafx.h"
+//#include "boaaa/stdafx.h"
 #define NO_EXPORT //defines __export as nothing, to fix import problem of LLVMVersionManager
 #include "boaaa/dynamic_interface.h"
 #undef NO_EXPORT
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
 	llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
 
-	std::shared_ptr<boaaa::StringRefVPM> manager = std::make_shared<boaaa::StringRefVPM>(*(new boaaa::StringRefVPM()));
+	boaaa::StringRefVPM* manager = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(manager);
 	llvm40->registerStringRefVPM(manager);
 	llvm50->registerStringRefVPM(manager);
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
 
 	uint64_t str_test_hash = man.registerData(ref);
 
-
+	llvm40->test(&str_test_hash, 1);
 	
 
 	//test();

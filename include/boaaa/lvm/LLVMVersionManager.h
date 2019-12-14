@@ -67,7 +67,7 @@ namespace boaaa {
 
 		//DLInterface-functions
 
-		void registerStringRefVPM(std::shared_ptr<StringRefVPM> manager) override;
+		void registerStringRefVPM(StringRefVPM* manager) override;
 		void setBasicOStream(std::ostream& ostream, bool del = false) override;
 	private:
 		void onLoad() override;

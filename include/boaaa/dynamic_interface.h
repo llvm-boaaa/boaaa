@@ -49,13 +49,13 @@ namespace boaaa {
 		virtual void onLoad() = 0;
 		virtual void onUnload() = 0;
 
-		virtual void registerStringRefVPM(std::shared_ptr<StringRefVPM> manager) = 0;
+		virtual void registerStringRefVPM(StringRefVPM* manager) = 0;
 		virtual void setBasicOStream(std::ostream& ostream, bool del = false) = 0;
 
 
 		//only defined in tool, so test ist allways public, 
 		//but only callable from outside, when DEBUG_DLL_Test is defined
-#ifdef DEBUG_DLL_TEST
+#ifndef DEBUG_DLL_TEST
 	private:
 #endif
 		virtual void test(uint64_t* hash = nullptr, uint8_t num = 0) = 0;

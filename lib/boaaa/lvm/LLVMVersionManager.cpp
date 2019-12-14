@@ -45,7 +45,7 @@ LLVMVersionManager::loadDL(StringRef filename, StringRef folder) {
 		m_dl_map->insert(std::pair<std::string, LLVM_Info*>(filename.str(), info));
 	}
 	info->ref_counter++;
-	return info->info.gen();
+	return info->inst;
 }
 
 void LLVMVersionManager::mayUnload(std::shared_ptr<DLInterface> inst, StringRef filename) {
@@ -78,7 +78,7 @@ void LLVMVersionManager::onUnload()
 
 }
 
-void LLVMVersionManager::registerStringRefVPM(std::shared_ptr<StringRefVPM> manager)
+void LLVMVersionManager::registerStringRefVPM(StringRefVPM* manager)
 {
 	registerVPM(manager);
 }

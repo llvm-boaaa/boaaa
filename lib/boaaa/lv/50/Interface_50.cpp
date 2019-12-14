@@ -24,7 +24,7 @@ void DLInterface50::onUnload()
 	delete context.string_ref_vp;
 }
 
-void DLInterface50::registerStringRefVPM(std::shared_ptr<StringRefVPM> manager)
+void DLInterface50::registerStringRefVPM(StringRefVPM* manager)
 {
 	context.string_ref_vp->registerVPM(manager);
 }

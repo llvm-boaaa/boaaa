@@ -16,7 +16,7 @@ namespace boaaa {
 
 		void onLoad() override;
 		void onUnload() override;
-		void registerStringRefVPM(std::shared_ptr<StringRefVPM> manager) override;
+		void registerStringRefVPM(StringRefVPM* manager) override;
 		void setBasicOStream(std::ostream& ostream, bool del = false) override;
 				
 		
