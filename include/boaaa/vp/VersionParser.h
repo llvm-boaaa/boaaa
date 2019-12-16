@@ -66,7 +66,7 @@ namespace boaaa
 		}
 
 		void registerVPM(VPM* manager) {
-			if (!m_manager) return;
+			if (!manager) return;
 			m_manager = manager;
 		}
 

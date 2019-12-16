@@ -72,7 +72,7 @@ PassList(cl::desc("Optimizations available:"), cl::cat(BoaaaCat));
 
 void registerPasses(PassRegistry& Registry);
 
-void test();
+ErrorOr<std::string> test();
 
 int main(int argc, char** argv) {
 	
@@ -111,10 +111,14 @@ int main(int argc, char** argv) {
 	std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
 	std::shared_ptr<boaaa::DLInterface> llvm90 = man.loadDL("boaaa.lv_90");
 
+	
 	llvm40->setBasicOStream(std::cout);
 	llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
 
+	llvm90->test(nullptr, 0);
+
+	/*
 	boaaa::StringRefVPM* manager = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(manager);
 	llvm40->registerStringRefVPM(manager);
@@ -127,7 +131,19 @@ int main(int argc, char** argv) {
 	uint64_t str_test_hash = man.registerData(ref);
 
 	llvm40->test(&str_test_hash, 1);
+	llvm50->test(&str_test_hash, 1);
+	llvm90->test(&str_test_hash, 1);
 	
+	llvm::ErrorOr<std::string> str = "test the erroror-type";
+	std::cout << str.get() << std::endl;
+
+	llvm::StringRef ref2 = test().get();
+	std::cout << ref2.str() << std::endl;
+
+	std::string str5 = test().get();
+	ref2 = str5;
+	std::cout << ref2.str() << std::endl;
+	*/
 
 	//test();
 	return 0;
@@ -138,18 +154,9 @@ int main(int argc, char** argv) {
 //tea dsa branch of sea dsa
 //svf
 
-void test()
+ErrorOr<std::string> test()
 {
-	LLVMContext con;
-	boaaa::data_store<int, std::string> bla(567, std::string("bar"));
-	std::cout << bla.hash() << std::endl;
-
-	boaaa::data_store<int, std::string> bla2(657, "foo");
-	std::cout << bla2.hash() << std::endl;
-
-	boaaa::data_store<std::string, llvm::LLVMContext> bla3;
-	bla3.set<0>("a really long string to test the capability of the hash algorithm");
-	std::cout << bla3.hash() << " " << bla3.get<0>().get() << std::endl;
+	return "test string";
 }
 
 void registerPasses(PassRegistry& Registry) 

@@ -1,5 +1,12 @@
 #include "Interface_40.h"
 
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IRReader/IRReader.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/SourceMgr.h"
+
 #include "boaaa/support/dump_ostream.h"
 
 using namespace boaaa;
@@ -40,6 +47,13 @@ void DLInterface40::setBasicOStream(std::ostream& ostream, bool del)
 
 void DLInterface40::test(uint64_t* hash, uint8_t num)
 {
-	llvm::StringRef ref = context.string_ref_vp->parseRegistered(*hash);
-	*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
+	//llvm::StringRef ref = context.string_ref_vp->parseRegistered(*hash);
+	//*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
+
+	//llvm::LLVMContext context;
+	//llvm::legacy::PassManager manager;
+	//llvm::SMDiagnostic Err;
+
+
+	//llvm::ErrorOr<std::unique_ptr<llvm::Module>> module = llvm::parseIRFile("../../../../bc_sources/libbmi160.a.bc", Err, context);
 }

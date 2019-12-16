@@ -131,7 +131,7 @@ namespace boaaa
 		template<size_t idx>
 		ErrorOr<type<idx>> get()
 		{
-			if (idx >= __n - 1)
+			if (idx >= __n)
 				return make_error_code(version_error_code::IndexOutOfBounds);
 			if (!get_helper<idx, store>::template checkType<type<idx>>(data))
 				return make_error_code(version_error_code::TypeError);
@@ -142,7 +142,7 @@ namespace boaaa
 		template<size_t idx>
 		bool set(const type<idx>& value)
 		{
-			if (idx >= __n - 1) return false;
+			if (idx >= __n) return false;
 			if (!get_helper<idx, store>::template checkType<type<idx>>(data))
 				return false;
 

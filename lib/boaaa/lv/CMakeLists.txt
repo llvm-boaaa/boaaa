@@ -122,6 +122,9 @@ foreach(version_ ${build_llvm_version} )
 			WORKING_DIRECTORY "${_path}/${branch}"
 			OUTPUT_VARIABLE   o)
 		message(STATUS "|| generating cmake ...")
+		if (${version_} STREQUAL "50")
+		file(COPY ${BOAAA_SOURCE_DIR}/replace/STLExtras.h DESTINATION "${_path}/${branche}/include/llvm/ADT")
+		endif()
 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		message(STATUS "|| using x64 generator")
 		execute_process(
