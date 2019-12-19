@@ -45,15 +45,16 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 }
 
 
-void DLInterface90::test(uint64_t* hash, uint8_t num)
+void DLInterface90::test(uint64_t hash, uint8_t num)
 {
-	//llvm::StringRef ref = context.string_ref_vp->parseRegistered(*hash);
-	//*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
+	_raw_type_inst(context.string_ref_vp)::store_t storeSR = context.string_ref_vp->generateStorage();
+	llvm::StringRef ref = context.string_ref_vp->parseRegistered(hash, storeSR);
+	*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
 
 	llvm::LLVMContext context;
 	llvm::legacy::PassManager manager;
 	llvm::SMDiagnostic Err;
 
 
-	llvm::ErrorOr<std::unique_ptr<llvm::Module>> module = llvm::parseIRFile("../../../../bc_sources/libbmi160.a.bc", Err, context);
+	std::unique_ptr<llvm::Module> module = llvm::parseIRFile("../../../../bc_sources/libbmi160.a.bc", Err, context);
 }

@@ -92,7 +92,7 @@ void LLVMVersionManager::setBasicOStream(std::ostream& ostream, bool del)
 }
 
 
-void LLVMVersionManager::test(uint64_t* hash, uint8_t num)
+void LLVMVersionManager::test(uint64_t hash, uint8_t num)
 {
 	//never called
 }

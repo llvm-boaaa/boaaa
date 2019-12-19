@@ -7,10 +7,12 @@ StringRefVPM::container StringRefVPCur::parse(llvm::StringRef& data)
 	return container(data.str());
 }
 
-llvm::StringRef StringRefVPCur::generate(StringRefVPM::container& data)
+llvm::StringRef StringRefVPCur::generate(StringRefVPM::container& data, store_t& store)
 {
-	ErrorOr<std::string> StringOrError = data.get<0>();
-	if (!StringOrError)
+	ErrorOr<std::string> StringOrErr = data.get<0>();
+	if (!StringOrErr)
 		return ""; //error;
-	return llvm::StringRef(StringOrError.get());
+	store.reset();
+	store = std::make_unique<std::string>(StringOrErr.get());
+	return llvm::StringRef(store->c_str(), store->size());
 }

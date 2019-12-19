@@ -48,18 +48,19 @@ namespace boaaa
 
 		virtual container parse(Type& data) = 0;
 		virtual Type generate(container& data) = 0;
-		virtual Type parseRegistered(uint64_t hash) 
+
+		Type parseRegistered(uint64_t hash) 
 		{
 			return generate(m_manager->getContainer(hash));
 		}
 
-		virtual uint64_t registerData(Type data)
+		uint64_t registerData(Type data)
 		{
 			if (!m_manager) return 0;
 			return m_manager->registerContainer(parse(data));
 		}
 
-		virtual uint64_t registerContainer(container& data)
+		uint64_t registerContainer(container& data)
 		{
 			if (!m_manager) return 0;
 			return m_manager->registerContainer(data);
@@ -74,6 +75,45 @@ namespace boaaa
 		VPM* m_manager;
 	};
 	
+	template<typename Type, typename Store, typename ...Tail>
+	class StoreVersionParser
+	{
+	public:
+		using VPM = VersionParseManager<Tail...>;
+		using container = typename VPM::container;
+		typedef std::unique_ptr<Store> store_t;
+
+		StoreVersionParser() { m_manager = nullptr; }
+
+		virtual container parse(Type& data) = 0;
+		virtual Type generate(container& data, store_t& store) = 0;
+
+		store_t generateStorage() { return std::make_unique<Store>(); };
+		Type parseRegistered(uint64_t hash, store_t& store)
+		{
+			return generate(m_manager->getContainer(hash), store);
+		}
+
+		uint64_t registerData(Type data)
+		{
+			if (!m_manager) return 0;
+			return m_manager->registerContainer(parse(data));
+		}
+
+		uint64_t registerContainer(container& data)
+		{
+			if (!m_manager) return 0;
+			return m_manager->registerContainer(data);
+		}
+
+		void registerVPM(VPM* manager) {
+			if (!manager) return;
+			m_manager = manager;
+		}
+
+	private:
+		VPM* m_manager;
+	};
 }
 
 #endif // !BOAAA_VP_VERSION_PARSER_H

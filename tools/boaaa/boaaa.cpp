@@ -116,36 +116,21 @@ int main(int argc, char** argv) {
 	llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
 
-	llvm90->test(nullptr, 0);
-
-	/*
+	
 	boaaa::StringRefVPM* manager = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(manager);
 	llvm40->registerStringRefVPM(manager);
 	llvm50->registerStringRefVPM(manager);
 	llvm90->registerStringRefVPM(manager);
 
-
 	StringRef ref = "this is a test string";
 
 	uint64_t str_test_hash = man.registerData(ref);
 
-	llvm40->test(&str_test_hash, 1);
-	llvm50->test(&str_test_hash, 1);
-	llvm90->test(&str_test_hash, 1);
-	
-	llvm::ErrorOr<std::string> str = "test the erroror-type";
-	std::cout << str.get() << std::endl;
+	llvm40->test(str_test_hash, 1);
+	llvm50->test(str_test_hash, 1);
+	llvm90->test(str_test_hash, 1);
 
-	llvm::StringRef ref2 = test().get();
-	std::cout << ref2.str() << std::endl;
-
-	std::string str5 = test().get();
-	ref2 = str5;
-	std::cout << ref2.str() << std::endl;
-	*/
-
-	//test();
 	return 0;
 }
 
@@ -154,8 +139,11 @@ int main(int argc, char** argv) {
 //tea dsa branch of sea dsa
 //svf
 
+#include "boaaa/support/raw_type.h"
+
 ErrorOr<std::string> test()
 {
+
 	return "test string";
 }
 

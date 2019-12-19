@@ -2,6 +2,7 @@
 #define BOAAA_LV_INTERFACE_40_H
 
 #include "boaaa/dynamic_interface.h"
+#include "boaaa/support/raw_type.h"
 #include "boaaa/vp/StringRefVersionParser.h"
 #include "StringRefVersionParser40.h"
 #include "../version_context.h"
@@ -20,7 +21,7 @@ namespace boaaa {
 		void setBasicOStream(std::ostream& ostream, bool del = false) override;
 				
 		
-		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
+		void test(uint64_t hash = 0, uint8_t num = 0) override;
 
 	private:
 		version_context context;

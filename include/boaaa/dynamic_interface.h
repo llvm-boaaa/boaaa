@@ -58,7 +58,7 @@ namespace boaaa {
 #ifndef DEBUG_DLL_TEST
 	private:
 #endif
-		virtual void test(uint64_t* hash = nullptr, uint8_t num = 0) = 0;
+		virtual void test(uint64_t hash = 0, uint8_t num = 0) = 0;
 	};
 }
 

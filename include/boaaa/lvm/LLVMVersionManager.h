@@ -73,7 +73,7 @@ namespace boaaa {
 		void onLoad() override;
 		void onUnload() override;
 
-		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
+		void test(uint64_t hash = 0, uint8_t num = 0) override;
 	};
 
 }

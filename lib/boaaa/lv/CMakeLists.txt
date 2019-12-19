@@ -188,14 +188,18 @@ foreach(version_ ${build_llvm_version} )
 		"${version_}/*.cpp"
 	)
 
+	#set(LLVM_${version_}_libs ${LLVM_AVAILABLE_LIBS})
+	#set(LLVM_${version_}_include_dir ${LLVM_INCLUDE_DIRS})
+
 	boaaa_add_llvm_version(NAME LLVM_${version_}
-					   LIBS ${LLVM_AVAILABLE_LIBS} 
+					   LIBS ${LLVM_AVAILABLE_LIBS}
 					   INTERFACE_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS}
 					   INTERFACE_COMPILE_OPTIONS -D_DEBUG)
 
 	boaaa_add_llvm_library(boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${_dl_files})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
-	target_link_libraries(boaaa.lv_${version_} LLVM_${version_} boaaa.support boaaa.vp boaaa.lvm)
+	target_link_libraries(boaaa.lv_${version_}
+							PRIVATE LLVM_${version_} boaaa.support boaaa.vp boaaa.lvm)
 
 
 

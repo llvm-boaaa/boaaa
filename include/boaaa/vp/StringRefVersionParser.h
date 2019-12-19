@@ -12,7 +12,7 @@ namespace boaaa
 
 	typedef VersionParseManager<std::string> StringRefVPM;
 	template<typename type>
-	using StringRefVP = VersionParser<type, std::string>;
+	using StringRefVP = StoreVersionParser<type, std::string, std::string>;
 }
 
 #endif //!BOAAA_VP_STRING_REF_VERSION_PARSER_H
