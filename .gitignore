@@ -16,5 +16,6 @@ out/
 **/*.Plo
 **/*.Po
 /tools/BUILD_LLVM/do_nothing_current.h
+/tools/BUILD_LLVM/do_nothing_release_40.h
 /tools/BUILD_LLVM/do_nothing_release_50.h
 /tools/BUILD_LLVM/do_nothing_release_90.h

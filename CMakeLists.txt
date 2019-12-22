@@ -47,7 +47,6 @@ endif()
 include(cmake/nicemake/NiceMake.cmake)
 include(cmake/checkOrCreateFoulder.cmake)
 
-
 message(STATUS "|| test: ${BOAAA_SOURCE_DIR}/libraries/llvm/build/")
 # set include dir
 #set(NM_CONF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")

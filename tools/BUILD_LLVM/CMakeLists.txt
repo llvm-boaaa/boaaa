@@ -10,14 +10,14 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
 	PRE_BUILD
 	COMMAND "start" cmd /c "cmake --build ."
 	COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
-	WORKING_DIRECTORY ${BOAAA_SOURCE_DIR}/libraries/llvm/current
+	WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build"
 	COMMENT "BUILD LLVM for BOAAA include")
 else()
 add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
 	PRE_BUILD
 	COMMAND cmake --build .
 	COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
-	WORKING_DIRECTORY ${BOAAA_SOURCE_DIR}/libraries/llvm/current
+	WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build"
 	COMMENT "BUILD LLVM for BOAAA include")
 endif()
 
@@ -34,14 +34,14 @@ foreach(dep ${llvm_dependencies})
 		PRE_BUILD
 		COMMAND "start" cmd /c "cmake --build ."
 		COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h ${CMAKE_CURRENT_SOURCE_DIR}/${output_file}
-		WORKING_DIRECTORY ${BOAAA_SOURCE_DIR}/llvm_version/${dep}
+		WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/llvm_version/${dep}/build"
 		COMMENT "BUILD LLVM version: ${dep}")
 	else()
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${output_file}"
 		PRE_BUILD
 		COMMAND cmake --build .
 		COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h ${CMAKE_CURRENT_SOURCE_DIR}/${output_file}
-		WORKING_DIRECTORY ${BOAAA_SOURCE_DIR}/llvm_version/${dep}
+		WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/llvm_version/${dep}/build"
 		COMMENT "BUILD LLVM version: ${dep}")
 	endif()
 	LIST(APPEND ALL_DEPS "${CMAKE_CURRENT_SOURCE_DIR}/${output_file}")
