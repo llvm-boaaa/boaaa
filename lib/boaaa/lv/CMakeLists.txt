@@ -98,59 +98,60 @@ foreach(version_ ${build_llvm_version} )
 	endif()
 
 	set(_path "${BOAAA_SOURCE_DIR}/llvm_version/")
+	message(STATUS ${_path})
 
-	if (EXISTS "${_path}/${branch}")
+	if (EXISTS "${_path}/${branch}/source")
 		message(STATUS "|| pulling from branch ${branch} ...")
 		execute_process(
 			COMMAND ${GIT_EXECUTABLE} pull origin ${branch}
-			WORKING_DIRECTORY "${_path}/${branch}"
+			WORKING_DIRECTORY "${_path}/${branch}/source"
 			RESULT_VARIABLE   result)
 	else()
 		message(STATUS "|| clone from branch ${branch} ...")
 		execute_process(
-			COMMAND ${GIT_EXECUTABLE} clone --branch ${branch} https://github.com/llvm-mirror/llvm.git ${branch}
-			WORKING_DIRECTORY ${_path}
+			COMMAND ${GIT_EXECUTABLE} clone --branch ${branch} https://github.com/llvm-mirror/llvm.git "source"
+			WORKING_DIRECTORY ${_path}/${branch}
 			RESULT_VARIABLE   result)
 	endif()
 
 	if(WIN32)
-		if(EXISTS "${_path}/${branch}/LLVM.sln") #skip generate for existing .sln
+		if(EXISTS "${_path}/${branch}/build/LLVM.sln") #skip generate for existing .sln
 			message(STATUS "|| skip cmake generation...")
 		else()
 		execute_process( #clean repo
 			COMMAND git clean -d -f -x
-			WORKING_DIRECTORY "${_path}/${branch}"
+			WORKING_DIRECTORY "${_path}/${branch}/build"
 			OUTPUT_VARIABLE   o)
 		message(STATUS "|| generating cmake ...")
 		if (${version_} STREQUAL "50")
-		file(COPY ${BOAAA_SOURCE_DIR}/replace/STLExtras.h DESTINATION "${_path}/${branche}/include/llvm/ADT")
+		file(COPY ${BOAAA_SOURCE_DIR}/replace/STLExtras.h DESTINATION "${_path}/${branch}/source/include/llvm/ADT")
 		endif()
 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		message(STATUS "|| using x64 generator")
 		execute_process(
-			COMMAND cmake "." -G "Visual Studio 16 2019" -Thost=x64
-			WORKING_DIRECTORY "${_path}/${branch}"
+			COMMAND cmake "../source" -G "Visual Studio 16 2019" -Thost=x64
+			WORKING_DIRECTORY "${_path}/${branch}/build"
 			OUTPUT_VARIABLE   o)
 		else()
 		message(STATUS "|| using x32 generator")
 		execute_process(
-			COMMAND cmake "." -G "Visual Studio 16 2019" -A Win32
-			WORKING_DIRECTORY "${_path}/${branch}"
+			COMMAND cmake "../source" -G "Visual Studio 16 2019" -A Win32
+			WORKING_DIRECTORY "${_path}/${branch}/build"
 			OUTPUT_VARIABLE   o)
 		endif()	
 		endif()
 	else()
 		message(STATUS "|| generating cmake ...")
 		execute_process(
-			COMMAND cmake .
-			WORKING_DIRECTORY "${_path}/${branch}"
+			COMMAND cmake "../source"
+			WORKING_DIRECTORY "${_path}/${branch}/build"
 			OUTPUT_VARIABLE   o)
 	endif()
 	
 	set(LLVM_NAME "LLVM_${branch}")
 	set(LLVM_NAME_DIR "${LLVM_NAME}_DIR")
 
-	set(${LLVM_NAME_DIR} "${_path}/${branch}/cmake/modules/CMakeFiles")
+	set(${LLVM_NAME_DIR} "${_path}/${branch}/build/cmake/modules/CMakeFiles")
 
 	if(EXISTS ${${LLVM_NAME_DIR}}/${LLVM_NAME}Config.cmake)
 		message(STATUS "|| No renaming to do file: ${LLVM_NAME}.cmake already exists.")
