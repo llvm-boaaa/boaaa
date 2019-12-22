@@ -1,0 +1,6 @@
+function(boaaa_checkOrCreateFoulder _PATH)
+if(NOT EXISTS ${_PATH})
+message(STATUS "|| created foulder ${_PATH}")
+file(MAKE_DIRECTORY ${_PATH})
+endif()
+endfunction()

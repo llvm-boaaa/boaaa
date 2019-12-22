@@ -3,6 +3,8 @@ out/
 cmake-build/
 .github/
 llvm_version/*/
+libraries/llvm/build
+out/
 
 #build files
 **/*.o

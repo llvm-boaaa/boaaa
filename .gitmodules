@@ -16,3 +16,7 @@
 [submodule "cmake/cmake_git_clone"]
 	path = cmake/cmake_git_clone
 	url = https://github.com/tschuchortdev/cmake_git_clone.git
+[submodule "libraries/llvm/source"]
+	path = libraries/llvm/source
+	url = https://github.com/llvm-mirror/llvm.git
+	branch = release_90

@@ -97,7 +97,7 @@ foreach(version_ ${build_llvm_version} )
 	set(branch "release_${version_}")
 	endif()
 
-	set(_path "${BOAAA_SOURCE_DIR}/llvm_version/")
+	set(_path "${BOAAA_SOURCE_DIR}/llvm_version")
 	message(STATUS ${_path})
 
 	if (EXISTS "${_path}/${branch}/source")
@@ -126,6 +126,9 @@ foreach(version_ ${build_llvm_version} )
 		if (${version_} STREQUAL "50")
 		file(COPY ${BOAAA_SOURCE_DIR}/replace/STLExtras.h DESTINATION "${_path}/${branch}/source/include/llvm/ADT")
 		endif()
+
+		boaaa_checkOrCreateFoulder("${_path}/${branch}/build")
+
 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		message(STATUS "|| using x64 generator")
 		execute_process(
