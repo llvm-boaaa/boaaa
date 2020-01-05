@@ -5,9 +5,15 @@ project(BOAAA)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#descripes all release_XX version of the repo https://github.com/llvm-mirror/llvm
-set(all_llvm_versions "10;16;20;21;22;23;24;25;27;28;29;30;31;32;33;34;35;36;37;38;39;40;50;60;70;80;90;master")
-set(build_llvm_version "40;50;90")
+if(NOT EXISTS LLVMVersionConfig.cmake)
+message(WARRNING "Configer installed LLVM-Versions in LLVMVersionConfig.cmake")
+include(LLVMVersionConfig-template.cmake)
+else()
+include(LLVMVersionConfig.cmake)
+endif()
+
+include(cmake/LLVMVersionIncludeHelp.cmake)
+include(cmake/replaceLast.cmake)
 
 message(STATUS "||===========generating BOAAA===========||")
 message(STATUS "||")

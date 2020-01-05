@@ -26,7 +26,7 @@ namespace boaaa {
 		LLVM_Info(StringRef filename, std::shared_ptr<DLInterface> inst, std::unique_ptr<DLHandle> handle, DL_Info info) 
 			: info(info), filename(filename), inst(inst), ref_counter(0), handle(std::move(handle)) { };
 
-		~LLVM_Info() { inst.unique(); handle.release(); };
+		~LLVM_Info() { inst.unique(); handle.reset(nullptr); };
 	};
 
 	class LLVMVersionManager : public DLInterface, public StringRefVPCur
