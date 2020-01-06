@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT EXISTS LLVMVersionConfig.cmake)
-message(WARRNING "Configer installed LLVM-Versions in LLVMVersionConfig.cmake")
+message(WARRNING "|| Configer installed LLVM-Versions in LLVMVersionConfig.cmake")
 include(LLVMVersionConfig-template.cmake)
 else()
 include(LLVMVersionConfig.cmake)
@@ -53,7 +53,6 @@ endif()
 include(cmake/nicemake/NiceMake.cmake)
 include(cmake/checkOrCreateFoulder.cmake)
 
-message(STATUS "|| test: ${BOAAA_SOURCE_DIR}/libraries/llvm/build/")
 # set include dir
 #set(NM_CONF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 	message(STATUS "|| configure cmake for boaaa")
@@ -105,7 +104,8 @@ nm_add_thirdparty_libs(NAME LLVM_BOAAA_VERSION
 					   INTERFACE_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS}
 					   INTERFACE_COMPILE_OPTIONS -D_DEBUG)
 
-add_definitions(${LLVM_DEFINITIONS})
+
+#add_definitions(${LLVM_DEFINITIONS})
 
 #add libs
 	# googletests, remove googletest error of some kind, but currently not important

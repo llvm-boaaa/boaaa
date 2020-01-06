@@ -47,7 +47,7 @@ foreach(version_ ${build_llvm_version} )
 			message(STATUS "|| clone from branch ${branch} ...")
 			execute_process(
 				COMMAND ${GIT_EXECUTABLE} clone https://github.com/llvm-mirror/llvm.git --branch ${branch} --single-branch "source"
-				WORKING_DIRECTORY ${_path}/${branch}
+				WORKING_DIRECTORY "${_path}/${branch}"
 				RESULT_VARIABLE   result)
 		endif()
 
@@ -61,6 +61,7 @@ foreach(version_ ${build_llvm_version} )
 				WORKING_DIRECTORY "${_path}/${branch}/build"
 				OUTPUT_VARIABLE   o)
 			message(STATUS "|| generating cmake ...")
+
 			if((${version_} STREQUAL "40") OR (${version_} STREQUAL "50"))
 			file(COPY ${BOAAA_SOURCE_DIR}/replace/STLExtras.h DESTINATION "${_path}/${branch}/source/include/llvm/ADT")
 			endif()
@@ -76,7 +77,7 @@ foreach(version_ ${build_llvm_version} )
 			else()
 			message(STATUS "|| using x32 generator")
 			execute_process(
-				COMMAND ${CMAKE_COMMAND}  "../source" -G "Visual Studio 16 2019" -A Win32
+				COMMAND ${CMAKE_COMMAND} "../source" -G "Visual Studio 16 2019" -A Win32
 				WORKING_DIRECTORY "${_path}/${branch}/build"
 				OUTPUT_VARIABLE   o)
 			endif()	
@@ -84,7 +85,7 @@ foreach(version_ ${build_llvm_version} )
 		else()
 			message(STATUS "|| generating cmake ...")
 			execute_process(
-				COMMAND ${CMAKE_COMMAND}  "../source"
+				COMMAND ${CMAKE_COMMAND} "../source"
 				WORKING_DIRECTORY "${_path}/${branch}/build"
 				OUTPUT_VARIABLE   o)
 		endif()
@@ -125,8 +126,6 @@ foreach(version_ ${build_llvm_version} )
 	message(STATUS "||>>====================================")
 	message(STATUS "||")
 
-	#add_custom_target(${LLVM_NAME})
-
 	file(GLOB _dl_files
 		"${version_}/*.h"
 		"${version_}/*.cpp"
@@ -147,6 +146,7 @@ foreach(version_ ${build_llvm_version} )
 	#>> if not installed fix include dirs
 	if(NOT ${LLVM_NAME}_REGISTERED)
 	boaaa_replace_last("build" "source" LLVM_${version_}_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS})
+	set(LLVM_${version_}_INCLUDE_DIRS "${LLVM_${version_}_INCLUDE_DIRS};${LLVM_INCLUDE_DIRS}")
 	message(STATUS "||fixed include dir path for generated llvm version")
 	message(STATUS "|| path: ${LLVM_${version_}_INCLUDE_DIRS}")
 	endif()
@@ -161,14 +161,23 @@ foreach(version_ ${build_llvm_version} )
 	target_link_libraries(boaaa.lv_${version_}
 							PRIVATE LLVM_${version_} boaaa.support boaaa.vp boaaa.lvm)
 
-
+	# on windows define LLVM_ON_WIN32 because sometimes undefined
+	#if((${version_} STREQUAL "50"))
+	#if(WIN32)
+	#set(sys_def "LLVM_ON_WIN32=1")
+	#endif()
+	#endif()
 
 	target_compile_definitions(boaaa.lv_${version_} 
 	PRIVATE 
 		LLVM_VERSION=${version_}
 		LLVM_VERSION_${version_}=${version_} 
-		BUILD_SHARED_LIB)
-	#add_dependencies(boaaa.lv_${version_} ${LLVM_NAME})
+		BUILD_SHARED_LIB
+		${sys_def})
+
+	#add_custom_target(${LLVM_NAME})
+
+	add_dependencies(boaaa.lv_${version_} LLVM_${version_})
 	message(STATUS "||added dynamic lib with llvm_version ${version_}: lv_${version_}")
 endforeach(version_)
 

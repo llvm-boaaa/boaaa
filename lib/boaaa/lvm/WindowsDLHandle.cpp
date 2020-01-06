@@ -40,7 +40,7 @@ void* WindowsDLHandle::getFunction(llvm::StringRef funcname)
 void WindowsDLHandle::load()
 {
 	std::string file = foldername.str() + "/" + filename.str() + ".dll";
-	inst = LoadLibrary(s2ws(file).c_str());
+	inst = LoadLibrary(file.c_str());
 	if (!inst) {
 		err.setError("DLL in file: " + file + ", can't be loaded!");
 		loadable = false;
@@ -64,7 +64,7 @@ std::wstring s2ws(const std::string& s)
 {
 	int len;
 	int slength = (int)s.length() + 1;
-	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, NULL, 0);
 	wchar_t* buf = new wchar_t[len];
 	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
 	std::wstring r(buf);
