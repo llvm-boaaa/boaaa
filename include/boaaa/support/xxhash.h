@@ -2,6 +2,9 @@
 #define BOAAA_XXHASH_H
 
 #include <inttypes.h>
+#if !defined(__LINUX__)
+#include <stddef.h>
+#endif
 
 namespace boaaa
 {

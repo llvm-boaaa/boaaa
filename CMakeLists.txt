@@ -53,6 +53,8 @@ endif()
 include(cmake/nicemake/NiceMake.cmake)
 include(cmake/checkOrCreateFoulder.cmake)
 
+boaaa_checkOrCreateFoulder("${BOAAA_SOURCE_DIR}/libraries/llvm/build")
+
 # set include dir
 #set(NM_CONF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 	message(STATUS "|| configure cmake for boaaa")
@@ -65,7 +67,7 @@ include(cmake/checkOrCreateFoulder.cmake)
 			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build/"
 			OUTPUT_VARIABLE   o)
 		message(STATUS "|| generating cmake ...")
-		boaaa_checkOrCreateFoulder("${BOAAA_SOURCE_DIR}/libraries/llvm/build")
+
 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		message(STATUS "|| using x64 generator")
 		execute_process(
@@ -83,7 +85,7 @@ include(cmake/checkOrCreateFoulder.cmake)
 	else()
 		message(STATUS "|| generating cmake ...")
 		execute_process(
-			COMMAND cmake ../source
+			COMMAND ${CMAKE_COMMAND} "../source" -G ${CMAKE_GENERATOR} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build/"
 			OUTPUT_VARIABLE   o)
 	endif()

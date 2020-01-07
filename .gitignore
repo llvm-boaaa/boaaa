@@ -5,6 +5,7 @@ cmake-build/
 llvm_version/*/
 libraries/llvm/build
 out/
+build/
 
 #build files
 **/*.o

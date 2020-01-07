@@ -36,20 +36,24 @@ foreach(version_ ${build_llvm_version} )
 		#>> llvm need to get build
 		set(_path "${BOAAA_SOURCE_DIR}/llvm_version")
 
+		boaaa_checkOrCreateFoulder("${_path}/${branch}")
+
 		#>> pull or clone git
 		if (EXISTS "${_path}/${branch}/source")
 			message(STATUS "|| pulling from branch ${branch} ...")
 			execute_process(
-				COMMAND ${GIT_EXECUTABLE} pull origin ${branch}
+				COMMAND git pull origin ${branch}
 				WORKING_DIRECTORY "${_path}/${branch}/source"
 				RESULT_VARIABLE   result)
 		else()
 			message(STATUS "|| clone from branch ${branch} ...")
 			execute_process(
-				COMMAND ${GIT_EXECUTABLE} clone https://github.com/llvm-mirror/llvm.git --branch ${branch} --single-branch "source"
+				COMMAND git clone https://github.com/llvm-mirror/llvm.git --branch ${branch} --single-branch source
 				WORKING_DIRECTORY "${_path}/${branch}"
 				RESULT_VARIABLE   result)
 		endif()
+
+		boaaa_checkOrCreateFoulder("${_path}/${branch}/build")
 
 		#>> generate cmake for llvm_version
 		if(WIN32)
@@ -65,8 +69,6 @@ foreach(version_ ${build_llvm_version} )
 			if((${version_} STREQUAL "40") OR (${version_} STREQUAL "50"))
 			file(COPY ${BOAAA_SOURCE_DIR}/replace/STLExtras.h DESTINATION "${_path}/${branch}/source/include/llvm/ADT")
 			endif()
-
-			boaaa_checkOrCreateFoulder("${_path}/${branch}/build")
 
 			if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 			message(STATUS "|| using x64 generator")
@@ -84,9 +86,13 @@ foreach(version_ ${build_llvm_version} )
 			endif()
 		else()
 			message(STATUS "|| generating cmake ...")
+			message(STATUS "|| use CC=${CMAKE_C_COMPILER}, CXX=${CMAKE_CXX_COMPILER}")
+			message(STATUS "|| generator: -G\"${CMAKE_GENERATOR}\"")
+			message(STATUS "|| command: ${CMAKE_COMMAND} ../source -G\"${CMAKE_GENERATOR}\" -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+			message(STATUS "|| path: ${_path}/${branch}/build")
 			execute_process(
-				COMMAND ${CMAKE_COMMAND} "../source"
-				WORKING_DIRECTORY "${_path}/${branch}/build"
+				COMMAND ${CMAKE_COMMAND} "../source" -G ${CMAKE_GENERATOR} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+ 				WORKING_DIRECTORY "${_path}/${branch}/build"
 				OUTPUT_VARIABLE   o)
 		endif()
 		

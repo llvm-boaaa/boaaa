@@ -8,17 +8,17 @@ endif()
 if (WIN32)
 add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
 	PRE_BUILD
-	COMMAND "start" cmd /c "cmake --build ."
-	#COMMAND "start" cmd /c "cmake --build . --target install"
-	COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
+	COMMAND "start" cmd /c "${CMAKE_COMMAND} --build ."
+	#COMMAND "start" cmd /c "${CMAKE_COMMAND} --build . --target install"
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
 	WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build"
 	COMMENT "BUILD LLVM for BOAAA include")
 else()
 add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
 	PRE_BUILD
-	COMMAND "cmake --build ."
-	#COMMAND "cmake --build . --target install"
-	COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
+	COMMAND ${CMAKE_COMMAND} --build .
+	#COMMAND "${CMAKE_COMMAND} --build . --target install"
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
 	WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build"
 	COMMENT "BUILD LLVM for BOAAA include")
 endif()
@@ -34,17 +34,17 @@ foreach(dep ${llvm_dependencies})
 	if(WIN32)
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${output_file}"
 		PRE_BUILD
-		COMMAND "start" cmd /c "cmake --build ."
-		#COMMAND "start" cmd /c "cmake --build . --target install"
-		COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h ${CMAKE_CURRENT_SOURCE_DIR}/${output_file}
+		COMMAND "start" cmd /c "${CMAKE_COMMAND} --build ."
+		#COMMAND "start" cmd /c "${CMAKE_COMMAND} --build . --target install"
+		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h ${CMAKE_CURRENT_SOURCE_DIR}/${output_file}
 		WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/llvm_version/${dep}/build"
 		COMMENT "BUILD LLVM version: ${dep}")
 	else()
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${output_file}"
 		PRE_BUILD
-		COMMAND "cmake --build ."
-		#COMMAND "cmake --build . --target install"
-		COMMAND cmake -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h ${CMAKE_CURRENT_SOURCE_DIR}/${output_file}
+		COMMAND ${CMAKE_COMMAND} --build .
+		#COMMAND "${CMAKE_COMMAND} --build . --target install"
+		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h ${CMAKE_CURRENT_SOURCE_DIR}/${output_file}
 		WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/llvm_version/${dep}/build"
 		COMMENT "BUILD LLVM version: ${dep}")
 	endif()
