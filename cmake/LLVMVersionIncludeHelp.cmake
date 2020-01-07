@@ -28,7 +28,7 @@ endfunction()
 #copied from nicemake/TargetCreation.cmake::nm_add_library
 #moddified, so every file in FOULDER_NAME get linked to the lib.
 #all individual source files have to be added by the cmake-function target_source
-function(boaaa_add_llvm_library NAME FOULDER_NAME BRANCH KIND)
+function(boaaa_add_llvm_library REGISTERED NAME FOULDER_NAME BRANCH KIND)
   if((KIND MATCHES "OBJECT") AND (CMAKE_VERSION VERSION_LESS "3.12"))
     # Pre-3.12 CMake has incomplete support for object libraries, e.g.
     # no way of importing compile options and include dirs via
@@ -52,7 +52,9 @@ function(boaaa_add_llvm_library NAME FOULDER_NAME BRANCH KIND)
   add_library(${NAME} ${simple_kind} ${LIBRARY_HEADERS} ${ARGN})
 
   cmake_global_list(dll_dependecies ${NAME} "VAR0")
+  if (NOT ${REGISTERED})
   cmake_global_list(llvm_dependencies ${BRANCH} "VAR1")
+  endif()
 
   set_property(TARGET "${NAME}" PROPERTY FOLDER "Libraries/${FOLDER_NAME}")
   set_property(TARGET "${NAME}" PROPERTY PROJECT_LABEL "Library")

@@ -1,28 +1,6 @@
 message(STATUS "||==========BOAAA_LLVM_BUILD============||")
 message(STATUS "||")
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h")
-file(REMOVE "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h")
-endif()
-
-if (WIN32)
-add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
-	PRE_BUILD
-	COMMAND "start" cmd /c "${CMAKE_COMMAND} --build ."
-	#COMMAND "start" cmd /c "${CMAKE_COMMAND} --build . --target install"
-	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
-	WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build"
-	COMMENT "BUILD LLVM for BOAAA include")
-else()
-add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
-	PRE_BUILD
-	COMMAND ${CMAKE_COMMAND} --build .
-	#COMMAND "${CMAKE_COMMAND} --build . --target install"
-	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h "${CMAKE_CURRENT_SOURCE_DIR}/do_nothing_current.h"
-	WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build"
-	COMMENT "BUILD LLVM for BOAAA include")
-endif()
-
 message(STATUS "|| LLVM_VERSION_TARGETS: ${llvm_dependencies}")
 
 foreach(dep ${llvm_dependencies})
@@ -34,7 +12,7 @@ foreach(dep ${llvm_dependencies})
 	if(WIN32)
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${output_file}"
 		PRE_BUILD
-		COMMAND "start" cmd /c "${CMAKE_COMMAND} --build ."
+		COMMAND "start" cmd /c "cmake --build ."
 		#COMMAND "start" cmd /c "${CMAKE_COMMAND} --build . --target install"
 		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/do_nothing.h ${CMAKE_CURRENT_SOURCE_DIR}/${output_file}
 		WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/llvm_version/${dep}/build"
@@ -53,4 +31,4 @@ endforeach()
 
 message(STATUS "|| deps: ${ALL_DEPS}")
 
-add_executable(BOAAA_LLVM_BUILD "do_nothing.cpp" "do_nothing_current.h" ${ALL_DEPS})
+add_executable(BOAAA_LLVM_BUILD "do_nothing.cpp" ${ALL_DEPS})

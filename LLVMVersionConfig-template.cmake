@@ -13,6 +13,8 @@
 set(all_llvm_versions "30;31;32;33;34;35;36;37;38;39;40;50;60;70;80;90")
 set(build_llvm_version "40;50;90")
 
+set(llvm_boaaa "90")
+
 include(cmake/registerLLVMVersion.cmake)
 
 # LLVM_40

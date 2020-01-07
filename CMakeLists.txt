@@ -8,6 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 message(STATUS "||===========generating BOAAA===========||")
 message(STATUS "||")
 
+find_package(Git)
+if(NOT GIT_FOUND)
+    message(FATAL_ERROR "git not found!")
+endif()
+
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/LLVMVersionConfig.cmake")
 include(LLVMVersionConfig.cmake)
 else()
@@ -19,6 +24,8 @@ endif()
 include(cmake/LLVMVersionIncludeHelp.cmake)
 include(cmake/replaceLast.cmake)
 include(cmake/copyAndRename.cmake)
+include(cmake/checkOrCreateFoulder.cmake)
+include(cmake/createLLVMWrapperTarget.cmake)
 
 message(STATUS "|| BOAAA is generated with following")
 message(STATUS "|| supported versions:")
@@ -54,59 +61,27 @@ endif()
 
 # include Nicemake https://github.com/fkutzner/NiceMake
 include(cmake/nicemake/NiceMake.cmake)
-include(cmake/checkOrCreateFoulder.cmake)
 
-boaaa_checkOrCreateFoulder("${BOAAA_SOURCE_DIR}/libraries/llvm/build")
+message(STATUS "|| configure LLVM versions:")
 
-# set include dir
-#set(NM_CONF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-	message(STATUS "|| configure cmake for boaaa")
-	if(WIN32)
-		if(EXISTS "${BOAAA_SOURCE_DIR}/libraries/llvm/build/LLVM.sln") #skip generate for existing .sln
-			message(STATUS "|| skip cmake generation...")
-		else()
-		execute_process( #clean repo
-			COMMAND git clean -d -f -x
-			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build/"
-			OUTPUT_VARIABLE   o)
-		message(STATUS "|| generating cmake ...")
+foreach(version_ ${build_llvm_version})
 
-		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		message(STATUS "|| using x64 generator")
-		execute_process(
-			COMMAND cmake "../source" -G "Visual Studio 16 2019" -Thost=x64
-			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build/"
-			OUTPUT_VARIABLE   o)
-		else()
-		message(STATUS "|| using x32 generator")
-		execute_process(
-			COMMAND cmake "../source" -G "Visual Studio 16 2019"
-			WORKING_DIRECTORY ${BOAAA_SOURCE_DIR}"/libraries/llvm/build/"
-			OUTPUT_VARIABLE   o)
-		endif()	
-		endif()
-	else()
-		message(STATUS "|| generating cmake ...")
-		execute_process(
-			COMMAND ${CMAKE_COMMAND} "../source" -G ${CMAKE_GENERATOR} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-			WORKING_DIRECTORY "${BOAAA_SOURCE_DIR}/libraries/llvm/build/"
-			OUTPUT_VARIABLE   o)
-	endif()
+	boaaa_create_llvm_wrapper(${version_})
 
-#add llvm
-set(LLVM_DIR "${BOAAA_SOURCE_DIR}/libraries/llvm/build/cmake/modules/CMakeFiles/")
-find_package(LLVM REQUIRED CONFIG)
-message(STATUS "||=========LLVM used for BOAAA==========")
-message(STATUS "||LLVM_DIR: ${LLVM_DIR}")
-message(STATUS "||Found LLVM Version ${LLVM_PACKAGE_VERSION}")
-message(STATUS "||LLVM libs: ${LLVM_AVAILABLE_LIBS} ")
-message(STATUS "||LLVM include dirs: ${LLVM_INCLUDE_DIRS} ")
-message(STATUS "||======================================")
-message(STATUS "||")
+endforeach(version_)
+
+message(STATUS "|| configured all versions")
+
+	set(BOAAA_LLVM_NAME "LLVM_${llvm_boaaa}")
+
+	message(STATUS "||>>=======LLVM used for BOAAA=========")
+	message(STATUS "||LLVM Version ${${BOAAA_LLVM_NAME}_VERSION}")
+	message(STATUS "||LLVM libs: ${${BOAAA_LLVM_NAME}_LIBS} ")
+	message(STATUS "||LLVM include dirs: ${${BOAAA_LLVM_NAME}_INCLUDE_DIRS} ")
 
 nm_add_thirdparty_libs(NAME LLVM_BOAAA_VERSION 
-					   LIBS ${LLVM_AVAILABLE_LIBS} 
-					   INTERFACE_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS}
+					   LIBS ${${BOAAA_LLVM_NAME}_LIBS} 
+					   INTERFACE_INCLUDE_DIRS ${${BOAAA_LLVM_NAME}_INCLUDE_DIRS}
 					   INTERFACE_COMPILE_OPTIONS -D_DEBUG)
 
 
