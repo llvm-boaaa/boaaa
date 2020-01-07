@@ -5,18 +5,21 @@ project(BOAAA)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT EXISTS LLVMVersionConfig.cmake)
-message(WARRNING "|| Configer installed LLVM-Versions in LLVMVersionConfig.cmake")
-include(LLVMVersionConfig-template.cmake)
-else()
+message(STATUS "||===========generating BOAAA===========||")
+message(STATUS "||")
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/LLVMVersionConfig.cmake")
 include(LLVMVersionConfig.cmake)
+else()
+message(STATUS "|| WARNING: configure installed LLVM-Versions in LLVMVersionConfig.cmake")
+message(STATUS "||")
+include(LLVMVersionConfig-template.cmake)
 endif()
 
 include(cmake/LLVMVersionIncludeHelp.cmake)
 include(cmake/replaceLast.cmake)
+include(cmake/copyAndRename.cmake)
 
-message(STATUS "||===========generating BOAAA===========||")
-message(STATUS "||")
 message(STATUS "|| BOAAA is generated with following")
 message(STATUS "|| supported versions:")
 

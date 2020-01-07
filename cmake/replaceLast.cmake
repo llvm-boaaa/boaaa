@@ -11,6 +11,5 @@ function(boaaa_replace_last COM REP OUTPUT_ INPUT_)
 	set(${OUTPUT_} "${${OUTPUT_}}${REP}")
 	list(GET __list ${__len2} __tmp)
 	set(${OUTPUT_} ${${OUTPUT_}}${__tmp})
-	message(STATUS "||test|| ${OUTPUT_} :=: ${${OUTPUT_}}")
 	set(${OUTPUT_} ${${OUTPUT_}} PARENT_SCOPE) #return
 endfunction()

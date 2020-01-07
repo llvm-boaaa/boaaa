@@ -16,7 +16,7 @@ function(boaaa_add_llvm_version)
   if(NOT P_ARGS_LIBS)
     message(FATAL "boaaa_add_llvm_version: LIBS must be specified")
   endif()
-  
+
   set(nm_dummy_target_name ${P_ARGS_NAME})
   add_library(${nm_dummy_target_name} INTERFACE)
   target_link_libraries(${nm_dummy_target_name} INTERFACE ${P_ARGS_LIBS})

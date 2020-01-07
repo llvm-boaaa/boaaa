@@ -88,8 +88,6 @@ foreach(version_ ${build_llvm_version} )
 			message(STATUS "|| generating cmake ...")
 			message(STATUS "|| use CC=${CMAKE_C_COMPILER}, CXX=${CMAKE_CXX_COMPILER}")
 			message(STATUS "|| generator: -G\"${CMAKE_GENERATOR}\"")
-			message(STATUS "|| command: ${CMAKE_COMMAND} ../source -G\"${CMAKE_GENERATOR}\" -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-			message(STATUS "|| path: ${_path}/${branch}/build")
 			execute_process(
 				COMMAND ${CMAKE_COMMAND} "../source" -G ${CMAKE_GENERATOR} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
  				WORKING_DIRECTORY "${_path}/${branch}/build"
@@ -105,10 +103,12 @@ foreach(version_ ${build_llvm_version} )
 	else()
 		if(EXISTS ${${LLVM_NAME_DIR}}/LLVMConfig.cmake)
 			message(STATUS "|| renaming LLVMConfig.cmake to ${LLVM_NAME}Config.cmake")
-			file(READ ${${LLVM_NAME_DIR}}/LLVMConfig.cmake __tmp_content)
-			file(WRITE ${${LLVM_NAME_DIR}}/${LLVM_NAME}Config.cmake ${__tmp_content})
+			#file(READ ${${LLVM_NAME_DIR}}/LLVMConfig.cmake __tmp_content)
+			#file(WRITE ${${LLVM_NAME_DIR}}/${LLVM_NAME}Config.cmake ${__tmp_content})
 			#removed rename, because of lost file LLVMConfig in installed LLVM Versions
 			#file(RENAME ${${LLVM_NAME_DIR}}/LLVMConfig.cmake ${${LLVM_NAME_DIR}}/${LLVM_NAME}Config.cmake)
+			boaaa_copy_and_rename(${${LLVM_NAME_DIR}} LLVMConfig.cmake ${${LLVM_NAME_DIR}} ${LLVM_NAME}Config.cmake)
+			#file(COPY ${${LLVM_NAME_DIR}}/LLVMConfig.cmake ${${LLVM_NAME_DIR}}/${LLVM_NAME}Config.cmake)
 		else()
 		message(FATAL_ERROR "ERROR: llvm_version: ${ver} of branch: {branch} is not properly configured")
 		endif()
@@ -165,7 +165,7 @@ foreach(version_ ${build_llvm_version} )
 	boaaa_add_llvm_library(boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${_dl_files})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
 	target_link_libraries(boaaa.lv_${version_}
-							PRIVATE LLVM_${version_} boaaa.support boaaa.vp boaaa.lvm)
+							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp boaaa.lvm)
 
 	# on windows define LLVM_ON_WIN32 because sometimes undefined
 	#if((${version_} STREQUAL "50"))
