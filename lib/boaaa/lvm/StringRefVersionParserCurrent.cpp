@@ -7,7 +7,7 @@ StringRefVPM::container StringRefVPCur::parse(llvm::StringRef& data)
 	return container(data.str());
 }
 
-llvm::StringRef StringRefVPCur::generate(StringRefVPM::container& data, store_t& store)
+llvm::StringRef StringRefVPCur::generate(StringRefVPM::container&& data, store_t& store)
 {
 	ErrorOr<std::string> StringOrErr = data.get<0>();
 	if (!StringOrErr)

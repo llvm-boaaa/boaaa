@@ -11,8 +11,8 @@ namespace boaaa
 	public:
 		StringRefVP90() = default;
 
-		virtual container parse(llvm::StringRef& data);
-		virtual llvm::StringRef generate(container& data, store_t& store);
+		container parse(llvm::StringRef& data);
+		llvm::StringRef generate(container&& data, store_t& store);
 	};
 
 }

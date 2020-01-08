@@ -103,7 +103,7 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 	endif()
 
 	if(${version_} STREQUAL "50")
-	set(REMOVE_LIST "LLVMAArch64AsmPrinter;LLVMAMDGPUAsmPrinter;LLVMARMAsmPrinter;LLVMBPFAsmPrinter;LLVMLanaiAsmPrinter;LLVMMipsAsmPrinter;LLVMMSP430AsmPrinter;LLVMNVPTXAsmPrinter;LLVMPowerPCAsmPrinter;LLVMSparcAsmPrinter;LLVMSystemZAsmPrinter;LLVMX86AsmPrinter;LLVMXCoreAsmPrinter;LLVMLanaiInstPrinter")
+	set(REMOVE_LIST "LLVMFuzzMutate")
 	foreach(rem ${REMOVE_LIST})
 	list(REMOVE_ITEM LLVM_AVAILABLE_LIBS ${rem})
 	endforeach()

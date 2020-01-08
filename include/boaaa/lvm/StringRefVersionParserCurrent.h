@@ -12,7 +12,7 @@ namespace boaaa
 		StringRefVPCur() = default;
 
 		virtual container parse(llvm::StringRef& data) override;
-		virtual llvm::StringRef generate(container& data, store_t& store) override;
+		virtual llvm::StringRef generate(container&& data, store_t& store) override;
 	};
 
 }

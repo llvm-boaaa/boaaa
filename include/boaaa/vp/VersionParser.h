@@ -21,7 +21,7 @@ namespace boaaa
 			m_store = new std::unordered_map<uint64_t, container>();
 		}
 
-		uint64_t registerContainer(container& data)
+		uint64_t registerContainer(container&& data)
 		{
 			uint64_t hash = data.hash();
 			(*m_store).insert({ hash, data });
@@ -47,7 +47,7 @@ namespace boaaa
 		VersionParser() { m_manager = nullptr; }
 
 		virtual container parse(Type& data) = 0;
-		virtual Type generate(container& data) = 0;
+		virtual Type generate(container&& data) = 0;
 
 		Type parseRegistered(uint64_t hash) 
 		{
@@ -86,7 +86,7 @@ namespace boaaa
 		StoreVersionParser() { m_manager = nullptr; }
 
 		virtual container parse(Type& data) = 0;
-		virtual Type generate(container& data, store_t& store) = 0;
+		virtual Type generate(container&& data, store_t& store) = 0;
 
 		store_t generateStorage() { return std::make_unique<Store>(); };
 		Type parseRegistered(uint64_t hash, store_t& store)
