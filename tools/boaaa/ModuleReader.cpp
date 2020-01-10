@@ -13,7 +13,7 @@ namespace boaaa {
 		if (!M) {
 			Err.print("boaaa", errs());
 		}
-		return std::move(M);
+		return M;
 	}
 
 	std::unique_ptr<std::vector<StringRef>> getFilesOfFolder(StringRef fouldername)
@@ -29,7 +29,7 @@ namespace boaaa {
 				if (f.path().extension() == "bc")
 					files->push_back(f.path().string());
 		}
-		return std::move(files);
+		return files;
 	}
 
 	fs::path resolveAbsoluteOrRelativePath(StringRef path)

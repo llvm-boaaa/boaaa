@@ -10,6 +10,7 @@ namespace boaaa
 	{
 	public:
 		StringRefVP90() = default;
+		~StringRefVP90() = default;
 
 		container parse(llvm::StringRef& data);
 		llvm::StringRef generate(container&& data, store_t& store);

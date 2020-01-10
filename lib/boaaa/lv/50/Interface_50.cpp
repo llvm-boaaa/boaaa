@@ -44,10 +44,10 @@ void DLInterface50::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
-void DLInterface50::test(uint64_t hash, uint8_t num)
+void DLInterface50::test(uint64_t* hash, uint8_t num)
 {
 	_raw_type_inst(context.string_ref_vp)::store_t storeSR = context.string_ref_vp->generateStorage();
-	llvm::StringRef ref = context.string_ref_vp->parseRegistered(hash, storeSR);
+	llvm::StringRef ref = context.string_ref_vp->parseRegistered(hash[0], storeSR);
 	*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
 
 }

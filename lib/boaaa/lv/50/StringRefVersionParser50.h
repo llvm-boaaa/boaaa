@@ -10,9 +10,10 @@ namespace boaaa
 	{
 	public:
 		StringRefVP50() = default;
+		~StringRefVP50() = default;
 
 		virtual container parse(llvm::StringRef& data);
-		virtual llvm::StringRef generate(container& data, store_t& store);
+		virtual llvm::StringRef generate(container&& data, store_t& store);
 	};
 
 }

@@ -91,8 +91,8 @@ int main(int argc, char** argv) {
 	registerPasses(Registry);
 
 #ifdef DEBUG_COMMAND_LINE
-	const int _argc = 2;
-	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc" };
+	const int _argc = 3;
+	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc", "--debug-pass=Structure" };
 	//const char* _argv[] = { "boaaa", "-help" };
 	cl::ParseCommandLineOptions(_argc, _argv, "");	
 #else
@@ -107,29 +107,37 @@ int main(int argc, char** argv) {
 
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
 	
-	std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
-	std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
+	//std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
+	//std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
 	std::shared_ptr<boaaa::DLInterface> llvm90 = man.loadDL("boaaa.lv_90");
 
 	
-	llvm40->setBasicOStream(std::cout);
-	llvm50->setBasicOStream(std::cout);
+	//llvm40->setBasicOStream(std::cout);
+	//llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
 
 	
 	boaaa::StringRefVPM* manager = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(manager);
-	llvm40->registerStringRefVPM(manager);
-	llvm50->registerStringRefVPM(manager);
+	//llvm40->registerStringRefVPM(manager);
+	//llvm50->registerStringRefVPM(manager);
 	llvm90->registerStringRefVPM(manager);
 
 	StringRef ref = "this is a test string";
 
 	uint64_t str_test_hash = man.registerData(ref);
+	uint64_t str_test_bc = man.registerData(InputFilename);
 
-	llvm40->test(str_test_hash, 1);
-	llvm50->test(str_test_hash, 1);
-	llvm90->test(str_test_hash, 1);
+	uint64_t* test_args = new uint64_t[2]{ str_test_hash, str_test_bc };
+
+	//llvm40->test(str_test_hash, 1);
+	//llvm50->test(str_test_hash, 1);
+	llvm90->test(test_args, 2);
+
+	llvm::AAManager aaman;
+	llvm::legacy::PassManager basic_aa;
+	basic_aa.add(new llvm::BasicAAWrapperPass());
+	basic_aa.run(*M.get());
 
 	return 0;
 }

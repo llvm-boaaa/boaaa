@@ -21,7 +21,7 @@ namespace boaaa {
 		void setBasicOStream(std::ostream& ostream, bool del = false) override;
 
 
-		void test(uint64_t hash = 0, uint8_t num = 0) override;
+		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
 	private:
 		version_context context;
 	};

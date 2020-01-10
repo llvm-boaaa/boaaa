@@ -9,7 +9,7 @@ StringRefVPM::container StringRefVP40::parse(llvm::StringRef& data)
 	return container(data.str());
 }
 
-llvm::StringRef StringRefVP40::generate(StringRefVPM::container& data, store_t& store)
+llvm::StringRef StringRefVP40::generate(StringRefVPM::container&& data, store_t& store)
 {
 	ErrorOr<std::string> StringOrErr = data.get<0>();
 	if (!StringOrErr)

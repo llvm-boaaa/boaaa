@@ -26,7 +26,7 @@ namespace boaaa {
 		LLVM_Info(StringRef filename, std::shared_ptr<DLInterface> inst, std::unique_ptr<DLHandle> handle, DL_Info info) 
 			: info(info), filename(filename), inst(inst), ref_counter(0), handle(std::move(handle)) { };
 
-		~LLVM_Info() { inst.unique(); handle.reset(nullptr); };
+		~LLVM_Info() { handle.reset(nullptr); };
 	};
 
 	class LLVMVersionManager : public DLInterface, public StringRefVPCur
@@ -73,7 +73,7 @@ namespace boaaa {
 		void onLoad() override;
 		void onUnload() override;
 
-		void test(uint64_t hash = 0, uint8_t num = 0) override;
+		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
 	};
 
 }
