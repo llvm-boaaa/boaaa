@@ -1,5 +1,4 @@
 #define __CONCAT(MACRO1, MACRO2) MACRO1 ## MACRO2
-#define __STRINGIFY(MACRO) #MACRO
 #define __EVALUATE(MACRO1, MACRO2) __CONCAT(MACRO1, MACRO2)
 #ifndef __FUNC
 #define __FUNC Func

@@ -16,21 +16,19 @@ namespace boaaa
 //-------------------------------------------------------LLVM_VERSION dependent
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ string_ref_vp
-#ifdef LLVM_VERSION_40
-#include "40/StringRefVersionParser40.h"
-		StringRefVP40
-#endif // LLVM_VERSION_40
+#define LLVM_VERSION_CALL_FILE __FILE__
+#define LLVM_VERSION_CALL_LINE __LINE__
 
-#ifdef LLVM_VERSION_50
-#include "50/StringRefVersionParser50.h"
-		StringRefVP50
-#endif // LLVM_VERSION_50
+#define LLVM_VERSION_40_INCLUDE "40/StringRefVersionParser40.h"
+#define LLVM_VERSION_50_INCLUDE "50/StringRefVersionParser50.h"
+#define LLVM_VERSION_90_INCLUDE "90/StringRefVersionParser90.h"
 
-#ifdef LLVM_VERSION_90
-#include "90/StringRefVersionParser90.h"
-		StringRefVP90
-#endif // LLVM_VERSION_90
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/ *string_ref_vp;
+#define LLVM_VERSION_40_UNIFY std::add_pointer_t<StringRefVP40>
+#define LLVM_VERSION_50_UNIFY std::add_pointer_t<StringRefVP50>
+#define LLVM_VERSION_90_UNIFY std::add_pointer_t<StringRefVP90>
+#define LLVM_VERSION_UNIFY_FINALIZE string_ref_vp;
+#include "boaaa/lv/unify_LLVM_VERSION.def"
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ string_ref_vp */
 
 //-----------------------------------------------------LLVM_VERSION independent
 		std::ostream* basic_ostream;

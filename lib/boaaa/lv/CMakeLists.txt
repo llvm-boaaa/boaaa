@@ -7,6 +7,7 @@ file(GLOB DL_files
 	"*.h"
 	"*.cpp"
 	"${BOAAA_SOURCE_DIR}/include/boaaa/*.h"
+	"${BOAAA_SOURCE_DIR}/include/boaaa/lv/include_versions/*.inc"
 )
 
 set(tmp_FOLDER_NAME ${FOULDER_NAME})

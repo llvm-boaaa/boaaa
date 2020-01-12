@@ -1,0 +1,215 @@
+//unifies a definition from different versions to one single like the following example
+// #include "boaaa/support/__STRINGIFY.h"
+//
+// #define LLVM_VERSION_CALL_FILE "path/to/file"
+// #define LLVM_VERSION_CALL_LINE "5" 
+// #define LLVM_VERSION_40_INCLUDE "llvm/IR/Module.h"
+// #define LLVM_VERSION_...
+// #define LLVM_VERSION_REST_INCLUDE "llvm/IR/Module"
+// #define LLVM_VERSION_UNIFY using Module =
+// #define LLVM_VERSION_40_UNIFY llvm::Module
+// #define LLVM_VERSION_...
+// #define LLVM_VERSION_REST_UNIFY llvm::Module //define for all other versions
+// #define LLVM_VERSION_UNIFY_FINALIZE ;
+//
+// expends for LLVM_VERSION_40 to: 
+// #include "llvm/IR/Module.h"
+// using Module = llvm::Module;
+//
+// define LLVM_VERSION_ONLY_INCLUDE when only headerfiles get included
+
+
+#include "sup_LLVM_VERSION.h"
+
+#ifndef LLVM_VERSION_ONLY_INCLUDE
+
+#define NO_SUPPORTED_VERSION
+#define __EVALUATE(MACRO1, MACRO2, MACRO3) MACRO1 ## MACRO2 ## MACRO3
+#define __CONCATINATE3(MACRO1, MACRO2, MACRO3) __EVALUATE(MACRO1, MACRO2, MACRO3)
+
+#ifndef LLVM_VERSION_CALL_FILE
+#define LLVM_VERSION_CALL_FILE "unknown file"
+#endif
+
+#ifndef LLVM_VERSION_CALL_LINE
+#define LLVM_VERSION_CALL_LINE "unknown line"
+#endif
+
+#ifndef LLVM_VERSION_UNIFY
+#define LLVM_VERSION_UNIFY
+#endif
+
+#ifndef LLVM_VERSION_UNIFY_FINALIZE
+#define LLVM_VERSION_UNIFY_FINALIZE
+#endif
+
+#ifdef LLVM_VERSION_40_UNIFY
+#undef NO_SUPPORTED_VERSION
+#elif defined(LLVM_VERSION_REST_UNIFY)
+#define LLVM_VERSION_40_UNIFY LLVM_VERSION_REST_UNIFY
+#undef NO_SUPPORTED_VERSION
+#endif
+
+#ifdef LLVM_VERSION_50_UNIFY
+#undef NO_SUPPORTED_VERSION
+#elif defined(LLVM_VERSION_REST_UNIFY)
+#define LLVM_VERSION_50_UNIFY LLVM_VERSION_REST_UNIFY
+#undef NO_SUPPORTED_VERSION
+#endif
+
+#ifdef LLVM_VERSION_60_UNIFY
+#undef NO_SUPPORTED_VERSION
+#elif defined(LLVM_VERSION_REST_UNIFY)
+#define LLVM_VERSION_60_UNIFY LLVM_VERSION_REST_UNIFY
+#undef NO_SUPPORTED_VERSION
+#endif
+
+#ifdef LLVM_VERSION_70_UNIFY
+#undef NO_SUPPORTED_VERSION
+#elif defined(LLVM_VERSION_REST_UNIFY)
+#define LLVM_VERSION_70_UNIFY LLVM_VERSION_REST_UNIFY
+#undef NO_SUPPORTED_VERSION
+#endif
+
+#ifdef LLVM_VERSION_80_UNIFY
+#undef NO_SUPPORTED_VERSION
+#elif defined(LLVM_VERSION_REST_UNIFY)
+#define LLVM_VERSION_80_UNIFY LLVM_VERSION_REST_UNIFY
+#undef NO_SUPPORTED_VERSION
+#endif
+
+#ifdef LLVM_VERSION_90_UNIFY
+#undef NO_SUPPORTED_VERSION
+#elif defined(LLVM_VERSION_REST_UNIFY)
+#define LLVM_VERSION_90_UNIFY LLVM_VERSION_REST_UNIFY
+#undef NO_SUPPORTED_VERSION
+#endif
+
+#else 
+#undef NO_SUPPORTED_VERSION
+#endif
+
+//include
+#if defined(LLVM_VERSION_40_INCLUDE) && defined(LLVM_VERSION_40)
+#include LLVM_VERSION_40_INCLUDE
+#elif defined(LLVM_VERSION_REST_INCLUDE)
+#include LLVM_VERSION_REST_INCLUDE
+#endif
+
+#if defined(LLVM_VERSION_50_INCLUDE) && defined(LLVM_VERSION_50)
+#include LLVM_VERSION_50_INCLUDE
+#elif defined(LLVM_VERSION_REST_INCLUDE)
+#include LLVM_VERSION_REST_INCLUDE
+#endif
+
+#if defined(LLVM_VERSION_60_INCLUDE) && defined(LLVM_VERSION_60)
+#include LLVM_VERSION_60_INCLUDE
+#elif defined(LLVM_VERSION_REST_INCLUDE)
+#include LLVM_VERSION_REST_INCLUDE
+#endif
+
+#if defined(LLVM_VERSION_70_INCLUDE) && defined(LLVM_VERSION_70)
+#include LLVM_VERSION_70_INCLUDE
+#elif defined(LLVM_VERSION_REST_INCLUDE)
+#include LLVM_VERSION_REST_INCLUDE
+#endif
+
+#if defined(LLVM_VERSION_80_INCLUDE) && defined(LLVM_VERSION_80)
+#include LLVM_VERSION_80_INCLUDE
+#elif defined(LLVM_VERSION_REST_INCLUDE)
+#include LLVM_VERSION_REST_INCLUDE
+#endif
+
+#if defined(LLVM_VERSION_90_INCLUDE) && defined(LLVM_VERSION_90)
+#include LLVM_VERSION_90_INCLUDE
+#elif defined(LLVM_VERSION_REST_INCLUDE)
+#include LLVM_VERSION_REST_INCLUDE
+#endif
+
+//errorhandling
+#ifdef NO_SUPPORTED_VERSION
+#ifdef NOT_SUPPORTED_LLVM_VERSION
+
+namespace {
+	constexpr int compile_error() {
+		static_assert(false, "Version not implemented, please implement and register afterwards in sup_LLVM_VERSION.h");
+		return 0;
+	}
+
+	const int __error__ = compile_error();
+}
+#else
+#include "boaaa/support/__STRINGIFY.h"
+#define LLVM_VERSION_PRINT __STRINGIFY(LLVM_VERSION)
+
+#define LLVM_VERSION_ERROR_CODE struct compile_error_struct { static_assert(false, "Version is not SUPPORTED: LLVM_" LLVM_VERSION_PRINT " in current implementation file: " __FILE__); };						\
+
+namespace {									
+	constexpr int compile_error() {			
+		static_assert(false, "Version is not SUPPORTED: LLVM_" LLVM_VERSION_PRINT " in current implementation, type LLVM_VERSION_ERROR_CODE to learn more."); 
+		return 0;							
+	}										
+											
+	const int __error__ = compile_error();	
+}											
+
+#undef LLVM_VERSION_CALL_FILE_PRINT
+#undef LLVM_VERSION_CALL_FILE_PRINT
+
+#endif
+#endif
+
+#ifndef LLVM_VERSION_ONLY_INCLUDE
+
+//unfould 
+#ifdef LLVM_VERSION_40
+LLVM_VERSION_UNIFY LLVM_VERSION_40_UNIFY LLVM_VERSION_UNIFY_FINALIZE
+#endif
+
+#ifdef LLVM_VERSION_50
+LLVM_VERSION_UNIFY LLVM_VERSION_50_UNIFY LLVM_VERSION_UNIFY_FINALIZE
+#endif
+
+#ifdef LLVM_VERSION_60
+LLVM_VERSION_UNIFY LLVM_VERSION_60_UNIFY LLVM_VERSION_UNIFY_FINALIZE
+#endif
+
+#ifdef LLVM_VERSION_70
+LLVM_VERSION_UNIFY LLVM_VERSION_70_UNIFY LLVM_VERSION_UNIFY_FINALIZE
+#endif
+
+#ifdef LLVM_VERSION_80
+LLVM_VERSION_UNIFY LLVM_VERSION_80_UNIFY LLVM_VERSION_UNIFY_FINALIZE
+#endif
+
+#ifdef LLVM_VERSION_90
+LLVM_VERSION_UNIFY LLVM_VERSION_90_UNIFY LLVM_VERSION_UNIFY_FINALIZE
+#endif
+
+#endif //!LLVM_VERSION_ONLY_INCLUDE
+
+//cleanup
+#undef LLVM_VERSION_ONLY_INCLUDE
+
+#undef LLVM_VERSION_UNIFY
+#undef LLVM_VERSION_UNIFY_FINALIZE
+#undef LLVM_VERSION_CALL_FILE 
+#undef LLVM_VERSION_CALL_LINE
+
+#undef LLVM_VERSION_REST_INCLUDE
+
+#undef LLVM_VERSION_40_INCLUDE
+#undef LLVM_VERSION_50_INCLUDE
+#undef LLVM_VERSION_60_INCLUDE
+#undef LLVM_VERSION_70_INCLUDE
+#undef LLVM_VERSION_80_INCLUDE
+#undef LLVM_VERSION_90_INCLUDE
+
+#undef LLVM_VERSION_REST_UNIFY
+
+#undef LLVM_VERSION_40_UNIFY
+#undef LLVM_VERSION_50_UNIFY
+#undef LLVM_VERSION_60_UNIFY
+#undef LLVM_VERSION_70_UNIFY
+#undef LLVM_VERSION_80_UNIFY
+#undef LLVM_VERSION_90_UNIFY

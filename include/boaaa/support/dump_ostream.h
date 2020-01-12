@@ -28,7 +28,7 @@ namespace boaaa
 		void exceptions(std::ios_base::iostate except) const {}
 		bool fail() const { return false; }
 		//fill not overridden
-		std::ios_base::fmtflags flags() const {};
+		//not override flags
 		void flags(std::ios_base::fmtflags flags) {};
 		std::ostream& flush() { return *this; }
 		//getloc not overriden

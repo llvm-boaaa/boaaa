@@ -1,4 +1,5 @@
 #include "boaaa/lvm/LLVMVersionManager.h"
+#include "boaaa/support/__STRINGIFY.h"
 
 #ifdef _WIN32
 #include "WindowsDLHandle.h"
@@ -30,16 +31,15 @@ LLVMVersionManager::loadDL(StringRef filename, StringRef folder) {
 	} else {
 		std::unique_ptr<_DLHandle> handle = std::unique_ptr<_DLHandle>(new _DLHandle(filename, folder));
 		
-#define __STR(macro) __STRINGIFY(macro)
-		StringRef funcname = __STR(GETDL_INFO);
-#undef __STR
+		StringRef funcname = __STRINGIFY(GETDL_INFO);
+
 		GETDL_INFOFUNC getInfo = (GETDL_INFOFUNC)handle->getFunction(funcname);
 		if (!getInfo) {
 			//ERROR
 			return std::unique_ptr<DLInterface>(nullptr);
 		}
 		DL_Info _info = getInfo();
-		info = new LLVM_Info(filename, std::move(_info.gen()), std::move(handle), _info);
+		info = new LLVM_Info(filename, _info.gen(), std::move(handle), _info);
 
 		info->inst->onLoad();
 		m_dl_map->insert(std::pair<std::string, LLVM_Info*>(filename.str(), info));

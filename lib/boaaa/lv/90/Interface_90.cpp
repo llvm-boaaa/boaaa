@@ -52,6 +52,7 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 #include "llvm/IR/LegacyPassManager.h"
+#include "boaaa/lv/CountPass.h"
 
 
 void DLInterface90::test(uint64_t* hash, uint8_t num)

@@ -9,8 +9,8 @@ namespace boaaa
 	class StringRefVP90 : public StringRefVP<llvm::StringRef>
 	{
 	public:
-		StringRefVP90() = default;
-		~StringRefVP90() = default;
+		StringRefVP90() { };
+		virtual ~StringRefVP90() { };
 
 		container parse(llvm::StringRef& data);
 		llvm::StringRef generate(container&& data, store_t& store);

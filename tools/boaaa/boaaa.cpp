@@ -119,7 +119,9 @@ int main(int argc, char** argv) {
 	
 	boaaa::StringRefVPM* manager = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(manager);
+	//LLVMVectorize.lib not compiling
 	//llvm40->registerStringRefVPM(manager);
+	//LLVMFuzzMutate.lib not compiling
 	//llvm50->registerStringRefVPM(manager);
 	llvm90->registerStringRefVPM(manager);
 

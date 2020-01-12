@@ -45,7 +45,7 @@ namespace boaaa
 		using container = typename VPM::container;
 
 		VersionParser() { m_manager = nullptr; }
-		~VersionParser() = default;
+		virtual ~VersionParser() = default;
 
 		virtual container parse(Type& data) = 0;
 		virtual Type generate(container&& data) = 0;
@@ -85,7 +85,7 @@ namespace boaaa
 		typedef std::unique_ptr<Store> store_t;
 
 		StoreVersionParser() { m_manager = nullptr; }
-		~StoreVersionParser() = default;
+		virtual ~StoreVersionParser() = default;
 
 		virtual container parse(Type& data) = 0;
 		virtual Type generate(container&& data, store_t& store) = 0;
