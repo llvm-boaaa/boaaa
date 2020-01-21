@@ -2,12 +2,12 @@ function(cmake_global_list LIST ADD IDENT)
 set(${LIST} "${${LIST}};${ADD}" CACHE STRING ${IDENT} FORCE)
 endfunction()
 
-function(boaaa_add_llvm_version)
+macro(boaaa_add_llvm_version)
 	cmake_parse_arguments(
     P_ARGS
     ""
     "NAME"
-    "LIBS;INTERFACE_INCLUDE_DIRS;INTERFACE_COMPILE_OPTIONS"
+    "LIBS;INTERFACE_INCLUDE_DIRS;INTERFACE_LINK_DIRS;INTERFACE_COMPILE_OPTIONS"
     ${ARGN}
   )
   if(NOT P_ARGS_NAME)
@@ -19,11 +19,19 @@ function(boaaa_add_llvm_version)
 
   set(nm_dummy_target_name ${P_ARGS_NAME})
   add_library(${nm_dummy_target_name} INTERFACE)
+  #target_link_directories(${nm_dummy_target_name} BEFORE INTERFACE ${P_ARGS_INTERFACE_LINK_DIRS})
+  #target_link_directories(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_LINK_DIRS})
   target_link_libraries(${nm_dummy_target_name} INTERFACE ${P_ARGS_LIBS})
   target_include_directories(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_INCLUDE_DIRS})
   target_compile_options(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_COMPILE_OPTIONS})
   #target_link_options(${nm_dummy_target_name} INTERFACE "/FORCE:MULTIPLE")
-endfunction()
+
+  if("LLVM_${llvm_boaaa}" STREQUAL ${P_ARGS_NAME})
+  list(APPEND NM_THIRDPARTY_LIBS ${nm_dummy_target_name})
+  message(STATUS "|| linked LLVM BOAAA Version")
+  endif()
+
+endmacro()
 
 #copied from nicemake/TargetCreation.cmake::nm_add_library
 #moddified, so every file in FOULDER_NAME get linked to the lib.

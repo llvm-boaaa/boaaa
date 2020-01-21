@@ -3,7 +3,6 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ combine versions
 namespace {
-
 	namespace _a { //define LLVMModule
 #include "include_versions/LLVM_Module.inc"
 #include "unify_LLVM_VERSION.def"
@@ -18,23 +17,34 @@ namespace {
 #include "include_versions/LLVM_ModulePass.inc"
 #include "unify_LLVM_VERSION.def"
 	}
+	namespace _d { //define LLVMRegisterPass
+#include "include_versions/LLVM_RegisterPass.inc"
+#include "unify_LLVM_VERSION.def"
+	}
 
 #ifdef LLVM_VERSION_ERROR_CODE
-LLVM_VERSION_ERROR_CODE
+	LLVM_VERSION_ERROR_CODE
 #endif
-}
+
 using namespace _a;
 using namespace _c;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-namespace boaaa {
-
-	class EvaluationPass : public LLVMModulePass
+	struct AAEvaluationPass : public LLVMModulePass
 	{
+		static char ID;
+		AAEvaluationPass() : LLVMModulePass(ID) {}
 
+		bool runOnModule(LLVMModule& M) override {
+
+			return false;
+		}
 	};
-
 }
+
+char AAEvaluationPass::ID = 0;
+
+//static LLVMRegisterPass<AAEvaluationPass> X("aaeval", "AAEvaluation Pass", true, false);
 
 #endif // !EVALUATION_PASS_H

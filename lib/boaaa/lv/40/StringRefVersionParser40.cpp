@@ -1,7 +1,5 @@
 #include "StringRefVersionParser40.h"
 
-#include "boaaa/lv/StringRefHold.h"
-
 using namespace boaaa;
 
 StringRefVPM::container StringRefVP40::parse(llvm::StringRef& data)

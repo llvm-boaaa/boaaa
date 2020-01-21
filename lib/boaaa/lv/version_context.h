@@ -28,6 +28,10 @@ namespace boaaa
 #define LLVM_VERSION_90_UNIFY std::add_pointer_t<StringRefVP90>
 #define LLVM_VERSION_UNIFY_FINALIZE string_ref_vp;
 #include "boaaa/lv/unify_LLVM_VERSION.def"
+
+#ifdef LLVM_VERSION_ERROR_CODE
+LLVM_VERSION_ERROR_CODE
+#endif
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ string_ref_vp */
 
 //-----------------------------------------------------LLVM_VERSION independent

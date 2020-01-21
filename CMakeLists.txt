@@ -66,7 +66,15 @@ message(STATUS "|| configure LLVM versions:")
 
 foreach(version_ ${build_llvm_version})
 
+	unset(LLVM_DIR)
 	boaaa_create_llvm_wrapper(${version_})
+	message(STATUS "||>>=======LLVM used for BOAAA=========")
+	message(STATUS "||LLVM Version :      ${LLVM_${version_}_VERSION}")
+	message(STATUS "||LLVM DIR :          ${LLVM_${version_}_DIR}")
+	message(STATUS "||LLVM Link Dirs :    ${LLVM_${version_}_LIBRARY_DIR}")
+	message(STATUS "||LLVM libs :         ${LLVM_${version_}_LIBS} ")
+	message(STATUS "||LLVM include dirs : ${LLVM_${version_}_INCLUDE_DIRS} ")
+
 
 endforeach(version_)
 
@@ -78,12 +86,6 @@ message(STATUS "|| configured all versions")
 	message(STATUS "||LLVM Version ${${BOAAA_LLVM_NAME}_VERSION}")
 	message(STATUS "||LLVM libs: ${${BOAAA_LLVM_NAME}_LIBS} ")
 	message(STATUS "||LLVM include dirs: ${${BOAAA_LLVM_NAME}_INCLUDE_DIRS} ")
-
-nm_add_thirdparty_libs(NAME LLVM_BOAAA_VERSION 
-					   LIBS ${${BOAAA_LLVM_NAME}_LIBS} 
-					   INTERFACE_INCLUDE_DIRS ${${BOAAA_LLVM_NAME}_INCLUDE_DIRS}
-					   INTERFACE_COMPILE_OPTIONS -D_DEBUG)
-
 
 #add_definitions(${LLVM_DEFINITIONS})
 

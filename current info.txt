@@ -8,3 +8,9 @@ opt path in llvm: tools/opt/opt.cpp
 find pointeranalysis and all needed for running aa on .bc files
 
 code must be configurable 
+
+===================================================================================================
+
+fix llvm link error 5.0.2 windows
+
+https://github.com/numba/llvmlite/blob/master/conda-recipes/llvm-lto-static.patch

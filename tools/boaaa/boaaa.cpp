@@ -7,6 +7,8 @@
 
 #endif
 
+#define LLVM_VERSION_90 90
+
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/Analysis/CallGraphSCCPass.h"
 #include "llvm/Analysis/LoopPass.h"
@@ -36,6 +38,7 @@
 #define NO_EXPORT //defines __export as nothing, to fix import problem of LLVMVersionManager
 #include "boaaa/dynamic_interface.h"
 #undef NO_EXPORT
+#include "boaaa/lv/CountPass.h"
 #include "boaaa/lvm/LLVMVersionManager.h"
 #include "boaaa/support/LLVMErrorOr.h"
 #include "ModuleReader.h"
@@ -139,6 +142,7 @@ int main(int argc, char** argv) {
 	llvm::AAManager aaman;
 	llvm::legacy::PassManager basic_aa;
 	basic_aa.add(new llvm::BasicAAWrapperPass());
+	basic_aa.add(new boaaa::CountPass());
 	basic_aa.run(*M.get());
 
 	return 0;

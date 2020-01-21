@@ -1,15 +1,17 @@
-function(boaaa_create_llvm_wrapper version_)
+macro(boaaa_create_llvm_wrapper version_)
 
 message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 
 	set(branch "release_${version_}")
 	set(LLVM_NAME "LLVM_${branch}")
 	set(LLVM_NAME_DIR "${LLVM_NAME}_DIR")
+	set(LLVM_LINK_DIR "${LLVM_NAME}_LINK_DIR")
 
 	if(${LLVM_NAME}_REGISTERED)
 		#>> llvm installed
 		set(_path ${${LLVM_NAME}_PATH})
 		set(${LLVM_NAME_DIR} "${_path}/lib/cmake/llvm")
+		set(${LLVM_LINK_DIR} "${_path}/lib")
 	else()
 		#>> llvm need to get build
 		set(_path "${BOAAA_SOURCE_DIR}/llvm_version")
@@ -48,6 +50,26 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 			file(COPY ${BOAAA_SOURCE_DIR}/replace/STLExtras.h DESTINATION "${_path}/${branch}/source/include/llvm/ADT")
 			endif()
 
+			#build lto static and dynamic on windows in version 50
+			if((${version_} STREQUAL "40") OR (${version_} STREQUAL "50"))
+			file(COPY ${BOAAA_SOURCE_DIR}/replace/CMakeLists.txt DESTINATION "${_path}/${branch}/source/tools/lto")
+			endif()
+
+			if (${version_} STREQUAL "40") 
+			if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+			message(STATUS "|| using x64 generator")
+			execute_process(
+				COMMAND ${CMAKE_COMMAND} "../source" -G "Visual Studio 15 2017" -Thost=x64
+				WORKING_DIRECTORY "${_path}/${branch}/build"
+				OUTPUT_VARIABLE   o)
+			else()
+			message(STATUS "|| using x32 generator")
+			execute_process(
+				COMMAND ${CMAKE_COMMAND} "../source" -G "Visual Studio 15 2019"
+				WORKING_DIRECTORY "${_path}/${branch}/build"
+				OUTPUT_VARIABLE   o)
+			endif()	
+			else()
 			if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 			message(STATUS "|| using x64 generator")
 			execute_process(
@@ -57,10 +79,11 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 			else()
 			message(STATUS "|| using x32 generator")
 			execute_process(
-				COMMAND ${CMAKE_COMMAND} "../source" -G "Visual Studio 16 2019" -A Win32
+				COMMAND ${CMAKE_COMMAND} "../source" -G "Visual Studio 16 2019"
 				WORKING_DIRECTORY "${_path}/${branch}/build"
 				OUTPUT_VARIABLE   o)
 			endif()	
+			endif()
 			endif()
 		else()
 			message(STATUS "|| generating cmake ...")
@@ -73,6 +96,7 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 		endif()
 		
 		set(${LLVM_NAME_DIR} "${_path}/${branch}/build/cmake/modules/CMakeFiles")
+		set(${LLVM_LINK_DIR} "${_path}/${branch}/build/Debug/lib")
 	endif()
 
 	#>> find package 
@@ -94,16 +118,25 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 
 	find_package(${LLVM_NAME} CONFIG REQUIRED)
 
-	#probably wrong configuration of cmake in release_40 and release_50, not needed, so dependencies get removed
 	if(${version_} STREQUAL "40")
-	set(REMOVE_LIST "LLVMAArch64AsmPrinter;LLVMAMDGPUAsmPrinter;LLVMARMAsmPrinter;LLVMBPFAsmPrinter;LLVMLanaiAsmPrinter;LLVMMipsAsmPrinter;LLVMMSP430AsmPrinter;LLVMNVPTXAsmPrinter;LLVMPowerPCAsmPrinter;LLVMSparcAsmPrinter;LLVMSystemZAsmPrinter;LLVMX86AsmPrinter;LLVMXCoreAsmPrinter;LLVMVectorize")
+	#set(REMOVE_LIST "LLVMFuzzMutate")
+	#set(REMOVE_LIST "LLVMFuzzMutate;LLVMLanaiAsmPrinter;LLVMBinaryFormat;LLVMBitstreamReader;LLVMAggressiveInstCombine;LLVMMCA;LLVMRemarks;LLVMDebugInfoGSYM;LLVMJITLink;LLVMARMUtils;LLVMBPFAsmParser;LLVMMSP430AsmParser;LLVMMSP430Disassembler;LLVMRISCVAsmParser;LLVMRISCVDisassembler;LLVMRISCVUtils;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDisassembler;LLVMWebAssemblyDesc;LLVMWebAssemblyInfo;LLVMTextAPI;LLVMDlltoolDriver;LLVMWindowsManifest;LLVM-C;Remarks;LLVMRISCVCodeGen;LLVMRISCVDesc;LLVMRISCVInfo")
 	foreach(rem ${REMOVE_LIST})
 	list(REMOVE_ITEM LLVM_AVAILABLE_LIBS ${rem})
 	endforeach()
 	endif()
 
 	if(${version_} STREQUAL "50")
-	set(REMOVE_LIST "LLVMFuzzMutate")
+	#set(REMOVE_LIST "LLVMFuzzMutate;LLVMBitstreamReader")
+	#set(REMOVE_LIST "LLVMFuzzMutate;LLVMLanaiAsmPrinter;LLVMBinaryFormat;LLVMBitstreamReader;LLVMAggressiveInstCombine;LLVMMCA;LLVMRemarks;LLVMDebugInfoGSYM;LLVMJITLink;LLVMARMUtils;LLVMBPFAsmParser;LLVMMSP430AsmParser;LLVMMSP430Disassembler;LLVMRISCVAsmParser;LLVMRISCVDisassembler;LLVMRISCVUtils;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDisassembler;LLVMWebAssemblyDesc;LLVMWebAssemblyInfo;LLVMTextAPI;LLVMDlltoolDriver;LLVMWindowsManifest;LLVM-C;Remarks;LLVMRISCVCodeGen;LLVMRISCVDesc;LLVMRISCVInfo")
+	foreach(rem ${REMOVE_LIST})
+	list(REMOVE_ITEM LLVM_AVAILABLE_LIBS ${rem})
+	endforeach()
+	endif()
+
+	if(${version_} STREQUAL "90")
+	set(REMOVE_LIST "")
+	#set(REMOVE_LIST "LLVMFuzzMutate;LLVMLanaiAsmPrinter;LLVMBinaryFormat;LLVMBitstreamReader;LLVMAggressiveInstCombine;LLVMMCA;LLVMRemarks;LLVMDebugInfoGSYM;LLVMJITLink;LLVMARMUtils;LLVMBPFAsmParser;LLVMMSP430AsmParser;LLVMMSP430Disassembler;LLVMRISCVAsmParser;LLVMRISCVDisassembler;LLVMRISCVUtils;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDisassembler;LLVMWebAssemblyDesc;LLVMWebAssemblyInfo;LLVMTextAPI;LLVMDlltoolDriver;LLVMWindowsManifest;LLVM-C;Remarks;LLVMRISCVCodeGen;LLVMRISCVDesc;LLVMRISCVInfo")
 	foreach(rem ${REMOVE_LIST})
 	list(REMOVE_ITEM LLVM_AVAILABLE_LIBS ${rem})
 	endforeach()
@@ -136,14 +169,38 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 	message(STATUS "||fixed include dir path for generated llvm version")
 	message(STATUS "|| path: ${LLVM_${version_}_INCLUDE_DIRS}")
 	endif()
+	
+	set(FILE_EXTENSION ".a")
+
+	if(WIN32)
+		set(FILE_EXTENSION ".lib")
+	endif()
+
+	#create full path to libs
+	set(LIBS_TMP "")
+	foreach(lib ${LLVM_${version_}_LIBS})
+	list(APPEND LIBS_TMP "${${LLVM_LINK_DIR}}/${lib}${FILE_EXTENSION}")
+	endforeach(lib)
+
+	set(LLVM_${version_}_LIBS ${LIBS_TMP})
+
+	#return definitions
+	set(LLVM_${version_}_DIR "${LLVM_DIR}"								 PARENT_SCOPE)
+	set(LLVM_${version_}_LIBRARY_DIR "${LLVM_LIBRARY_DIR}"               PARENT_SCOPE)
+	set(LLVM_${version_}_VERSION "${LLVM_PACKAGE_VERSION}"				 PARENT_SCOPE)
+	set(LLVM_${version_}_LIBS "${LLVM_${version_}_LIBS}"				 PARENT_SCOPE)
+	set(LLVM_${version_}_INCLUDE_DIRS "${LLVM_${version_}_INCLUDE_DIRS}" PARENT_SCOPE)
+	#set(${LLVM_LINK_DIR} ${${LLVM_LINK_DIR}} PARENT_SCOPE)
+	set(${LLVM_NAME}_DIR "${LLVM_DIR}"									 PARENT_SCOPE)
+	set(${LLVM_NAME}_LIBRARY_DIR "${LLVM_LIBRARY_DIR}"					 PARENT_SCOPE)
+	set(${LLVM_NAME}_VERSION "${LLVM_PACKAGE_VERSION}"					 PARENT_SCOPE)
+	set(${LLVM_NAME}_LIBS "${LLVM_${version_}_LIBS}"					 PARENT_SCOPE)
+	set(${LLVM_NAME}_INCLUDE_DIRS "${LLVM_INCLUDE_DIRS}"				 PARENT_SCOPE)
 
 	boaaa_add_llvm_version(NAME LLVM_${version_}
 					   LIBS ${LLVM_${version_}_LIBS}
 					   INTERFACE_INCLUDE_DIRS ${LLVM_${version_}_INCLUDE_DIRS}
+					   INTERFACE_LINK_DIRS ${${LLVM_NAME}_LIBRARY_DIR}
 					   INTERFACE_COMPILE_OPTIONS -D_DEBUG)
-	
-	#return definitions
-	set(LLVM_${version_}_VERSION "${LLVM_PACKAGE_VERSION}" PARENT_SCOPE)
-	set(LLVM_${version_}_LIBS "${LLVM_${version_}_LIBS}" PARENT_SCOPE)
-	set(LLVM_${version_}_INCLUDE_DIRS "${LLVM_${version_}_INCLUDE_DIRS}" PARENT_SCOPE)
-endfunction(boaaa_create_llvm_wrapper)
+
+endmacro(boaaa_create_llvm_wrapper)

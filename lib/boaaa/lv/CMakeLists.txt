@@ -20,6 +20,7 @@ foreach(version_ ${build_llvm_version})
 
 	set(branch "release_${version_}")
 	set(LLVM_NAME "LLVM_${branch}")
+	set(LLVM_LINK_DIR "${LLVM_NAME}_LINK_DIR")
 	#set(LLVM_NAME_DIR "${LLVM_NAME}_DIR")
 
 	if(${LLVM_NAME}_REGISTERED)
@@ -39,6 +40,7 @@ foreach(version_ ${build_llvm_version})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
 	target_link_libraries(boaaa.lv_${version_}
 							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp boaaa.lvm)
+	#target_link_directories(boaaa.lv_${version_} BEFORE INTERFACE ${${LLVM_LINK_DIR}})
 
 	# on windows define LLVM_ON_WIN32 because sometimes undefined
 	#if((${version_} STREQUAL "50"))

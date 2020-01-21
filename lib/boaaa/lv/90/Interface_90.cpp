@@ -1,10 +1,10 @@
 #include "Interface_90.h"
 
 #include "llvm/Support/CommandLine.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IRReader/IRReader.h"
+//#include "llvm/IR/LLVMContext.h"
+//#include "llvm/IR/LegacyPassManager.h"
+//#include "llvm/IR/Module.h"
+//#include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/ErrorOr.h"
 #include "llvm/Support/SourceMgr.h"
 
@@ -49,11 +49,13 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
+/*
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "boaaa/lv/CountPass.h"
-
+#include "boaaa/lv/EvaluatePass.h"
+*/
 
 void DLInterface90::test(uint64_t* hash, uint8_t num)
 {
@@ -61,18 +63,19 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	llvm::StringRef ref = context.string_ref_vp->parseRegistered(hash[0], storeSR);
 	*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
 
-	llvm::LLVMContext llvm_context;
-	llvm::legacy::PassManager manager;
-	llvm::SMDiagnostic Err;
+	//llvm::LLVMContext llvm_context;
+	//llvm::legacy::PassManager manager;
+	//llvm::SMDiagnostic Err;
 
 	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(hash[1], storeBC);
 
 
-	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, llvm_context);
-
+	//std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, llvm_context);
+	/*
 	llvm::AAManager aaman;
 	llvm::legacy::PassManager basic_aa;
 	basic_aa.add(new llvm::BasicAAWrapperPass());
 	basic_aa.run(*module.get());
+	*/
 }

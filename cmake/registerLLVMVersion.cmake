@@ -1,8 +1,8 @@
 function(boaaa_registerLLVMVersion VERSION_ PATH_)
     if(NOT "${VERSION_}" MATCHES "[0-9]+[0-9]")
-    message(FATAL_ERROR "|| ${P_ARGS_VERSION} dont match regex [0-9]+[0-9]")
+    message(FATAL_ERROR "|| ${VERSION_} dont match regex [0-9]+[0-9]")
     else()
-    message(STATUS "|| Version ${P_ARGS_VERSION} registered")
+    message(STATUS "|| Version ${VERSION_} registered")
     endif()
     
     set(LLVM_release_${VERSION_}_REGISTERED TRUE PARENT_SCOPE)
