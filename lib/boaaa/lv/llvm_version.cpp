@@ -23,13 +23,13 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 #endif
 #ifdef LLVM_VERSION_40
-#include "40/Interface_40.h"
+#include "boaaa/lv/40/Interface_40.h"
 #endif // LLVM_VERSION_40
 #ifdef LLVM_VERSION_50
-#include "50/Interface_50.h"
+#include "boaaa/lv/50/Interface_50.h"
 #endif // !LLVM_VERSION_50
 #ifdef LLVM_VERSION_90
-#include "90/Interface_90.h"
+#include "boaaa/lv/90/Interface_90.h"
 #endif //!LLVM_VERSION_90
 
 DLIFp genDLIF() {

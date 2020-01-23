@@ -185,17 +185,17 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 	set(LLVM_${version_}_LIBS ${LIBS_TMP})
 
 	#return definitions
-	set(LLVM_${version_}_DIR "${LLVM_DIR}"								 PARENT_SCOPE)
-	set(LLVM_${version_}_LIBRARY_DIR "${LLVM_LIBRARY_DIR}"               PARENT_SCOPE)
-	set(LLVM_${version_}_VERSION "${LLVM_PACKAGE_VERSION}"				 PARENT_SCOPE)
-	set(LLVM_${version_}_LIBS "${LLVM_${version_}_LIBS}"				 PARENT_SCOPE)
-	set(LLVM_${version_}_INCLUDE_DIRS "${LLVM_${version_}_INCLUDE_DIRS}" PARENT_SCOPE)
+	set(LLVM_${version_}_DIR "${LLVM_DIR}")
+	set(LLVM_${version_}_LIBRARY_DIR "${LLVM_LIBRARY_DIR}")
+	set(LLVM_${version_}_VERSION "${LLVM_PACKAGE_VERSION}")
+	set(LLVM_${version_}_LIBS "${LLVM_${version_}_LIBS}")
+	set(LLVM_${version_}_INCLUDE_DIRS "${LLVM_${version_}_INCLUDE_DIRS}")
 	#set(${LLVM_LINK_DIR} ${${LLVM_LINK_DIR}} PARENT_SCOPE)
-	set(${LLVM_NAME}_DIR "${LLVM_DIR}"									 PARENT_SCOPE)
-	set(${LLVM_NAME}_LIBRARY_DIR "${LLVM_LIBRARY_DIR}"					 PARENT_SCOPE)
-	set(${LLVM_NAME}_VERSION "${LLVM_PACKAGE_VERSION}"					 PARENT_SCOPE)
-	set(${LLVM_NAME}_LIBS "${LLVM_${version_}_LIBS}"					 PARENT_SCOPE)
-	set(${LLVM_NAME}_INCLUDE_DIRS "${LLVM_INCLUDE_DIRS}"				 PARENT_SCOPE)
+	set(${LLVM_NAME}_DIR "${LLVM_DIR}")
+	set(${LLVM_NAME}_LIBRARY_DIR "${LLVM_LIBRARY_DIR}")
+	set(${LLVM_NAME}_VERSION "${LLVM_PACKAGE_VERSION}")
+	set(${LLVM_NAME}_LIBS "${LLVM_${version_}_LIBS}")
+	set(${LLVM_NAME}_INCLUDE_DIRS "${LLVM_INCLUDE_DIRS}")
 
 	boaaa_add_llvm_version(NAME LLVM_${version_}
 					   LIBS ${LLVM_${version_}_LIBS}

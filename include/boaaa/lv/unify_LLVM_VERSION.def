@@ -16,7 +16,7 @@
 // #include "llvm/IR/Module.h"
 // using Module = llvm::Module;
 //
-// define LLVM_VERSION_ONLY_INCLUDE when only headerfiles get included
+// define "LLVM_VERSION_ONLY_INCLUDE 1" when only headerfiles get included
 
 
 #include "sup_LLVM_VERSION.h"
@@ -92,37 +92,37 @@
 //include
 #if defined(LLVM_VERSION_40_INCLUDE) && defined(LLVM_VERSION_40)
 #include LLVM_VERSION_40_INCLUDE
-#elif defined(LLVM_VERSION_REST_INCLUDE)
+#elif defined(LLVM_VERSION_REST_INCLUDE) && defined(LLVM_VERSION_40)
 #include LLVM_VERSION_REST_INCLUDE
 #endif
 
 #if defined(LLVM_VERSION_50_INCLUDE) && defined(LLVM_VERSION_50)
 #include LLVM_VERSION_50_INCLUDE
-#elif defined(LLVM_VERSION_REST_INCLUDE)
+#elif defined(LLVM_VERSION_REST_INCLUDE) && defined(LLVM_VERSION_50)
 #include LLVM_VERSION_REST_INCLUDE
 #endif
 
 #if defined(LLVM_VERSION_60_INCLUDE) && defined(LLVM_VERSION_60)
 #include LLVM_VERSION_60_INCLUDE
-#elif defined(LLVM_VERSION_REST_INCLUDE)
+#elif defined(LLVM_VERSION_REST_INCLUDE) && defined(LLVM_VERSION_60)
 #include LLVM_VERSION_REST_INCLUDE
 #endif
 
 #if defined(LLVM_VERSION_70_INCLUDE) && defined(LLVM_VERSION_70)
 #include LLVM_VERSION_70_INCLUDE
-#elif defined(LLVM_VERSION_REST_INCLUDE)
+#elif defined(LLVM_VERSION_REST_INCLUDE) && defined(LLVM_VERSION_70)
 #include LLVM_VERSION_REST_INCLUDE
 #endif
 
 #if defined(LLVM_VERSION_80_INCLUDE) && defined(LLVM_VERSION_80)
 #include LLVM_VERSION_80_INCLUDE
-#elif defined(LLVM_VERSION_REST_INCLUDE)
+#elif defined(LLVM_VERSION_REST_INCLUDE) && defined(LLVM_VERSION_80)
 #include LLVM_VERSION_REST_INCLUDE
 #endif
 
 #if defined(LLVM_VERSION_90_INCLUDE) && defined(LLVM_VERSION_90)
 #include LLVM_VERSION_90_INCLUDE
-#elif defined(LLVM_VERSION_REST_INCLUDE)
+#elif defined(LLVM_VERSION_REST_INCLUDE) && defined(LLVM_VERSION_90)
 #include LLVM_VERSION_REST_INCLUDE
 #endif
 

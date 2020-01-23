@@ -32,10 +32,12 @@ namespace {
 	LLVM_VERSION_ERROR_CODE
 #endif
 }
+
 using namespace _a;
 using namespace _c;
 using namespace _d;
 using namespace _e;
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace boaaa {
 	struct CountPass : public LLVMModulePass
@@ -65,7 +67,6 @@ namespace boaaa {
 			llvm::errs() << "Function #" << function_count << "\n"
 				<< "BasicBlock #" << basic_block_count << "\n"
 				<< "Instructions #" << instruction_count <<  "\n";
-
 
 			return false;
 		}

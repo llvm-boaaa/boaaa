@@ -22,3 +22,5 @@ build/
 /tools/BUILD_LLVM/do_nothing_release_90.h
 
 LLVMVersionConfig.cmake
+/MACROLIST_GEN/.idea
+/MACROLIST_GEN/.idea

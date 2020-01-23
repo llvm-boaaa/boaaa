@@ -18,6 +18,11 @@ set(tmp_FOLDER_NAME ${FOULDER_NAME})
 
 foreach(version_ ${build_llvm_version})
 
+
+file(GLOB DL_VERSION_files
+	"${BOAAA_SOURCE_DIR}/include/boaaa/lv/${version_}/*.h"
+)
+
 	set(branch "release_${version_}")
 	set(LLVM_NAME "LLVM_${branch}")
 	set(LLVM_LINK_DIR "${LLVM_NAME}_LINK_DIR")
@@ -36,7 +41,7 @@ foreach(version_ ${build_llvm_version})
 		"${version_}/*.cpp"
 	)
 
-	boaaa_add_llvm_library(${REGISTERED} boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${_dl_files})
+	boaaa_add_llvm_library(${REGISTERED} boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${DL_VERSION_files} ${_dl_files})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
 	target_link_libraries(boaaa.lv_${version_}
 							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp boaaa.lvm)
