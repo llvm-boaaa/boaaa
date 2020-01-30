@@ -107,8 +107,10 @@ int main(int argc, char** argv) {
 	// maybe use to reset commandline args 
 	//cl::getRegisteredOptions().begin()->getValue()->reset();
 
+	LLVMContext context;
+
 	
-	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, Context);
+	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, context);
 
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
 	
@@ -147,8 +149,8 @@ int main(int argc, char** argv) {
 	//basic_aa.add(llvm::createCFLSteensAAWrapperPass());
 	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
 	//basic_aa.add(llvm::createSCEVAAWrapperPass());
-	//basic_aa.add(llvm::createAAEvalPass());
-	basic_aa.run(*module.get());
+	basic_aa.add(llvm::createAAEvalPass());
+	basic_aa.run(*M);
 
 	//llvm::AAManager aaman;
 	//llvm::legacy::PassManager basic_aa;

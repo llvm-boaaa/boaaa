@@ -2,44 +2,26 @@
 #define COUNT_PASS_H
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ combine versions
-namespace {
-	namespace _a { //define LLVMModule
+
+//define LLVMModule
 #include "include_versions/LLVM_Module.inc"
-#include "unify_LLVM_VERSION.def"
-	}
-
-	namespace _b {
+// include llvm/Pass.h
 #include "include_versions/LLVM_include_Pass_h.inc"
-#include "unify_LLVM_VERSION.def"
-	}
-
-	namespace _c { //define LLVMModulePass
+//define LLVMModulePass
 #include "include_versions/LLVM_ModulePass.inc"
-#include "unify_LLVM_VERSION.def"
-	}
-
-	namespace _d { //define LLVMRegisterPass
+//define LLVMRegisterPass
 #include "include_versions/LLVM_RegisterPass.inc"
-#include "unify_LLVM_VERSION.def"
-	}
-
-	namespace _e { //define LLVMFunction
+//define LLVMFunction
 #include "include_versions/LLVM_Function.inc"
-#include "unify_LLVM_VERSION.def"
-	}
 
 #ifdef LLVM_VERSION_ERROR_CODE
 	LLVM_VERSION_ERROR_CODE
 #endif
-}
-
-using namespace _a;
-using namespace _c;
-using namespace _d;
-using namespace _e;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 namespace boaaa {
+
 	struct CountPass : public LLVMModulePass
 	{
 		static char ID;
@@ -48,15 +30,25 @@ namespace boaaa {
 		uint64_t function_count = 0;
 		uint64_t basic_block_count = 0;
 		uint64_t instruction_count = 0;
+		uint64_t loop_count = 0;
 
 		bool runOnModule(LLVMModule& M) override {
 			function_count = 0;
 			basic_block_count = 0;
 			instruction_count = 0;
+			loop_count = 0;
 
-			for (LLVMFunction& f : M.functions()) {
-				for (llvm::BasicBlock &BB : f) {
-					for (llvm::Instruction& I : BB) {
+
+			for (LLVMFunction& F : M.functions()) {
+
+				llvm::LoopInfo& LI = getAnalysis<llvm::LoopInfoWrapperPass>(F).getLoopInfo();
+				for (llvm::Loop* L : LI) {
+					loop_count++;
+				}
+
+				for (llvm::BasicBlock &BB : F.getBasicBlockList()) {
+
+					for (llvm::Instruction& I : BB.getInstList()) {
 						instruction_count++;
 					}
 					basic_block_count++;
@@ -71,10 +63,11 @@ namespace boaaa {
 			return false;
 		}
 	};
+
+	char CountPass::ID = 0;
+
+	//static LLVMRegisterPass<CountPass> X("count", "CountPass", true, false);
 }
 
-char boaaa::CountPass::ID = 0;
-
-static LLVMRegisterPass<boaaa::CountPass> X("count", "CountPass", true, false);
 
 #endif
