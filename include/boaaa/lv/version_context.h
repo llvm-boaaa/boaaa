@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "boaaa/lv/sup_LLVM_VERSION.h"
+#include "boaaa/lv/macrolist/MACROLIST_DEF.h"
 #include "boaaa/support/dump_ostream.h"
 #include "boaaa/vp/StringRefVersionParser.h"
 
@@ -15,27 +16,38 @@ namespace boaaa {
 }
 #else
 }
+
+#ifdef LLVM_VERSION_40
+//#include "llvm/IR/Module.h"
+#include "boaaa/lv/40/StringRefVersionParser40.h"
+using BOAAAStringRefVP = boaaa::StringRefVP40;
+#endif
+#ifdef LLVM_VERSION_50
+//#include "llvm/IR/Module.h"
+#include "boaaa/lv/50/StringRefVersionParser50.h"
+using BOAAAStringRefVP = boaaa::StringRefVP50;
+#endif
+#ifdef LLVM_VERSION_90
+//#include "llvm/IR/Module.h"
+#include "boaaa/lv/90/StringRefVersionParser90.h"
+using BOAAAStringRefVP = boaaa::StringRefVP90;
+#endif
+
+//using LLVMModule = llvm::Module;
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ combine versions
+//define BOAAAStringRefVP
+//#include "include_versions/BOAAA_StringRefVP.inc"
 
-namespace {
-	namespace _a { //define BOAAAStringRefVP
-#include "include_versions/BOAAA_StringRefVP.inc"
-#include "unify_LLVM_VERSION.def"
-	}
-
-	namespace _b { //define LLVMModule
+//define LLVMModule
 //#include "include_versions/LLVM_Module.inc"
-//#include "unify_LLVM_VERSION.def"
-	}
+
 
 #ifdef LLVM_VERSION_ERROR_CODE
 	LLVM_VERSION_ERROR_CODE
 #endif
 
-}
-
-using namespace _a;
-using namespace _b;
+#define BOAAA_MACROLIST_LIST_VER_MAX 0002
+//#include "boaaa/lv/macrolist/MACROLIST_EVAL.inc"
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -54,10 +66,10 @@ namespace boaaa {
 		
 		version_context()
 		{
-			basic_ostream = new dump_ostream(std::_Uninitialized::_Noinit);
+			string_ref_vp = nullptr;
 			//loaded_module.reset(nullptr);
+			basic_ostream = new dump_ostream(std::_Uninitialized::_Noinit);
 			del_strm_after_use = false;
-			//string_ref_vp = nullptr;
 		}
 
 	};

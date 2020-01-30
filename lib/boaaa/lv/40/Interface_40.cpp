@@ -1,4 +1,4 @@
-#include "Interface_40.h"
+#include "boaaa/lv/40/Interface_40.h"
 
 #include "boaaa/support/dump_ostream.h"
 
@@ -37,22 +37,14 @@ void DLInterface40::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
-//#include "llvm/IR/LLVMContext.h"
-//#include "llvm/IR/LegacyPassManager.h"
-//#include "llvm/IR/Module.h"
-//#include "llvm/IRReader/IRReader.h"
-//#include "llvm/Support/ErrorOr.h"
-//#include "llvm/Support/SourceMgr.h"
-
-void runModule()
-{
-	//llvm::LLVMContext context;
-	//llvm::legacy::PassManager manager;
-	//llvm::SMDiagnostic Err;
-
-
-	//std::unique_ptr<llvm::Module> module = llvm::parseIRFile("../../../../bc_sources/libbmi160.a.bc", Err, context);
-}
+/*
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IRReader/IRReader.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/SourceMgr.h"
+*/
 
 void DLInterface40::test(uint64_t* hash, uint8_t num)
 {
@@ -60,5 +52,15 @@ void DLInterface40::test(uint64_t* hash, uint8_t num)
 	llvm::StringRef ref = context.string_ref_vp->parseRegistered(hash[0], storeSR);
 	*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
 
-	//runModule();
+	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
+	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(hash[1], storeBC);
+
+	/*
+	llvm::LLVMContext context;
+	llvm::legacy::PassManager manager;
+	llvm::SMDiagnostic Err;
+
+
+	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, context);
+	*/
 }

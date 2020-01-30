@@ -26,8 +26,7 @@ namespace {
 	LLVM_VERSION_ERROR_CODE
 #endif
 
-using namespace _a;
-using namespace _c;
+#include "boaaa/lv/macrolist/MACROLLIST_EVAL.inc"
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

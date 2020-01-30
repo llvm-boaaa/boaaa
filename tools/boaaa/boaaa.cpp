@@ -1,6 +1,11 @@
 //debug flags
 #define DEBUG 1
 
+#ifdef _WIN32
+#define NOMINMAX
+#include <Windows.h>
+#endif
+
 #ifdef DEBUG
 #define DEBUG_COMMAND_LINE
 #define DEBUG_DLL_TEST
@@ -9,36 +14,39 @@
 
 #define LLVM_VERSION_90 90
 
-#include "llvm/Analysis/CallGraph.h"
-#include "llvm/Analysis/CallGraphSCCPass.h"
-#include "llvm/Analysis/LoopPass.h"
-#include "llvm/Analysis/RegionPass.h"
-#include "llvm/Analysis/TargetLibraryInfo.h"
-#include "llvm/Analysis/TargetTransformInfo.h"
-#include "llvm/IR/DataLayout.h"
-#include "llvm/IR/DebugInfo.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/LegacyPassNameParser.h"
-#include "llvm/IR/RemarkStreamer.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/IRReader/IRReader.h"
-#include "llvm/InitializePasses.h"
-#include "llvm/LinkAllPasses.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Host.h"
-#include "llvm/Support/InitLLVM.h"
+
+//#include "llvm/Analysis/CallGraph.h"
+//#include "llvm/Analysis/CallGraphSCCPass.h"
+//#include "llvm/Analysis/LoopPass.h"
+//#include "llvm/Analysis/RegionPass.h"
+//#include "llvm/Analysis/TargetLibraryInfo.h"
+//#include "llvm/Analysis/TargetTransformInfo.h"
+//#include "llvm/IR/DataLayout.h"
+//#include "llvm/IR/DebugInfo.h"
+//#include "llvm/IR/LegacyPassManager.h"
+//#include "llvm/IR/LegacyPassNameParser.h"
+//#include "llvm/IR/RemarkStreamer.h"
+//#include "llvm/IR/Verifier.h"
+//#include "llvm/IRReader/IRReader.h"
+//#include "llvm/InitializePasses.h"
+//#include "llvm/LinkAllPasses.h"
+//#include "llvm/Support/Debug.h"
+//#include "llvm/Support/Host.h"
+//#include "llvm/Support/InitLLVM.h"
 //#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/SystemUtils.h"
-#include "llvm/Support/TargetRegistry.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/Target/TargetMachine.h"
+//#include "llvm/Support/SystemUtils.h"
+//#include "llvm/Support/TargetRegistry.h"
+//#include "llvm/Support/TargetSelect.h"
+//#include "llvm/Support/YAMLTraits.h"
+//#include "llvm/Target/TargetMachine.h"
 //boaaa
 //#include "boaaa/stdafx.h"
+
+#include "llvm/Support/CommandLine.h"
+
 #define NO_EXPORT //defines __export as nothing, to fix import problem of LLVMVersionManager
 #include "boaaa/dynamic_interface.h"
 #undef NO_EXPORT
-#include "boaaa/lv/CountPass.h"
 #include "boaaa/lvm/LLVMVersionManager.h"
 #include "boaaa/support/LLVMErrorOr.h"
 #include "ModuleReader.h"
@@ -47,7 +55,7 @@
 #include <memory>
 #include <iostream>
 
-using namespace llvm;
+//using namespace llvm;
 
 
 //command line arg variables
@@ -70,28 +78,22 @@ static cl::opt<std::string>
 InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 	cl::init("-"), cl::value_desc("filename"), cl::cat(BoaaaCat));
 
-static cl::list<const PassInfo*, bool, PassNameParser>
-PassList(cl::desc("Optimizations available:"), cl::cat(BoaaaCat));
+//static cl::list<const PassInfo*, bool, PassNameParser>
+//PassList(cl::desc("Optimizations available:"), cl::cat(BoaaaCat));
 
-void registerPasses(PassRegistry& Registry);
+//void registerPasses(PassRegistry& Registry);
 
-ErrorOr<std::string> test();
+#include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/AliasAnalysisEvaluator.h"
+#include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
+#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
+#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
+#include "llvm/Analysis/ScopedNoAliasAA.h"
+#include "llvm/IR/LegacyPassManager.h"
 
 int main(int argc, char** argv) {
-	
 	//init llvm and register needed passes
-	InitLLVM X(argc, argv);
-
-	LLVMContext Context;
-
-	InitializeAllTargets();
-	InitializeAllTargetMCs();
-	InitializeAllAsmPrinters();
-	InitializeAllAsmParsers();
-
-	// Initialize passes
-	PassRegistry& Registry = *PassRegistry::getPassRegistry();
-	registerPasses(Registry);
 
 #ifdef DEBUG_COMMAND_LINE
 	const int _argc = 3;
@@ -110,22 +112,20 @@ int main(int argc, char** argv) {
 
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
 	
-	//std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
-	//std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
+	std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
+	std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
 	std::shared_ptr<boaaa::DLInterface> llvm90 = man.loadDL("boaaa.lv_90");
 
 	
-	//llvm40->setBasicOStream(std::cout);
-	//llvm50->setBasicOStream(std::cout);
+	llvm40->setBasicOStream(std::cout);
+	llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
 
 	
 	boaaa::StringRefVPM* manager = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(manager);
-	//LLVMVectorize.lib not compiling
-	//llvm40->registerStringRefVPM(manager);
-	//LLVMFuzzMutate.lib not compiling
-	//llvm50->registerStringRefVPM(manager);
+	llvm40->registerStringRefVPM(manager);
+	llvm50->registerStringRefVPM(manager);
 	llvm90->registerStringRefVPM(manager);
 
 	StringRef ref = "this is a test string";
@@ -135,34 +135,36 @@ int main(int argc, char** argv) {
 
 	uint64_t* test_args = new uint64_t[2]{ str_test_hash, str_test_bc };
 
-	//llvm40->test(str_test_hash, 1);
-	//llvm50->test(str_test_hash, 1);
+	//FreeConsole();
+
+	llvm40->test(test_args, 2);
+	llvm50->test(test_args, 2);
 	llvm90->test(test_args, 2);
 
-	llvm::AAManager aaman;
 	llvm::legacy::PassManager basic_aa;
-	basic_aa.add(new llvm::BasicAAWrapperPass());
-	basic_aa.add(new boaaa::CountPass());
-	basic_aa.run(*M.get());
+	basic_aa.add(llvm::createBasicAAWrapperPass());
+	//basic_aa.add(llvm::createCFLAndersAAWrapperPass());
+	//basic_aa.add(llvm::createCFLSteensAAWrapperPass());
+	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
+	//basic_aa.add(llvm::createSCEVAAWrapperPass());
+	//basic_aa.add(llvm::createAAEvalPass());
+	basic_aa.run(*module.get());
+
+	//llvm::AAManager aaman;
+	//llvm::legacy::PassManager basic_aa;
+	//basic_aa.add(new llvm::BasicAAWrapperPass());
+	//basic_aa.add(new boaaa::CountPass());
+	//basic_aa.run(*M.get());
 
 	return 0;
 }
 
-#include "boaaa/support/data_store.h"
-
 //tea dsa branch of sea dsa
 //svf
 
-#include "boaaa/support/raw_type.h"
-
-ErrorOr<std::string> test()
-{
-
-	return "test string";
-}
-
-void registerPasses(PassRegistry& Registry) 
-{
+//void registerPasses(PassRegistry& Registry) 
+//{
+	/*
 	initializeCore(Registry);
 	initializeCoroutines(Registry);
 	//initializeScalarOpts(Registry);
@@ -201,4 +203,4 @@ void registerPasses(PassRegistry& Registry)
 	initializeWriteBitcodePassPass(Registry);
 	initializeHardwareLoopsPass(Registry);
 	*/
-}
+//}

@@ -1,4 +1,4 @@
-#include "Interface_50.h"
+#include "boaaa/lv/50/Interface_50.h"
 
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/LegacyPassManager.h"
@@ -44,10 +44,28 @@ void DLInterface50::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
+/*
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IRReader/IRReader.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/SourceMgr.h"
+*/
+
+
 void DLInterface50::test(uint64_t* hash, uint8_t num)
 {
 	_raw_type_inst(context.string_ref_vp)::store_t storeSR = context.string_ref_vp->generateStorage();
 	llvm::StringRef ref = context.string_ref_vp->parseRegistered(hash[0], storeSR);
 	*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
 
+	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
+	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(hash[1], storeBC);
+
+	//llvm::LLVMContext context;
+	//llvm::legacy::PassManager manager;
+	//llvm::SMDiagnostic Err;
+
+	//std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, context);
 }

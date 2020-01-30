@@ -1,0 +1,6 @@
+#pragma pop_macro("BOAAA_MACROLIST_LIST_INCLUDE_0")
+#pragma pop_macro("BOAAA_MACROLIST_LIST_INCLUDE_1")
+#pragma pop_macro("BOAAA_MACROLIST_LIST_INCLUDE_2")
+#pragma pop_macro("BOAAA_MACROLIST_LIST_MACRO_STORE_0")
+#pragma pop_macro("BOAAA_MACROLIST_LIST_MACRO_STORE_1")
+#pragma pop_macro("BOAAA_MACROLIST_LIST_MACRO_STORE_2")
