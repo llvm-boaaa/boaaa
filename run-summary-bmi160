@@ -1,0 +1,116 @@
+basic-aa:
+Assumption Cache Tracker
+Target Library Information
+  ModulePass Manager
+    FunctionPass Manager
+      Dominator Tree Construction
+      Basic Alias Analysis (stateless AA impl)
+      Function Alias Analysis Results
+      Exhaustive Alias Analysis Precision Evaluator
+===== Alias Analysis Evaluator Report =====
+  102594 Total Alias Queries Performed
+  54358 no alias responses (52.9%)
+  41084 may alias responses (40.0%)
+  700 partial alias responses (0.6%)
+  6452 must alias responses (6.2%)
+  Alias Analysis Evaluator Pointer Alias Summary: 52%/40%/0%/6%
+  9955 Total ModRef Queries Performed
+  1663 no mod/ref responses (16.7%)
+  212 mod responses (2.1%)
+  32 ref responses (0.3%)
+  7962 mod & ref responses (79.9%)
+  0 must responses (0.0%)
+  86 must mod responses (0.8%)
+  0 must ref responses (0.0%)
+  0 must mod & ref responses (0.0%)
+  Alias Analysis Evaluator Mod/Ref Summary: 16%/2%/0%/79%/0%/0%/0%/0%
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+cfl-anders-aa:
+Target Library Information
+Inclusion-Based CFL Alias Analysis
+Assumption Cache Tracker
+  ModulePass Manager
+    FunctionPass Manager
+      Dominator Tree Construction
+      Basic Alias Analysis (stateless AA impl)
+      Function Alias Analysis Results
+      Exhaustive Alias Analysis Precision Evaluator
+===== Alias Analysis Evaluator Report =====
+  102594 Total Alias Queries Performed
+  57817 no alias responses (56.3%)
+  37625 may alias responses (36.6%)
+  700 partial alias responses (0.6%)
+  6452 must alias responses (6.2%)
+  Alias Analysis Evaluator Pointer Alias Summary: 56%/36%/0%/6%
+  9955 Total ModRef Queries Performed
+  1755 no mod/ref responses (17.6%)
+  120 mod responses (1.2%)
+  32 ref responses (0.3%)
+  7962 mod & ref responses (79.9%)
+  0 must responses (0.0%)
+  86 must mod responses (0.8%)
+  0 must ref responses (0.0%)
+  0 must mod & ref responses (0.0%)
+  Alias Analysis Evaluator Mod/Ref Summary: 17%/1%/0%/79%/0%/0%/0%/0%
+
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  cfl-steens-aa:
+  Target Library Information
+Unification-Based CFL Alias Analysis
+Assumption Cache Tracker
+  ModulePass Manager
+    FunctionPass Manager
+      Dominator Tree Construction
+      Basic Alias Analysis (stateless AA impl)
+      Function Alias Analysis Results
+      Exhaustive Alias Analysis Precision Evaluator
+===== Alias Analysis Evaluator Report =====
+  102594 Total Alias Queries Performed
+  57817 no alias responses (56.3%)
+  37625 may alias responses (36.6%)
+  700 partial alias responses (0.6%)
+  6452 must alias responses (6.2%)
+  Alias Analysis Evaluator Pointer Alias Summary: 56%/36%/0%/6%
+  9955 Total ModRef Queries Performed
+  1755 no mod/ref responses (17.6%)
+  120 mod responses (1.2%)
+  32 ref responses (0.3%)
+  7962 mod & ref responses (79.9%)
+  0 must responses (0.0%)
+  86 must mod responses (0.8%)
+  0 must ref responses (0.0%)
+  0 must mod & ref responses (0.0%)
+  Alias Analysis Evaluator Mod/Ref Summary: 17%/1%/0%/79%/0%/0%/0%/0%
+
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  scoped-noalias-aa:
+  Scoped NoAlias Alias Analysis
+Assumption Cache Tracker
+Target Library Information
+  ModulePass Manager
+    FunctionPass Manager
+      Dominator Tree Construction
+      Basic Alias Analysis (stateless AA impl)
+      Function Alias Analysis Results
+      Exhaustive Alias Analysis Precision Evaluator
+===== Alias Analysis Evaluator Report =====
+  102594 Total Alias Queries Performed
+  54358 no alias responses (52.9%)
+  41084 may alias responses (40.0%)
+  700 partial alias responses (0.6%)
+  6452 must alias responses (6.2%)
+  Alias Analysis Evaluator Pointer Alias Summary: 52%/40%/0%/6%
+  9955 Total ModRef Queries Performed
+  1663 no mod/ref responses (16.7%)
+  212 mod responses (2.1%)
+  32 ref responses (0.3%)
+  7962 mod & ref responses (79.9%)
+  0 must responses (0.0%)
+  86 must mod responses (0.8%)
+  0 must ref responses (0.0%)
+  0 must mod & ref responses (0.0%)
+  Alias Analysis Evaluator Mod/Ref Summary: 16%/2%/0%/79%/0%/0%/0%/0%

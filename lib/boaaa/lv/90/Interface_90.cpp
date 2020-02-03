@@ -27,11 +27,11 @@ DLInterface90::~DLInterface90()
 void DLInterface90::onLoad()
 {
 	context.string_ref_vp = new StringRefVP90();
-	RedirectIOToConsole();
+	//RedirectIOToConsole();
 	//cl passing no working or not printing
-	//const int _argc = 1;
-	//const char* _argv[] = { "--debug-pass=Structure" };
-	//llvm::cl::ParseCommandLineOptions(_argc, _argv);
+	const int _argc = 1;
+	const char* _argv[] = { "--debug-pass=Structure" };
+	llvm::cl::ParseCommandLineOptions(_argc, _argv);
 }
 
 void DLInterface90::onUnload()
@@ -62,7 +62,8 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 #include "llvm/Analysis/ScopedNoAliasAA.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "boaaa/lv/CountPass.h"
-#include "boaaa/lv/EvaluatePass.h"
+#include "boaaa/lv/EvaluationPass.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
 
 void DLInterface90::test(uint64_t* hash, uint8_t num)
 {
@@ -77,19 +78,18 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(hash[1], storeBC);
 
-	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, llvm_context);
-	
-	
+	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, llvm_context);	
 
 	llvm::AAManager aaman;
 	llvm::legacy::PassManager basic_aa;
-	basic_aa.add(llvm::createBasicAAWrapperPass());
+	//basic_aa.add(llvm::createBasicAAWrapperPass());
 	//basic_aa.add(llvm::createCFLAndersAAWrapperPass());
 	//basic_aa.add(llvm::createCFLSteensAAWrapperPass());
 	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
-	//basic_aa.add(llvm::createSCEVAAWrapperPass());
+	basic_aa.add(llvm::createSCEVAAWrapperPass());
+	basic_aa.add(boaaa::createSVECAAEVALWrapperPass());
 	//basic_aa.add(llvm::createAAEvalPass());
-	basic_aa.run(*module.get());
+	basic_aa.run(*module);
 	
 }
 

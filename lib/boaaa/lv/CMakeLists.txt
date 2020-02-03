@@ -7,6 +7,7 @@ file(GLOB DL_files
 	"*.h"
 	"*.cpp"
 	"${BOAAA_SOURCE_DIR}/include/boaaa/*.h"
+	"${BOAAA_SOURCE_DIR}/include/boaaa/lv/*.h"
 	"${BOAAA_SOURCE_DIR}/include/boaaa/lv/include_versions/*.inc"
 )
 
@@ -41,6 +42,7 @@ file(GLOB DL_VERSION_files
 		"${version_}/*.cpp"
 	)
 
+	message(STATUS "||test|| ${DL_files} ${DL_VERSION_files} ${_dl_files}")
 	boaaa_add_llvm_library(${REGISTERED} boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${DL_VERSION_files} ${_dl_files})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
 	target_link_libraries(boaaa.lv_${version_}

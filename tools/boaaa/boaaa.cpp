@@ -15,32 +15,32 @@
 #define LLVM_VERSION_90 90
 
 
-//#include "llvm/Analysis/CallGraph.h"
-//#include "llvm/Analysis/CallGraphSCCPass.h"
-//#include "llvm/Analysis/LoopPass.h"
-//#include "llvm/Analysis/RegionPass.h"
-//#include "llvm/Analysis/TargetLibraryInfo.h"
-//#include "llvm/Analysis/TargetTransformInfo.h"
-//#include "llvm/IR/DataLayout.h"
-//#include "llvm/IR/DebugInfo.h"
-//#include "llvm/IR/LegacyPassManager.h"
-//#include "llvm/IR/LegacyPassNameParser.h"
-//#include "llvm/IR/RemarkStreamer.h"
-//#include "llvm/IR/Verifier.h"
-//#include "llvm/IRReader/IRReader.h"
-//#include "llvm/InitializePasses.h"
-//#include "llvm/LinkAllPasses.h"
-//#include "llvm/Support/Debug.h"
-//#include "llvm/Support/Host.h"
-//#include "llvm/Support/InitLLVM.h"
-//#include "llvm/Support/PluginLoader.h"
-//#include "llvm/Support/SystemUtils.h"
-//#include "llvm/Support/TargetRegistry.h"
-//#include "llvm/Support/TargetSelect.h"
-//#include "llvm/Support/YAMLTraits.h"
-//#include "llvm/Target/TargetMachine.h"
+#include "llvm/Analysis/CallGraph.h"
+#include "llvm/Analysis/CallGraphSCCPass.h"
+#include "llvm/Analysis/LoopPass.h"
+#include "llvm/Analysis/RegionPass.h"
+#include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/IR/DataLayout.h"
+#include "llvm/IR/DebugInfo.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/LegacyPassNameParser.h"
+#include "llvm/IR/RemarkStreamer.h"
+#include "llvm/IR/Verifier.h"
+#include "llvm/IRReader/IRReader.h"
+#include "llvm/InitializePasses.h"
+#include "llvm/LinkAllPasses.h"
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/Host.h"
+#include "llvm/Support/InitLLVM.h"
+#include "llvm/Support/PluginLoader.h"
+#include "llvm/Support/SystemUtils.h"
+#include "llvm/Support/TargetRegistry.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/YAMLTraits.h"
+#include "llvm/Target/TargetMachine.h"
 //boaaa
-//#include "boaaa/stdafx.h"
+#include "boaaa/stdafx.h"
 
 #include "llvm/Support/CommandLine.h"
 
@@ -81,7 +81,7 @@ InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 //static cl::list<const PassInfo*, bool, PassNameParser>
 //PassList(cl::desc("Optimizations available:"), cl::cat(BoaaaCat));
 
-//void registerPasses(PassRegistry& Registry);
+void registerPasses(PassRegistry& Registry);
 
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/AliasAnalysisEvaluator.h"
@@ -92,12 +92,15 @@ InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 #include "llvm/Analysis/ScopedNoAliasAA.h"
 #include "llvm/IR/LegacyPassManager.h"
 
+#include "boaaa/lv/EvaluationPass.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
+
 int main(int argc, char** argv) {
 	//init llvm and register needed passes
 
 #ifdef DEBUG_COMMAND_LINE
-	const int _argc = 3;
-	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc", "--debug-pass=Structure" };
+	const int _argc = 4;
+	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc", "--debug-pass=Structure", "--evaluate-aa-metadata" }; //"--print-all-alias-modref-info" };
 	//const char* _argv[] = { "boaaa", "-help" };
 	cl::ParseCommandLineOptions(_argc, _argv, "");	
 #else
@@ -107,28 +110,33 @@ int main(int argc, char** argv) {
 	// maybe use to reset commandline args 
 	//cl::getRegisteredOptions().begin()->getValue()->reset();
 
-	LLVMContext context;
+	InitializeAllTargets();
+	InitializeAllTargetMCs();
+	InitializeAllAsmPrinters();
+	InitializeAllAsmParsers();
 
-	
+	PassRegistry &Registry = *PassRegistry::getPassRegistry();
+	registerPasses(Registry);
+
+	LLVMContext context;	
 	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, context);
 
+	
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
+	boaaa::StringRefVPM* srvpm = new boaaa::StringRefVPM();
+	man.registerStringRefVPM(srvpm);
 	
-	std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
-	std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
+	//std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
+	//std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
 	std::shared_ptr<boaaa::DLInterface> llvm90 = man.loadDL("boaaa.lv_90");
-
 	
-	llvm40->setBasicOStream(std::cout);
-	llvm50->setBasicOStream(std::cout);
+	//llvm40->setBasicOStream(std::cout);
+	//llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
 
-	
-	boaaa::StringRefVPM* manager = new boaaa::StringRefVPM();
-	man.registerStringRefVPM(manager);
-	llvm40->registerStringRefVPM(manager);
-	llvm50->registerStringRefVPM(manager);
-	llvm90->registerStringRefVPM(manager);
+	//llvm40->registerStringRefVPM(srvpm);
+	//llvm50->registerStringRefVPM(srvpm);
+	llvm90->registerStringRefVPM(srvpm);
 
 	StringRef ref = "this is a test string";
 
@@ -139,18 +147,9 @@ int main(int argc, char** argv) {
 
 	//FreeConsole();
 
-	llvm40->test(test_args, 2);
-	llvm50->test(test_args, 2);
+	//llvm40->test(test_args, 2);
+	//llvm50->test(test_args, 2);
 	llvm90->test(test_args, 2);
-
-	llvm::legacy::PassManager basic_aa;
-	basic_aa.add(llvm::createBasicAAWrapperPass());
-	//basic_aa.add(llvm::createCFLAndersAAWrapperPass());
-	//basic_aa.add(llvm::createCFLSteensAAWrapperPass());
-	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
-	//basic_aa.add(llvm::createSCEVAAWrapperPass());
-	basic_aa.add(llvm::createAAEvalPass());
-	basic_aa.run(*M);
 
 	//llvm::AAManager aaman;
 	//llvm::legacy::PassManager basic_aa;
@@ -164,24 +163,23 @@ int main(int argc, char** argv) {
 //tea dsa branch of sea dsa
 //svf
 
-//void registerPasses(PassRegistry& Registry) 
-//{
-	/*
+void registerPasses(PassRegistry& Registry) 
+{
+	
 	initializeCore(Registry);
 	initializeCoroutines(Registry);
-	//initializeScalarOpts(Registry);
-	//initializeObjCARCOpts(Registry);
-	//initializeVectorization(Registry);
-	//initializeIPO(Registry);
+	initializeScalarOpts(Registry);
+	initializeObjCARCOpts(Registry);
+	initializeVectorization(Registry);
+	initializeIPO(Registry);
 	initializeAnalysis(Registry);
-	//initializeTransformUtils(Registry);
-	//initializeInstCombine(Registry);
-	//initializeAggressiveInstCombine(Registry);
-	//initializeInstrumentation(Registry);
+	initializeTransformUtils(Registry);
+	initializeInstCombine(Registry);
+	initializeAggressiveInstCombine(Registry);
+	initializeInstrumentation(Registry);
 	initializeTarget(Registry);
 	// For codegen passes, only passes that do IR to IR transformation are
 	// supported.
-	/*
 	initializeExpandMemCmpPassPass(Registry);
 	initializeScalarizeMaskedMemIntrinPass(Registry);
 	initializeCodeGenPreparePass(Registry);
@@ -204,5 +202,4 @@ int main(int argc, char** argv) {
 	initializeWasmEHPreparePass(Registry);
 	initializeWriteBitcodePassPass(Registry);
 	initializeHardwareLoopsPass(Registry);
-	*/
-//}
+}
