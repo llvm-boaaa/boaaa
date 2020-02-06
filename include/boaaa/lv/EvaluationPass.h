@@ -35,9 +35,20 @@ namespace boaaa {
 	class AAResultEvaluationPassImpl
 	{
     public:
-		AAResultEvaluationPassImpl() {}
+		AAResultEvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
+			MustAliasCount(), NoModRefCount(), ModCount(), RefCount(), ModRefCount(), MustCount(), 
+			MustRefCount(),	MustModCount(), MustModRefCount() {}
 
-        void evaluateAAResult(std::unique_ptr<llvm::AAResults> AAResult, LLVMModule& M);
+        void evaluateAAResult(llvm::AAResults &AAResult, LLVMModule& M);
+		void evaluateAAResultOnFunction(llvm::AAResults& AAResult, LLVMFunction& F);
+
+		void printResult(std::ostream &stream);
+
+	private:
+		int64_t FunctionCount;
+		int64_t NoAliasCount, MayAliasCount, PartialAliasCount, MustAliasCount;
+		int64_t NoModRefCount, ModCount, RefCount, ModRefCount;
+		int64_t MustCount, MustRefCount, MustModCount, MustModRefCount;
 	};
 }
 

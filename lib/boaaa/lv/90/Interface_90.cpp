@@ -27,7 +27,7 @@ DLInterface90::~DLInterface90()
 void DLInterface90::onLoad()
 {
 	context.string_ref_vp = new StringRefVP90();
-	//RedirectIOToConsole();
+	RedirectIOToConsole();
 	//cl passing no working or not printing
 	const int _argc = 1;
 	const char* _argv[] = { "--debug-pass=Structure" };
@@ -60,7 +60,9 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 #include "llvm/Analysis/CFLSteensAliasAnalysis.h"
 #include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
 #include "llvm/Analysis/ScopedNoAliasAA.h"
-#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/LegacyPassManagers.h"
+#include "llvm/Passes/PassBuilder.h"
+
 #include "boaaa/lv/CountPass.h"
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/EvaluationPassDefinitions.h"
@@ -81,16 +83,44 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, llvm_context);	
 
 	llvm::AAManager aaman;
-	llvm::legacy::PassManager basic_aa;
+	llvm::PassBuilder builder;
+	llvm::FunctionPassManager FPM(false);
+	
+	
+
+	llvm::legacy::PassManager pm;
 	//basic_aa.add(llvm::createBasicAAWrapperPass());
 	//basic_aa.add(llvm::createCFLAndersAAWrapperPass());
 	//basic_aa.add(llvm::createCFLSteensAAWrapperPass());
 	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
-	basic_aa.add(llvm::createSCEVAAWrapperPass());
-	basic_aa.add(boaaa::createSVECAAEVALWrapperPass());
-	//basic_aa.add(llvm::createAAEvalPass());
-	basic_aa.run(*module);
-	
+	llvm::TargetLibraryInfoWrapperPass* tli = new llvm::TargetLibraryInfoWrapperPass();
+	llvm::SCEVAAWrapperPass *scev = new llvm::SCEVAAWrapperPass();
+	llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
+	pm.add(tli);
+	//basic_aa.add(scev);
+	pm.add(basic_aa);
+
+	//pm.add(new llvm::ScalarEvolutionWrapperPass());
+	//pm.add(llvm::createSCEVAAWrapperPass());
+	//pm.add(boaaa::createSVECAAEVALWrapperPass());
+	//pm.add(llvm::createAAEvalPass());
+	pm.run(*module);
+
+	llvm::AAResults result(tli->getTLI());
+	result.addAAResult(basic_aa->getResult());
+
+	boaaa::AAResultEvaluationPassImpl impl;
+	int i = 0;
+	for (LLVMFunction& F : *module)
+	{
+		i++;
+		//i == 116/121 other error in find next
+		if (i == 2 || i == 25 || i == 26 || i == 27 || i == 28 || i == 46 || i == 50 || i == 65 || i == 83 || i == 110 || i == 111 || i == 112 || i == 114 || i == 115 || i == 116 || i == 119 || i == 120 || i == 121 || i >= 124) continue;
+		impl.evaluateAAResultOnFunction(result, F);
+	}
+
+	//impl.evaluateAAResult(result, *module);	
+	impl.printResult(*(context.basic_ostream));
 }
 
 //http://www.halcyon.com/~ast/dload/guicon.htm
@@ -100,7 +130,7 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 #include <stdio.h>
 #include <fcntl.h>
 #include <io.h>
-#include <iostream>
+#include <iostream> 
 #include <fstream>
 
 // maximum mumber of lines the output console should have

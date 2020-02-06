@@ -7,6 +7,7 @@
 #include <memory>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 #include <iostream>
 #endif
@@ -61,7 +62,5 @@ namespace boaaa {
 		virtual void test(uint64_t* hash = nullptr, uint8_t num = 0) = 0;
 	};
 }
-
-#include "minwindef_undef.inc"
 
 #endif

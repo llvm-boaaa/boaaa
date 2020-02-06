@@ -23,16 +23,18 @@ SVECAAEvalWrapperPass::SVECAAEvalWrapperPass() : impl(), LLVMModulePass(ID)
 
 bool SVECAAEvalWrapperPass::runOnModule(LLVMModule& M) 
 {
+    auto& TLI = getAnalysis<TargetLibraryInfoWrapperPass>();
     auto& WrapperPass = getAnalysis<SCEVAAWrapperPass>();
-    std::unique_ptr<llvm::AAResults> result;
-    result->addAAResult(WrapperPass.getResult());
-    impl.evaluateAAResult(std::move(result), M);
+    llvm::AAResults result(TLI.getTLI());
+    result.addAAResult(WrapperPass.getResult());
+    impl.evaluateAAResult(result, M);
     return false;
 }
 
 void SVECAAEvalWrapperPass::getAnalysisUsage(llvm::AnalysisUsage& AU) const
 {
     AU.setPreservesAll();
+    AU.addRequired<TargetLibraryInfoWrapperPass>();
     AU.addRequired<SCEVAAWrapperPass>();
 }
 
