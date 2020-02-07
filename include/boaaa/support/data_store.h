@@ -2,6 +2,7 @@
 #define BOAAA_DATA_STORE_H
 
 #include "LLVMErrorOr.h"
+#include "boaaa/support/enable_if_else.h"
 #include "boaaa/support/version_error.h"
 #include "boaaa/support/xxhash.h"
 
@@ -36,13 +37,16 @@ namespace boaaa
 	{
 		using type = T;
 
-		template<typename T>
-		static T get(_data_store<T, Tail...>& data) {
+		template<typename T2>
+		using TOrError = typename enable_if_else<std::is_same<T, T2>::value, T, void>::type;
+
+		template<typename T2>
+		static TOrError<T2> get(_data_store<TOrError<T2>, Tail...>& data) {
 			return data.head;
 		}
 
-		template<typename T>
-		static void set(_data_store<T, Tail...>& data, const T& value)
+		template<typename T2>
+		static void set(_data_store<TOrError<T2>, Tail...>& data, const TOrError<T2>& value)
 		{
 			data.head = value;
 		}
@@ -50,7 +54,7 @@ namespace boaaa
 		template<typename T2>
 		static bool checkType(_data_store<T, Tail...>& data)
 		{
-			return std::is_same<T, T2>();
+			return std::is_same<T, T2>::value;
 		}
 
 		static size_t countBytes(_data_store<T, Tail...>& data)
@@ -69,6 +73,15 @@ namespace boaaa
 	{
 		using type = typename get_helper<idx - 1, _data_store<Tail...>>::type;
 
+		template<typename T2>
+		using TOrT2 = typename enable_if_else<std::is_same<T, T2>::value, T, T2>::type;
+
+		template<typename T2>
+		static TOrT2<T2> get(_data_store<TOrT2<T2>, Tail...>& data)
+		{
+			return get_helper<idx - 1, _data_store<Tail...>>::template get<TOrT2<T2>>(data.tail);
+		}
+		/*
 		template<typename T>
 		static T get(_data_store<T, Tail...>& data)
 		{
@@ -80,7 +93,13 @@ namespace boaaa
 		{
 			return get_helper<idx - 1, _data_store<Tail...>>::template get<T2>(data.tail);
 		}
-
+		*/
+		template<typename T2>
+		static void set(_data_store<TOrT2<T2>, Tail...>& data, const TOrT2<T2>& value)
+		{
+			get_helper<idx - 1, _data_store<Tail...>>::template set<TOrT2<T2>>(data.tail, value);
+		}
+		/*
 		template<typename T>
 		static void set(_data_store<T, Tail...>& data, const T& value)
 		{
@@ -92,7 +111,7 @@ namespace boaaa
 		{
 			get_helper<idx - 1, _data_store<Tail...>>::template set<T2>(data.tail, value);
 		}
-
+		*/
 		template<typename T2>
 		static bool checkType(_data_store<T, Tail...>& data)
 		{

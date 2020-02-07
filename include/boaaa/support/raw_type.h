@@ -3,11 +3,6 @@
 
 #include <type_traits>
 namespace boaaa {
-	template<bool B, class T, class F>
-	struct enable_if_else { typedef F type; };
-
-	template<class T, class F>
-	struct enable_if_else<true, T, F> { typedef T type; };
 
 	template<typename K>
 	struct rem
