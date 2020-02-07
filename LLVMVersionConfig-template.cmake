@@ -34,11 +34,11 @@ include(cmake/registerLLVMVersion.cmake)
 #set(BOAAA_LLVM_DYNLIB_LIST "")
 
 #Mac
-set(BOAAA_LIB_PREFIX "lib")
-set(BOAAA_LIB_EXTENSION ".a")
-set(BOAAA_DYNLIB_PREFIX "lib")
-set(BOAAA_DYNLIB_EXTENSION ".dylib")
-set(BOAAA_LLVM_DYNLIB_LIST "LTO;Remarks;LLVM")
+#set(BOAAA_LIB_PREFIX "lib")
+#set(BOAAA_LIB_EXTENSION ".a")
+#set(BOAAA_DYNLIB_PREFIX "lib")
+#set(BOAAA_DYNLIB_EXTENSION ".dylib")
+#set(BOAAA_LLVM_DYNLIB_LIST "LTO;Remarks;LLVM")
 
 
 #Linux

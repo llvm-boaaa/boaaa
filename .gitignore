@@ -6,6 +6,7 @@ llvm_version/*/
 libraries/llvm/build
 out/
 build/
+__tmp/
 
 #build files
 **/*.o

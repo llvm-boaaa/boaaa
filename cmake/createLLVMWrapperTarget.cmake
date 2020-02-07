@@ -169,12 +169,6 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 	message(STATUS "||fixed include dir path for generated llvm version")
 	message(STATUS "|| path: ${LLVM_${version_}_INCLUDE_DIRS}")
 	endif()
-	
-	set(FILE_EXTENSION ".a")
-
-	if(WIN32)
-		set(FILE_EXTENSION ".lib")
-	endif()
 
 	#create full path to libs
 	set(LIBS_TMP "")
