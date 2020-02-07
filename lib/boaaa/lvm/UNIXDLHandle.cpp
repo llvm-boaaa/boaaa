@@ -5,7 +5,6 @@ void* dlopen(const char* filename, int flag);
 char* dlerror();
 void* dlsym(void* handle, const char* symbol);
 int dlclose(void* handle);
-extern int RTLD_LAZY;
 
 using namespace boaaa;
 
@@ -38,7 +37,7 @@ void* UNIXDLHandle::getFunction(llvm::StringRef funcname)
 			return nullptr;
 		}
 	}
-	void* func = dlsym(inst, funcname.str.c_str());
+	void* func = dlsym(inst, funcname.str().c_str());
 	err.setError(err.readError().str() + "\n" + dlerror());
 	return func;
 }

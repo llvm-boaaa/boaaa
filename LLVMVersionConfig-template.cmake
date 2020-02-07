@@ -25,3 +25,25 @@ include(cmake/registerLLVMVersion.cmake)
 
 # LLVM_90
 #boaaa_registerLLVMVersion("90" "absolute/or/relative/path")
+
+#Windows
+#set(BOAAA_LIB_PREFIX )
+#set(BOAAA_LIB_EXTENSION ".lib")
+#set(BOAAA_DYNLIB_PREFIX )
+#set(BOAAA_DYNLIB_EXTENSION ".dll")
+#set(BOAAA_LLVM_DYNLIB_LIST "")
+
+#Mac
+set(BOAAA_LIB_PREFIX "lib")
+set(BOAAA_LIB_EXTENSION ".a")
+set(BOAAA_DYNLIB_PREFIX "lib")
+set(BOAAA_DYNLIB_EXTENSION ".dylib")
+set(BOAAA_LLVM_DYNLIB_LIST "LTO;Remarks;LLVM")
+
+
+#Linux
+#set(BOAAA_LIB_PREFIX )
+#set(BOAAA_LIB_EXTENSION ".a")
+#set(BOAAA_DYNLIB_PREFIX )
+#set(BOAAA_DYNLIB_EXTENSION ".so")
+#set(BOAAA_LLVM_DYNLIB_LIST "")

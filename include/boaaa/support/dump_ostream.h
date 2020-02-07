@@ -12,7 +12,7 @@ namespace boaaa
 	public:
 		static dump_streambuf create() { return dump_streambuf(); }
 	}; */
-
+#ifdef _WIN32
 	class dump_ostream : public std::ostream
 	{
 
@@ -62,6 +62,7 @@ namespace boaaa
 		//not overriden xalloc
 
 	};
+#endif
 
 }
 

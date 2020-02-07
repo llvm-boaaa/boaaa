@@ -115,7 +115,7 @@ namespace boaaa
 		template<typename T2>
 		static bool checkType(_data_store<T, Tail...>& data)
 		{
-			return get_helper<idx - 1, _data_store<Tail...>>::checkType<T2>(data.tail);
+			return get_helper<idx - 1, _data_store<Tail...>>::template checkType<T2>(data.tail);
 		}
 
 		static size_t countBytes(_data_store<T, Tail...>& data)

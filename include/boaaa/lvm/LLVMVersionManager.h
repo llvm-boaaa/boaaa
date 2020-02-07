@@ -4,6 +4,8 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringMap.h"
 
+#include <iostream>
+
 #include "boaaa/export.h"
 #include "boaaa/dynamic_interface.h"
 #include "boaaa/lvm/DLHandle.h"

@@ -179,7 +179,11 @@ message(STATUS "||>>>>>---------release_${version_}---------<<<<<")
 	#create full path to libs
 	set(LIBS_TMP "")
 	foreach(lib ${LLVM_${version_}_LIBS})
-	list(APPEND LIBS_TMP "${${LLVM_LINK_DIR}}/${lib}${FILE_EXTENSION}")
+	if(${lib} IN_LIST BOAAA_LLVM_DYNLIB_LIST)
+	list(APPEND LIBS_TMP "${${LLVM_LINK_DIR}}/${BOAAA_DYNLIB_PREFIX}${lib}${BOAAA_DYNLIB_EXTENSION}")
+	else()
+	list(APPEND LIBS_TMP "${${LLVM_LINK_DIR}}/${BOAAA_LIB_PREFIX}${lib}${BOAAA_LIB_EXTENSION}")
+	endif()
 	endforeach(lib)
 
 	set(LLVM_${version_}_LIBS ${LIBS_TMP})

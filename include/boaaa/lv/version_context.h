@@ -76,7 +76,7 @@ namespace boaaa {
 		{
 			string_ref_vp = nullptr;
 			loaded_module.reset(nullptr);
-			basic_ostream = new dump_ostream(std::_Uninitialized::_Noinit);
+            basic_ostream = nullptr; //new dump_ostream(std::_Uninitialized::_Noinit);
 			del_strm_after_use = false;
 		}
 
