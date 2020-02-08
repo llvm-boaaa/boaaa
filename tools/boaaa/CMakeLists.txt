@@ -14,3 +14,8 @@ foreach(dep ${dll_dependecies})
 endforeach()
 add_dependencies(boaaa LLVM_${llvm_boaaa})
 message(STATUS "||added tool boaaa")
+
+if(UNIX AND NOT APPLE)
+message(STATUS "||Set propertie of lv_${version_} as PIC")
+set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-ldl")
+endif()

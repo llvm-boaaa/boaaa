@@ -9,7 +9,9 @@ namespace boaaa {
 
 	class DLHandle 
 	{
-	public:		
+	public:	
+
+		virtual ~DLHandle() = default;	
 		virtual DLError getERR() = 0;
 		virtual void* getFunction(llvm::StringRef funcname) = 0;
 		virtual llvm::StringRef getFilename() = 0;

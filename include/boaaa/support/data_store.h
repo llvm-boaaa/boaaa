@@ -6,6 +6,8 @@
 #include "boaaa/support/version_error.h"
 #include "boaaa/support/xxhash.h"
 
+#include <cstring>
+
 namespace boaaa 
 {
 	//https://riptutorial.com/cplusplus/example/19276/variadic-template-data-structures

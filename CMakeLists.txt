@@ -5,6 +5,10 @@ project(BOAAA)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+
+set(GCC_COVERAGE_COMPILE_FLAG "-lstdc++fs")
+
 message(STATUS "||===========generating BOAAA===========||")
 message(STATUS "||")
 

@@ -42,8 +42,8 @@ include(cmake/registerLLVMVersion.cmake)
 
 
 #Linux
-#set(BOAAA_LIB_PREFIX )
+#set(BOAAA_LIB_PREFIX "lib")
 #set(BOAAA_LIB_EXTENSION ".a")
-#set(BOAAA_DYNLIB_PREFIX )
+#set(BOAAA_DYNLIB_PREFIX "lib")
 #set(BOAAA_DYNLIB_EXTENSION ".so")
-#set(BOAAA_LLVM_DYNLIB_LIST "")
+#set(BOAAA_LLVM_DYNLIB_LIST "LTO;Remarks")

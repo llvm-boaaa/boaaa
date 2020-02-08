@@ -47,6 +47,11 @@ file(GLOB DL_VERSION_files
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
 	target_link_libraries(boaaa.lv_${version_}
 							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp boaaa.lvm)
+
+	if(UNIX AND NOT APPLE)
+	message(STATUS "||Set propertie of lv_${version_} as PIC")
+	set_target_properties(boaaa.lv_${version_} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+	endif()
 	#target_link_directories(boaaa.lv_${version_} BEFORE INTERFACE ${${LLVM_LINK_DIR}})
 
 	# on windows define LLVM_ON_WIN32 because sometimes undefined

@@ -47,6 +47,8 @@ namespace boaaa {
 		DLInterface() {}
 	public:
 
+		virtual ~DLInterface() = default;
+
 		virtual void onLoad() = 0;
 		virtual void onUnload() = 0;
 
