@@ -2,7 +2,6 @@
 #define BOAAA_DATA_STORE_H
 
 #include "LLVMErrorOr.h"
-#include "boaaa/support/enable_if_else.h"
 #include "boaaa/support/version_error.h"
 #include "boaaa/support/xxhash.h"
 
@@ -40,7 +39,7 @@ namespace boaaa
 		using type = T;
 
 		template<typename T2>
-		using TOrError = typename enable_if_else<std::is_same<T, T2>::value, T, void>::type;
+		using TOrError = typename std::conditional_t<std::is_same<T, T2>::value, T, void>;
 
 		template<typename T2>
 		static TOrError<T2> get(_data_store<TOrError<T2>, Tail...>& data) {
@@ -76,7 +75,7 @@ namespace boaaa
 		using type = typename get_helper<idx - 1, _data_store<Tail...>>::type;
 
 		template<typename T2>
-		using TOrT2 = typename enable_if_else<std::is_same<T, T2>::value, T, T2>::type;
+		using TOrT2 = typename std::conditional_t<std::is_same<T, T2>::value, T, T2>;
 
 		template<typename T2>
 		static TOrT2<T2> get(_data_store<TOrT2<T2>, Tail...>& data)
