@@ -8,10 +8,16 @@ file(GLOB SourceFilesBoaaa
 
 nm_add_tool(boaaa ${SourceFilesBoaaa})
 target_link_libraries(boaaa PUBLIC boaaa.support boaaa.vp boaaa.lvm)
-foreach(dep ${dll_dependecies})
-	message(STATUS "|| boaaa dll dep: ${dep}")
-	add_dependencies(boaaa ${dep})
-endforeach()
+
+#removed this builddependencies because of multi-definitions of the llvm::classes.
+# By removing this loop every needed target has to be build seperate.
+#
+#foreach(dep ${dll_dependecies})
+	#message(STATUS "|| boaaa dll dep: ${dep}")
+	#add_dependencies(boaaa ${dep})
+#endforeach()
+
+#add llvm_version to boaaa
 add_dependencies(boaaa LLVM_${llvm_boaaa})
 message(STATUS "||added tool boaaa")
 
