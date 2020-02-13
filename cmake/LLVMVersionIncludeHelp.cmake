@@ -26,11 +26,6 @@ macro(boaaa_add_llvm_version)
   target_compile_options(${nm_dummy_target_name} INTERFACE ${P_ARGS_INTERFACE_COMPILE_OPTIONS})
   #target_link_options(${nm_dummy_target_name} INTERFACE "/FORCE:MULTIPLE")
 
-  if("LLVM_${llvm_boaaa}" STREQUAL ${P_ARGS_NAME})
-  list(APPEND NM_THIRDPARTY_LIBS ${nm_dummy_target_name})
-  message(STATUS "|| linked LLVM BOAAA Version")
-  endif()
-
 endmacro()
 
 #copied from nicemake/TargetCreation.cmake::nm_add_library

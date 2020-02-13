@@ -20,11 +20,12 @@ std::string formatProzent(uint64_t count, uint64_t total) {
 
 void AAResultEvaluationPassImpl::evaluateAAResult(llvm::AAResults &AAResult, LLVMModule& M) {
     //TODO remove
+#ifdef LLVM_VERSION_90
     using namespace llvm;
     llvm::DataLayout DL = M.getDataLayout();
 
     LLVMSetVector<Value*> Pointers;
-    LLVMSmallSetVector<CallBase*, 16> Calls;
+    LLVMSmallSetVector<CallBase*, 16> Calls; //llvm 50 CallInst
     LLVMSetVector<Value*> Loads;
     LLVMSetVector<Value*> Stores;
 
@@ -49,7 +50,7 @@ void AAResultEvaluationPassImpl::evaluateAAResult(llvm::AAResults &AAResult, LLV
             if (auto* Call = dyn_cast<CallBase>(&Inst)) {
                 Value* Callee = Call->getCalledValue();
                 // Skip actual functions for direct function calls.
-                if (!isa<Function>(Callee) && isInterestingPointer(Callee))
+                if (!isa<LLVMFunction>(Callee) && isInterestingPointer(Callee))
                     Pointers.insert(Callee);
                 // Consider formals.
                 for (Use& DataOp : Call->data_ops())
@@ -69,7 +70,7 @@ void AAResultEvaluationPassImpl::evaluateAAResult(llvm::AAResults &AAResult, LLV
         // iterate over the worklist, and run the full (n^2)/2 disambiguations
         for (SetVector<Value*>::iterator I1 = Pointers.begin(), E = Pointers.end();
             I1 != E; ++I1) {
-            auto I1Size = LocationSize::unknown();
+            auto I1Size = LocationSize::unknown(); //MemoryLocation
             Type* I1ElTy = cast<PointerType>((*I1)->getType())->getElementType();
             if (I1ElTy->isSized())
                 I1Size = LocationSize::precise(DL.getTypeStoreSize(I1ElTy));
@@ -214,10 +215,12 @@ void AAResultEvaluationPassImpl::evaluateAAResult(llvm::AAResults &AAResult, LLV
             }
         }
     }
+#endif
 }
 
 void AAResultEvaluationPassImpl::evaluateAAResultOnFunction(llvm::AAResults& AAResult, LLVMFunction& F)
 {
+#ifdef LLVM_VERSION_90
     using namespace llvm;
     llvm::DataLayout DL = F.getParent()->getDataLayout();
 
@@ -408,6 +411,7 @@ void AAResultEvaluationPassImpl::evaluateAAResultOnFunction(llvm::AAResults& AAR
             }
         }
     }
+#endif
 }
 
 void AAResultEvaluationPassImpl::printResult(std::ostream &stream) {

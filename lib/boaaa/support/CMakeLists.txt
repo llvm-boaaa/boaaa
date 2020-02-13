@@ -6,6 +6,8 @@ file(GLOB Support_Files
 	"*.cpp"
 )
 
+message(STATUS "||test|| NICEMAKE_LIBS: ${NM_THIRDPARTY_LIBS}")
+
 nm_add_library(boaaa.support STATIC ${Support_Files})
 message(STATUS "||added lib: support")
 

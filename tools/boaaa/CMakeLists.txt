@@ -7,7 +7,7 @@ file(GLOB SourceFilesBoaaa
 )
 
 nm_add_tool(boaaa ${SourceFilesBoaaa})
-target_link_libraries(boaaa PUBLIC boaaa.support boaaa.vp boaaa.lvm)
+target_link_libraries(boaaa PUBLIC boaaa.support boaaa.vp boaaa.lvm PRIVATE LLVM_${llvm_boaaa})
 
 #removed this builddependencies because of multi-definitions of the llvm::classes.
 # By removing this loop every needed target has to be build seperate.
