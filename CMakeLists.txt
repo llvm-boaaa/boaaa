@@ -31,8 +31,8 @@ include(cmake/copyAndRename.cmake)
 include(cmake/checkOrCreateFoulder.cmake)
 include(cmake/createLLVMWrapperTarget.cmake)
 
-message(STATUS "|| BOAAA is generated with following")
-message(STATUS "|| supported versions:")
+message(STATUS "||")
+message(STATUS "|| BOAAA is generated with following supported versions:")
 
 unset(dll_dependecies CACHE)
 unset(llvm_dependencies CACHE)
@@ -66,15 +66,17 @@ endif()
 # include Nicemake https://github.com/fkutzner/NiceMake
 include(cmake/nicemake/NiceMake.cmake)
 
+message(STATUS "||")
 message(STATUS "|| configure LLVM versions:")
 
 foreach(version_ ${build_llvm_version})
 
+	message(STATUS "||")
 	unset(LLVM_DIR)
 	boaaa_create_llvm_wrapper(${version_})
 	message(STATUS "||>>=======LLVM used for BOAAA=========")
 	message(STATUS "||LLVM Version :      ${LLVM_${version_}_VERSION}")
-	message(STATUS "||LLVM DIR :          ${LLVM_${version_}_DIR}")
+	#message(STATUS "||LLVM DIR :          ${LLVM_${version_}_DIR}")
 	message(STATUS "||LLVM Link Dirs :    ${LLVM_${version_}_LIBRARY_DIR}")
 	message(STATUS "||LLVM libs :         ${LLVM_${version_}_LIBS} ")
 	message(STATUS "||LLVM include dirs : ${LLVM_${version_}_INCLUDE_DIRS} ")
@@ -83,6 +85,7 @@ foreach(version_ ${build_llvm_version})
 endforeach(version_)
 
 message(STATUS "|| configured all versions")
+message(STATUS "||")
 
 	set(BOAAA_LLVM_NAME "LLVM_${llvm_boaaa}")
 

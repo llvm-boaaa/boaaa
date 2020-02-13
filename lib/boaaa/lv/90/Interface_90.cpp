@@ -97,8 +97,8 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	llvm::SCEVAAWrapperPass *scev = new llvm::SCEVAAWrapperPass();
 	llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
 	pm.add(tli);
-	//basic_aa.add(scev);
-	pm.add(basic_aa);
+	pm.add(scev);
+	//pm.add(basic_aa);
 
 	//pm.add(new llvm::ScalarEvolutionWrapperPass());
 	//pm.add(llvm::createSCEVAAWrapperPass());
@@ -107,7 +107,7 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	pm.run(*module);
 
 	llvm::AAResults result(tli->getTLI());
-	result.addAAResult(basic_aa->getResult());
+	result.addAAResult(scev->getResult());
 
 	boaaa::AAResultEvaluationPassImpl impl;
 	int i = 0;
