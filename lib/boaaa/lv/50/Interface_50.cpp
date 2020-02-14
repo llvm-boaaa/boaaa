@@ -44,15 +44,20 @@ void DLInterface50::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
-/*
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IRReader/IRReader.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/SourceMgr.h"
-*/
 
+#include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/AliasAnalysisEvaluator.h"
+#include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
+#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
+#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
+#include "llvm/Analysis/ScopedNoAliasAA.h"
+#include "llvm/IR/LegacyPassManagers.h"
+#include "llvm/Passes/PassBuilder.h"
+
+#include "boaaa/lv/CountPass.h"
+#include "boaaa/lv/EvaluationPass.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
 
 void DLInterface50::test(uint64_t* hash, uint8_t num)
 {
@@ -63,9 +68,42 @@ void DLInterface50::test(uint64_t* hash, uint8_t num)
 	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(hash[1], storeBC);
 
-	//llvm::LLVMContext context;
-	//llvm::legacy::PassManager manager;
-	//llvm::SMDiagnostic Err;
+	llvm::LLVMContext Context;
+	llvm::SMDiagnostic Err;
 
-	//std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, context);
+	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, Context);
+
+	llvm::legacy::PassManager pm;
+	//basic_aa.add(llvm::createBasicAAWrapperPass());
+	//basic_aa.add(llvm::createCFLAndersAAWrapperPass());
+	//basic_aa.add(llvm::createCFLSteensAAWrapperPass());
+	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
+	llvm::TargetLibraryInfoWrapperPass* tli = new llvm::TargetLibraryInfoWrapperPass();
+	llvm::SCEVAAWrapperPass* scev = new llvm::SCEVAAWrapperPass();
+	llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
+	pm.add(tli);
+	pm.add(basic_aa);
+	//pm.add(basic_aa);
+
+	//pm.add(new llvm::ScalarEvolutionWrapperPass());
+	//pm.add(llvm::createSCEVAAWrapperPass());
+	//pm.add(boaaa::createSVECAAEVALWrapperPass());
+	//pm.add(llvm::createAAEvalPass());
+	pm.run(*module);
+
+	llvm::AAResults result(tli->getTLI());
+	result.addAAResult(basic_aa->getResult());
+
+	boaaa::AAResultEvaluationPassImpl impl;
+	int i = 0;
+	for (LLVMFunction& F : *module)
+	{
+		i++;
+		//i == 116/121 other error in find next
+		if (i == 2 || i == 25 || i == 26 || i == 27 || i == 28 || i == 46 || i == 50 || i == 65 || i == 83 || i == 110 || i == 111 || i == 112 || i == 114 || i == 115 || i == 116 || i == 119 || i == 120 || i == 121 || i >= 124) continue;
+		impl.evaluateAAResultOnFunction(result, F);
+	}
+
+	//impl.evaluateAAResult(result, *module);	
+	impl.printResult(*(context.basic_ostream));
 }

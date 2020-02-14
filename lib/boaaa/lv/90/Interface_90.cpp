@@ -61,7 +61,6 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 #include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
 #include "llvm/Analysis/ScopedNoAliasAA.h"
 #include "llvm/IR/LegacyPassManagers.h"
-#include "llvm/Passes/PassBuilder.h"
 
 #include "boaaa/lv/CountPass.h"
 #include "boaaa/lv/EvaluationPass.h"
@@ -83,7 +82,6 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, llvm_context);	
 
 	llvm::AAManager aaman;
-	llvm::PassBuilder builder;
 	llvm::FunctionPassManager FPM(false);
 	
 	
@@ -97,7 +95,7 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	llvm::SCEVAAWrapperPass *scev = new llvm::SCEVAAWrapperPass();
 	llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
 	pm.add(tli);
-	pm.add(scev);
+	pm.add(basic_aa);
 	//pm.add(basic_aa);
 
 	//pm.add(new llvm::ScalarEvolutionWrapperPass());
@@ -107,7 +105,7 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	pm.run(*module);
 
 	llvm::AAResults result(tli->getTLI());
-	result.addAAResult(scev->getResult());
+	result.addAAResult(basic_aa->getResult());
 
 	boaaa::AAResultEvaluationPassImpl impl;
 	int i = 0;

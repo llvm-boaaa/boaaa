@@ -126,16 +126,16 @@ int main(int argc, char** argv) {
 	boaaa::StringRefVPM* srvpm = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(srvpm);
 	
-	//std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
-	//std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
+	std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
+	std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
 	std::shared_ptr<boaaa::DLInterface> llvm90 = man.loadDL("boaaa.lv_90");
 	
-	//llvm40->setBasicOStream(std::cout);
-	//llvm50->setBasicOStream(std::cout);
+	llvm40->setBasicOStream(std::cout);
+	llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
 
-	//llvm40->registerStringRefVPM(srvpm);
-	//llvm50->registerStringRefVPM(srvpm);
+	llvm40->registerStringRefVPM(srvpm);
+	llvm50->registerStringRefVPM(srvpm);
 	llvm90->registerStringRefVPM(srvpm);
 
 	StringRef ref = "this is a test string";
@@ -147,15 +147,9 @@ int main(int argc, char** argv) {
 
 	//FreeConsole();
 
-	//llvm40->test(test_args, 2);
-	//llvm50->test(test_args, 2);
+	llvm40->test(test_args, 2);
+	llvm50->test(test_args, 2);
 	llvm90->test(test_args, 2);
-
-	//llvm::AAManager aaman;
-	//llvm::legacy::PassManager basic_aa;
-	//basic_aa.add(new llvm::BasicAAWrapperPass());
-	//basic_aa.add(new boaaa::CountPass());
-	//basic_aa.run(*M.get());
 
 	return 0;
 }
