@@ -418,6 +418,11 @@ void AAResultEvaluationPassImpl::printResult(std::ostream &stream) {
     uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
 
     stream << "AliasEvaluationPass Report:\n";
+
+    if (AliasSum <= 0) {
+        stream << "AliasSum = 0 ...skipping\n";
+        return;
+    }
     stream << "AliasSum     : " << "         " << " " << AliasSum << "\n";
     stream << "\n";
     stream << "No Alias     : " << formatProzent(NoAliasCount, AliasSum) << " " << NoAliasCount << "\n";

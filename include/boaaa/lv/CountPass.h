@@ -62,6 +62,13 @@ namespace boaaa {
 
 			return false;
 		}
+
+		void printResult(std::ostream& stream) {
+			stream << "CountPass Report:\n";
+			stream << "Function #"     << function_count    << "\n"
+				   << "BasicBlock #"   << basic_block_count << "\n"
+				   << "Instructions #" << instruction_count << "\n";			
+		}
 	};
 
 	char CountPass::ID = 0;

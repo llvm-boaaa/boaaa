@@ -71,6 +71,7 @@ void DLInterface50::test(uint64_t* hash, uint8_t num)
 	llvm::LLVMContext Context;
 	llvm::SMDiagnostic Err;
 
+	/*
 	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(bc_ref, Err, Context);
 
 	llvm::legacy::PassManager pm;
@@ -106,4 +107,5 @@ void DLInterface50::test(uint64_t* hash, uint8_t num)
 
 	//impl.evaluateAAResult(result, *module);	
 	impl.printResult(*(context.basic_ostream));
+	*/
 }

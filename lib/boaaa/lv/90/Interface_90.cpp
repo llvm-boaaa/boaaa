@@ -65,6 +65,7 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 #include "boaaa/lv/CountPass.h"
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/EvaluationPassDefinitions.h"
+#include "boaaa/lv/TimePass.h"
 
 void DLInterface90::test(uint64_t* hash, uint8_t num)
 {
@@ -94,8 +95,13 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	llvm::TargetLibraryInfoWrapperPass* tli = new llvm::TargetLibraryInfoWrapperPass();
 	llvm::SCEVAAWrapperPass *scev = new llvm::SCEVAAWrapperPass();
 	llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
+	boaaa::TimePass<llvm::SCEVAAWrapperPass>* tmscev = new boaaa::TimePass<llvm::SCEVAAWrapperPass>();
+	boaaa::CountPass *cp = new boaaa::CountPass();
 	pm.add(tli);
-	pm.add(basic_aa);
+	
+	pm.add(tmscev);
+	//pm.add(cp);
+	//pm.add(scev);
 	//pm.add(basic_aa);
 
 	//pm.add(new llvm::ScalarEvolutionWrapperPass());
@@ -103,9 +109,10 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	//pm.add(boaaa::createSVECAAEVALWrapperPass());
 	//pm.add(llvm::createAAEvalPass());
 	pm.run(*module);
+	tmscev->printResult(*(context.basic_ostream));
 
 	llvm::AAResults result(tli->getTLI());
-	result.addAAResult(basic_aa->getResult());
+	result.addAAResult(tmscev->getResult());
 
 	boaaa::AAResultEvaluationPassImpl impl;
 	int i = 0;
@@ -113,8 +120,8 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	{
 		i++;
 		//i == 116/121 other error in find next
-		if (i == 2 || i == 25 || i == 26 || i == 27 || i == 28 || i == 46 || i == 50 || i == 65 || i == 83 || i == 110 || i == 111 || i == 112 || i == 114 || i == 115 || i == 116 || i == 119 || i == 120 || i == 121 || i >= 124) continue;
-		impl.evaluateAAResultOnFunction(result, F);
+		if (i == 1 || i == 2 || i == 25 || i == 26 || i == 27 || i == 28 || i == 46 || i == 50 || i == 65 || i == 83 || i == 110 || i == 111 || i == 112 || i == 114 || i == 115 || i == 116 || i == 119 || i == 120 || i == 121 || i >= 124) continue;
+		//impl.evaluateAAResultOnFunction(result, F);
 	}
 
 	//impl.evaluateAAResult(result, *module);	

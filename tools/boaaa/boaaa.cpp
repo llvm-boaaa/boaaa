@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
 
 #ifdef DEBUG_COMMAND_LINE
 	const int _argc = 4;
-	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc", "--debug-pass=Structure", "--evaluate-aa-metadata" }; //"--print-all-alias-modref-info" };
+	const char* _argv[] = { "boaaa", "../../../../bc_sources/hello.bc", "--debug-pass=Structure", "--evaluate-aa-metadata" }; //"--print-all-alias-modref-info" };
 	//const char* _argv[] = { "boaaa", "-help" };
 	cl::ParseCommandLineOptions(_argc, _argv, "");	
 #else
