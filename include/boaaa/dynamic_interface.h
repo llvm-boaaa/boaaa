@@ -54,6 +54,7 @@ namespace boaaa {
 
 		virtual void registerStringRefVPM(StringRefVPM* manager) = 0;
 		virtual void setBasicOStream(std::ostream& ostream, bool del = false) = 0;
+		virtual bool loadModule(uint64_t module_file_hash) = 0;
 
 
 		//only defined in tool, so test ist allways public, 

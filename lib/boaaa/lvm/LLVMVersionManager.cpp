@@ -97,6 +97,8 @@ void LLVMVersionManager::test(uint64_t* hash, uint8_t num)
 	//never called
 }
 
+bool LLVMVersionManager::loadModule(uint64_t module_file_hash) { return true; };
+
 
 
 

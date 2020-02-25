@@ -18,6 +18,7 @@ namespace boaaa {
 
 #include "boaaa/lv/include_versions/BOAAA_StringRefVP.inc"
 #include "boaaa/lv/include_versions/LLVM_Module.inc"
+#include "boaaa/lv/include_versions/LLVM_LLVMContext.inc"
 
 #ifdef LLVM_VERSION_ERROR_CODE
 LLVM_VERSION_ERROR_CODE
@@ -67,6 +68,7 @@ namespace boaaa {
 		
 		BOAAAStringRefVP* string_ref_vp;
 		std::unique_ptr<LLVMModule> loaded_module;
+		std::unique_ptr<LLVMLLVMContext> context_to_module;
 
 //-----------------------------------------------------LLVM_VERSION independent
 		std::ostream* basic_ostream;
@@ -76,6 +78,7 @@ namespace boaaa {
 		{
 			string_ref_vp = nullptr;
 			loaded_module.reset(nullptr);
+			context_to_module.reset(nullptr);
             basic_ostream = nullptr; //new dump_ostream(std::_Uninitialized::_Noinit);
 			del_strm_after_use = false;
 		}

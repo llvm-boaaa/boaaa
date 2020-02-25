@@ -41,10 +41,10 @@ namespace boaaa {
 
 			for (LLVMFunction& F : M.functions()) {
 
-				llvm::LoopInfo& LI = getAnalysis<llvm::LoopInfoWrapperPass>(F).getLoopInfo();
-				for (llvm::Loop* L : LI) {
-					loop_count++;
-				}
+				//llvm::LoopInfo& LI = getAnalysis<llvm::LoopInfoWrapperPass>(F).getLoopInfo();
+				//for (llvm::Loop* L : LI) {
+				//	loop_count++;
+				//}
 
 				for (llvm::BasicBlock &BB : F.getBasicBlockList()) {
 

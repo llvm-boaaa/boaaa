@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
 
 #ifdef DEBUG_COMMAND_LINE
 	const int _argc = 4;
-	const char* _argv[] = { "boaaa", "../../../../bc_sources/hello.bc", "--debug-pass=Structure", "--evaluate-aa-metadata" }; //"--print-all-alias-modref-info" };
+	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc", "--debug-pass=Structure", "--evaluate-aa-metadata" }; //"--print-all-alias-modref-info" };
 	//const char* _argv[] = { "boaaa", "-help" };
 	cl::ParseCommandLineOptions(_argc, _argv, "");	
 #else
@@ -109,6 +109,8 @@ int main(int argc, char** argv) {
 #endif
 	// maybe use to reset commandline args 
 	//cl::getRegisteredOptions().begin()->getValue()->reset();
+
+	//cl::ResetAllOptionOccurrences();
 
 	InitializeAllTargets();
 	InitializeAllTargetMCs();
@@ -121,6 +123,7 @@ int main(int argc, char** argv) {
 	LLVMContext context;	
 	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, context);
 
+	//setup dlls
 	
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
 	boaaa::StringRefVPM* srvpm = new boaaa::StringRefVPM();
@@ -138,14 +141,26 @@ int main(int argc, char** argv) {
 	llvm50->registerStringRefVPM(srvpm);
 	llvm90->registerStringRefVPM(srvpm);
 
+	//main
+
 	StringRef ref = "this is a test string";
 
 	uint64_t str_test_hash = man.registerData(ref);
-	uint64_t str_test_bc = man.registerData(InputFilename);
+	uint64_t test_bc = man.registerData(InputFilename);
 
-	uint64_t* test_args = new uint64_t[2]{ str_test_hash, str_test_bc };
+	uint64_t* test_args = new uint64_t[2]{ str_test_hash, test_bc };
 
-	//FreeConsole();
+	if (!llvm40->loadModule(test_bc)) {
+		std::cout << "error in llvm 40" << "\n";
+	}
+
+	if (!llvm50->loadModule(test_bc)) {
+		std::cout << "error in llvm 50" << "\n";
+	}
+
+	if (!llvm90->loadModule(test_bc)) {
+		std::cout << "error in llvm 90" << "\n";
+	}	
 
 	llvm40->test(test_args, 2);
 	llvm50->test(test_args, 2);

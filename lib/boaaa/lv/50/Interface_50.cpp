@@ -59,6 +59,22 @@ void DLInterface50::setBasicOStream(std::ostream& ostream, bool del)
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/EvaluationPassDefinitions.h"
 
+bool DLInterface50::loadModule(uint64_t module_file_hash)
+{
+	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
+	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
+
+	context.context_to_module.reset(new LLVMLLVMContext());
+	llvm::SMDiagnostic Err;
+
+	context.loaded_module = llvm::parseIRFile(bc_ref, Err, *context.context_to_module);
+	if (!context.loaded_module) {
+		*(context.basic_ostream) << "Error while loading LLVMModule " << bc_ref.str() << " \nerror: " << Err.getMessage().str() << "\n";
+		return false;
+	}
+	return true;
+}
+
 void DLInterface50::test(uint64_t* hash, uint8_t num)
 {
 	_raw_type_inst(context.string_ref_vp)::store_t storeSR = context.string_ref_vp->generateStorage();

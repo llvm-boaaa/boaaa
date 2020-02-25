@@ -76,6 +76,7 @@ namespace boaaa {
 		void onUnload() override;
 
 		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
+		bool loadModule(uint64_t module_file_hash) override;
 	};
 
 }

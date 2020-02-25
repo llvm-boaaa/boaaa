@@ -81,7 +81,6 @@ namespace boaaa
 				}
 
 				m_seconds += std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-
 			}
 
 			void reset() {
@@ -99,7 +98,7 @@ namespace boaaa
 				uint8_t  sum_nanos   = std::chrono::duration_cast<std::chrono::nanoseconds>(m_end - m_start).count()  % 1000;
 				uint8_t  sum_micros  = std::chrono::duration_cast<std::chrono::microseconds>(m_end - m_start).count() % 1000;
 				uint8_t  sum_millis  = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start).count() % 1000;
-				uint64_t sum_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_end - m_start).count()      % 1000;
+				uint64_t sum_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_end - m_start).count();
 
 				stream << "Real Time:" << sum_seconds << "," << (sum_millis < 100 ? "0" : "") << +(sum_millis < 10 ? "0" : "") << (int) sum_millis
 													  << "." << (sum_micros < 100 ? "0" : "") << +(sum_micros < 10 ? "0" : "") << (int) sum_micros
@@ -121,7 +120,7 @@ namespace boaaa
 			bool runOnModule(LLVMModule& M) override {
 				bool result;
 				timestamp start_ = start();
-				result = m_pass->runOnModule(M);
+				result = PASS::runOnModule(M);
 				addTime(start_);
 				return result;
 			}

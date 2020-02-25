@@ -22,6 +22,7 @@ namespace boaaa {
 		void onUnload() override;
 		void registerStringRefVPM(StringRefVPM* manager) override;
 		void setBasicOStream(std::ostream& ostream, bool del = false) override;
+		bool loadModule(uint64_t module_file_hash) override;
 
 
 		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
