@@ -1,6 +1,0 @@
-#ifndef PIPLINEBUILDER_H
-#define PIPLINEBUILDER_H
-
-
-
-#endif

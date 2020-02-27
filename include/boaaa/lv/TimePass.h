@@ -13,10 +13,12 @@
 #include "include_versions/LLVM_FunctionPass.inc"
 
 #include "boaaa/support/select_type.h"
+#include "boaaa/support/data_store.h"
 
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <vector>
 
 namespace boaaa
 {
@@ -26,9 +28,9 @@ namespace boaaa
 		public:
 			using timestamp = typename std::chrono::time_point<std::chrono::high_resolution_clock>;
 		private:
-			uint8_t m_nanos			= 0;
-			uint8_t m_micros		= 0;
-			uint8_t m_millis		= 0;
+			uint16_t m_nanos		= 0;
+			uint16_t m_micros		= 0;
+			uint16_t m_millis		= 0;
 			uint64_t m_seconds		= 0;
 
 			timestamp m_start;
@@ -39,7 +41,7 @@ namespace boaaa
 
 			std::mutex m_write_mutex;
 
-			uint8_t count = 0;
+			uint64_t count = 0;
 
 		public:
 			timestamp start() {
@@ -63,20 +65,20 @@ namespace boaaa
 					notset_end = false;
 				}
 
-				m_nanos +=	std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() % 1000;
+				m_nanos += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() % 1000;
 				if (m_nanos >= 1000) {
-					m_nanos -= 1000;
+					m_nanos -= 1000U;
 					m_micros++;
 				}
 				m_micros += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() % 1000;
 				if (m_micros >= 1000) {
-					m_micros -= 1000;
+					m_micros -= 1000U;
 					m_millis++;
 				}
 
 				m_millis += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() % 1000;
 				if (m_millis >= 1000) {
-					m_millis -= 1000;
+					m_millis -= 1000U;
 					m_seconds++;
 				}
 
@@ -133,10 +135,17 @@ namespace boaaa
 
 		template<class PASS>
 		class TimeFunctionPass : public PASS, TimeMessure {
+		private:
+			typedef boaaa::data_store<const char*, int> hashobj;
+			
+			std::vector<uint64_t> functionhashes;
+
 		public:
 			TimeFunctionPass() : PASS(), TimeMessure() { }
 
 			bool runOnFunction(LLVMFunction& F) override {
+				hashobj hash(F.getName().str().c_str(), F.getNumOperands());
+				functionhashes.push_back(hash.hash());
 				bool result;
 				timestamp start_ = start();
 				result = PASS::runOnFunction(F);
@@ -147,6 +156,10 @@ namespace boaaa
 			void printResult(std::ostream& stream) override {
 				stream << "TimePass Report for " << typeid(PASS).name() << ":\n";
 				TimeMessure::printResult(stream);
+			}
+
+			std::vector<uint64_t>& getFunctionHashes() {
+				return functionhashes;
 			}
 
 		};

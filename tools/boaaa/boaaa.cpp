@@ -7,7 +7,6 @@
 #endif
 
 #ifdef DEBUG
-#define DEBUG_COMMAND_LINE
 #define DEBUG_DLL_TEST
 
 #endif
@@ -49,27 +48,31 @@
 #undef NO_EXPORT
 #include "boaaa/lvm/LLVMVersionManager.h"
 #include "boaaa/support/LLVMErrorOr.h"
-#include "ModuleReader.h"
 
 #include <algorithm>
 #include <memory>
 #include <iostream>
+#include <fstream>
+
+#include "filesystem_check.h"
+#include "command_line_seperator.h"
+namespace fs = std::filesystem;
 
 //using namespace llvm;
 
 
 //command line arg variables
 
+static char* boaaa_string = "boaaa";
+
 static cl::OptionCategory BoaaaCat("BOAAA options:");
 
+static::cl::opt<std::string> FileInput("f", cl::desc("Specifies the file of multiple commandline arguments"), 
+	cl::value_desc("path/filename.cline"), cl::cat(BoaaaCat));
 
 static cl::opt<std::string> 
-InputFolder("f", cl::desc("Specify the input foldername of the *.bc files"), 
-	cl::value_desc("folder"), cl::cat(BoaaaCat));
-
-static cl::opt<std::string> 
-OutputFilename("out", cl::desc("Specify output filename"), 
-	cl::value_desc("filename"), cl::cat(BoaaaCat));
+LogFilename("log", cl::desc("Specify output filename"), 
+	cl::value_desc("path/filename"), cl::cat(BoaaaCat));
 
 
 //copyied from opt
@@ -78,61 +81,90 @@ static cl::opt<std::string>
 InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 	cl::init("-"), cl::value_desc("filename"), cl::cat(BoaaaCat));
 
-//static cl::list<const PassInfo*, bool, PassNameParser>
-//PassList(cl::desc("Optimizations available:"), cl::cat(BoaaaCat));
 
-void registerPasses(PassRegistry& Registry);
+std::shared_ptr<boaaa::DLInterface> llvm40;
+std::shared_ptr<boaaa::DLInterface> llvm50;
+std::shared_ptr<boaaa::DLInterface> llvm90;
 
-#include "llvm/Analysis/AliasAnalysis.h"
-#include "llvm/Analysis/AliasAnalysisEvaluator.h"
-#include "llvm/Analysis/BasicAliasAnalysis.h"
-#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
-#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
-#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
-#include "llvm/Analysis/ScopedNoAliasAA.h"
-#include "llvm/IR/LegacyPassManager.h"
-
-#include "boaaa/lv/EvaluationPass.h"
-#include "boaaa/lv/EvaluationPassDefinitions.h"
+#ifdef DEBUG
+int testmain();
+#endif // DEBUG
+int mainloop();
 
 int main(int argc, char** argv) {
 	//init llvm and register needed passes
-
-#ifdef DEBUG_COMMAND_LINE
+#ifdef DEBUG
 	const int _argc = 4;
-	const char* _argv[] = { "boaaa", "../../../../bc_sources/libbmi160.a.bc", "--debug-pass=Structure", "--evaluate-aa-metadata" }; //"--print-all-alias-modref-info" };
+	const char* _argv[] = { boaaa_string, "../../../../bc_sources/libbmi160.a.bc", "--debug-pass=Structure", "--evaluate-aa-metadata" }; //"--print-all-alias-modref-info" };
 	//const char* _argv[] = { "boaaa", "-help" };
-	cl::ParseCommandLineOptions(_argc, _argv, "");	
-#else
-	//parse command line
-	cl::ParseCommandLineOptions(argc, argv);
+	cl::ParseCommandLineOptions(_argc, _argv);
+	return testmain();
 #endif
-	// maybe use to reset commandline args 
-	//cl::getRegisteredOptions().begin()->getValue()->reset();
 
-	//cl::ResetAllOptionOccurrences();
+	cl::ParseCommandLineOptions(argc, argv);
 
-	InitializeAllTargets();
-	InitializeAllTargetMCs();
-	InitializeAllAsmPrinters();
-	InitializeAllAsmParsers();
+	if (FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
+		return mainloop();
+	}
 
-	PassRegistry &Registry = *PassRegistry::getPassRegistry();
-	registerPasses(Registry);
-
-	LLVMContext context;	
-	std::unique_ptr<Module> M = boaaa::parseIRFile(InputFilename, context);
-
-	//setup dlls
+	fs::path inputfile = FileInput.c_str();
 	
+	if (!fs::exists(inputfile)) {
+		std::cout << "InputFile: " << inputfile << " doesn`t exist!\n";
+		return -1;
+	}
+	
+	if (!(inputfile.has_extension() && inputfile.extension() == ".cline")) {
+		std::cout << "Inputfile: " << inputfile << " doesn`t have the correct file extension .cline!";
+		return -1;
+	}
+	
+	if (!(inputfile.is_absolute())) {
+		inputfile = fs::absolute(inputfile);
+	}
+
+	std::ifstream cl_inst(inputfile.c_str(), std::ios_base::in);
+	std::string line;
+	int res;
+	//while lines in file seperate arguments, parse them and run main loop to calculate what the arguments describe.
+	while (std::getline(cl_inst, line)) {
+		cl::ResetAllOptionOccurrences();
+		int _argc;
+		char** _argv = boaaa::parse(boaaa_string, line.data(), &_argc);
+		if (_argc < 0) {
+			std::cout << "Error: couldn`t seperate arguments of line:\n" << line << "\n";
+			res--;
+			continue;
+		}
+		cl::ParseCommandLineOptions(_argc, _argv);
+		res -= mainloop() < 0 ? 1 : 0;
+		free(_argv); //delete them after mainloop, so all variables could be invalidated.
+	}
+	return res;
+}
+
+//tea dsa branch of sea dsa
+//svf
+
+int mainloop() {
+
+
+
+	return 0;
+}
+
+#ifdef DEBUG
+int testmain() {
+	//setup dlls
+
 	boaaa::LLVMVersionManager man = boaaa::LLVMVersionManager();
 	boaaa::StringRefVPM* srvpm = new boaaa::StringRefVPM();
 	man.registerStringRefVPM(srvpm);
-	
-	std::shared_ptr<boaaa::DLInterface> llvm40 = man.loadDL("boaaa.lv_40");
-	std::shared_ptr<boaaa::DLInterface> llvm50 = man.loadDL("boaaa.lv_50");
-	std::shared_ptr<boaaa::DLInterface> llvm90 = man.loadDL("boaaa.lv_90");
-	
+
+	llvm40 = man.loadDL("boaaa.lv_40");
+	llvm50 = man.loadDL("boaaa.lv_50");
+	llvm90 = man.loadDL("boaaa.lv_90");
+
 	llvm40->setBasicOStream(std::cout);
 	llvm50->setBasicOStream(std::cout);
 	llvm90->setBasicOStream(std::cout);
@@ -151,64 +183,21 @@ int main(int argc, char** argv) {
 	uint64_t* test_args = new uint64_t[2]{ str_test_hash, test_bc };
 
 	if (!llvm40->loadModule(test_bc)) {
-		std::cout << "error in llvm 40" << "\n";
+		std::cout << "       Error in Module llvm 40" << "\n";
 	}
 
 	if (!llvm50->loadModule(test_bc)) {
-		std::cout << "error in llvm 50" << "\n";
+		std::cout << "       Error in Module llvm 50" << "\n";
 	}
 
 	if (!llvm90->loadModule(test_bc)) {
-		std::cout << "error in llvm 90" << "\n";
-	}	
+		std::cout << "       Error in Module llvm 90" << "\n";
+	}
 
 	llvm40->test(test_args, 2);
 	llvm50->test(test_args, 2);
 	llvm90->test(test_args, 2);
-
 	return 0;
 }
 
-//tea dsa branch of sea dsa
-//svf
-
-void registerPasses(PassRegistry& Registry) 
-{
-	
-	initializeCore(Registry);
-	initializeCoroutines(Registry);
-	initializeScalarOpts(Registry);
-	initializeObjCARCOpts(Registry);
-	initializeVectorization(Registry);
-	initializeIPO(Registry);
-	initializeAnalysis(Registry);
-	initializeTransformUtils(Registry);
-	initializeInstCombine(Registry);
-	initializeAggressiveInstCombine(Registry);
-	initializeInstrumentation(Registry);
-	initializeTarget(Registry);
-	// For codegen passes, only passes that do IR to IR transformation are
-	// supported.
-	initializeExpandMemCmpPassPass(Registry);
-	initializeScalarizeMaskedMemIntrinPass(Registry);
-	initializeCodeGenPreparePass(Registry);
-	initializeAtomicExpandPass(Registry);
-	initializeRewriteSymbolsLegacyPassPass(Registry);
-	initializeWinEHPreparePass(Registry);
-	initializeDwarfEHPreparePass(Registry);
-	initializeSafeStackLegacyPassPass(Registry);
-	initializeSjLjEHPreparePass(Registry);
-	initializeStackProtectorPass(Registry);
-	initializePreISelIntrinsicLoweringLegacyPassPass(Registry);
-	initializeGlobalMergePass(Registry);
-	initializeIndirectBrExpandPassPass(Registry);
-	initializeInterleavedLoadCombinePass(Registry);
-	initializeInterleavedAccessPass(Registry);
-	initializeEntryExitInstrumenterPass(Registry);
-	initializePostInlineEntryExitInstrumenterPass(Registry);
-	initializeUnreachableBlockElimLegacyPassPass(Registry);
-	initializeExpandReductionsPass(Registry);
-	initializeWasmEHPreparePass(Registry);
-	initializeWriteBitcodePassPass(Registry);
-	initializeHardwareLoopsPass(Registry);
-}
+#endif //!DEBUG

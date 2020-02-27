@@ -73,7 +73,7 @@ bool DLInterface90::loadModule(uint64_t module_file_hash)
 
 	context.loaded_module = llvm::parseIRFile(bc_ref, Err, *context.context_to_module);
 	if (!context.loaded_module) {
-		*(context.basic_ostream) << "Error while loading LLVMModule " << bc_ref.str() << " \nerror: " << Err.getMessage().str() << "\n";
+		*(context.basic_ostream) << "Error: while loading LLVMModule " << bc_ref.str() << " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
 	return true;
@@ -116,14 +116,24 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 
 	boaaa::AAResultEvaluationPassImpl impl;
 	int i = 0;
+	int k = 0;
 	for (LLVMFunction& F : *context.loaded_module)
 	{
-		i++;
 		//i == 116/121 other error in find next
+		k++;
+		boaaa::data_store<const char*, int> hash(F.getName().str().c_str(), F.getNumOperands());
+		std::vector<uint64_t> v = tmscev->getFunctionHashes();
+		if (std::find(v.begin(), v.end(), hash.hash()) != v.end()) {
+			i++;
+			*(context.basic_ostream) << "+ same hash: "<< hash.hash() << " c: " << i << " / " << k << "\n";
+			if (i == 1 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6) continue;
+			impl.evaluateAAResultOnFunction(result, F);
+		}
 		
-		if (i == 1 || i == 2 || i == 25 || i == 26 || i == 27 || i == 28 || i == 46 || i == 50 || i == 65 || i == 83 || i == 110 || i == 111 || i == 112 || i == 114 || i == 115 || i == 116 || i == 119 || i == 120 || i == 121 || i >= 124) continue;
-		impl.evaluateAAResultOnFunction(result, F);
+		//if (i == 1 || i == 2 || i == 25 || i == 26 || i == 27 || i == 28 || i == 46 || i == 50 || i == 65 || i == 83 || i == 110 || i == 111 || i == 112 || i == 114 || i == 115 || i == 116 || i == 119 || i == 120 || i == 121 || i >= 124) continue;
+		//impl.evaluateAAResultOnFunction(result, F);
 	}
+	*(context.basic_ostream) << "hash_count same: " << i << "\n";
 
 	//impl.evaluateAAResult(result, *module);	
 	impl.printResult(*(context.basic_ostream));

@@ -69,7 +69,7 @@ bool DLInterface50::loadModule(uint64_t module_file_hash)
 
 	context.loaded_module = llvm::parseIRFile(bc_ref, Err, *context.context_to_module);
 	if (!context.loaded_module) {
-		*(context.basic_ostream) << "Error while loading LLVMModule " << bc_ref.str() << " \nerror: " << Err.getMessage().str() << "\n";
+		*(context.basic_ostream) << "Error: while loading LLVMModule " << bc_ref.str() << " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
 	return true;
