@@ -5,6 +5,7 @@
 #include "boaaa/support/version_error.h"
 #include "boaaa/support/xxhash.h"
 
+#include <cassert>
 #include <cstring>
 
 namespace boaaa 
@@ -78,7 +79,7 @@ namespace boaaa
 		using TOrT2 = typename std::conditional_t<std::is_same<T, T2>::value, T, T2>;
 
 		template<typename T2>
-		static TOrT2<T2> get(_data_store<TOrT2<T2>, Tail...>& data)
+		static TOrT2<T2> get(_data_store<T, Tail...>& data)
 		{
 			return get_helper<idx - 1, _data_store<Tail...>>::template get<TOrT2<T2>>(data.tail);
 		}
@@ -149,25 +150,21 @@ namespace boaaa
 		};
 
 		template<size_t idx>
-		ErrorOr<type<idx>> get()
+		type<idx> get()
 		{
-			if (idx >= __n)
-				return make_error_code(version_error_code::IndexOutOfBounds);
-			if (!get_helper<idx, store>::template checkType<type<idx>>(data))
-				return make_error_code(version_error_code::TypeError);
+			assert((idx >= __n));
+			assert((!get_helper<idx, store>::template checkType<type<idx>>(data)));
 
 			return get_helper<idx, store>::template get<type<idx>>(data);
 		}
 
 		template<size_t idx>
-		bool set(const type<idx>& value)
+		void set(const type<idx>& value)
 		{
-			if (idx >= __n) return false;
-			if (!get_helper<idx, store>::template checkType<type<idx>>(data))
-				return false;
+			assert((idx >= __n));
+			assert((!get_helper<idx, store>::template checkType<type<idx>>(data)));
 
 			get_helper<idx, store>::template set<type<idx>>(data, value);
-			return true;
 		}
 
 		uint64_t hash(uint64_t seed = 0)
