@@ -1,8 +1,6 @@
 #ifndef LLVM_DYN_INTERFACE_H
 #define LLVM_DYN_INTERFACE_H
 
-#include "boaaa/export.h"
-#include "boaaa/vp/StringRefVersionParser.h"
 #include <inttypes.h>
 #include <memory>
 #ifdef _WIN32
@@ -11,6 +9,11 @@
 #include <Windows.h>
 #include <iostream>
 #endif
+
+#include "boaaa/export.h"
+#include "boaaa/vp/StringRefVersionParser.h"
+
+#include "boaaa/commandline_types.h"
 
 namespace boaaa {
 
@@ -54,9 +57,15 @@ namespace boaaa {
 
 		virtual void registerStringRefVPM(StringRefVPM* manager) = 0;
 		virtual void setBasicOStream(std::ostream& ostream, bool del = false) = 0;
+		virtual boaaa::cl_aa_store getAvailableAAs() = 0;
+		
 		virtual bool loadModule(uint64_t module_file_hash) = 0;
 
 
+		virtual llvm_version getVersion()
+		{
+			return -10;
+		}
 		//only defined in tool, so test ist allways public, 
 		//but only callable from outside, when DEBUG_DLL_Test is defined
 #ifndef DEBUG_DLL_TEST

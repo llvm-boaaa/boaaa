@@ -44,6 +44,10 @@ void DLInterface50::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
+boaaa::cl_aa_store DLInterface50::getAvailableAAs()
+{
+	return boaaa::getInitalizedAAs_50();
+}
 
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/AliasAnalysisEvaluator.h"

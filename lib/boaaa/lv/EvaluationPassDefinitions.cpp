@@ -12,6 +12,7 @@ using namespace llvm;
 char SVECAAEvalWrapperPass::ID = 0;
 
 INITIALIZE_PASS_BEGIN(SVECAAEvalWrapperPass, "svec-aa-eval", "SVEC Alias Analysis Evaluator", false, false)
+INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)
 INITIALIZE_PASS_DEPENDENCY(SCEVAAWrapperPass)
 INITIALIZE_PASS_END_BOAAA(SVECAAEvalWrapperPass, "svec-aa-eval", "SVEC Alias Analysis Evaluator", false, false)
 

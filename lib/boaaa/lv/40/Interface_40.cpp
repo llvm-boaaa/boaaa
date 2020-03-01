@@ -37,6 +37,11 @@ void DLInterface40::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
+boaaa::cl_aa_store DLInterface40::getAvailableAAs()
+{
+	return boaaa::getInitalizedAAs_40();
+}
+
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"

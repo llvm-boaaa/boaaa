@@ -91,13 +91,23 @@ void LLVMVersionManager::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
+boaaa::cl_aa_store LLVMVersionManager::getAvailableAAs()
+{
+	return boaaa::cl_aa_store();
+}
 
 void LLVMVersionManager::test(uint64_t* hash, uint8_t num)
 {
 	//never called
 }
 
-bool LLVMVersionManager::loadModule(uint64_t module_file_hash) { return true; };
+bool LLVMVersionManager::loadModule(uint64_t module_file_hash) { return false; };
+
+boaaa::cl_aa_store getAvailableAAs() 
+{
+	cl_aa_store store;
+	return store;
+}
 
 
 

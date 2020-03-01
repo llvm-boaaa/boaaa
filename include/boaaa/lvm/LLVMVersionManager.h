@@ -71,6 +71,8 @@ namespace boaaa {
 
 		void registerStringRefVPM(StringRefVPM* manager) override;
 		void setBasicOStream(std::ostream& ostream, bool del = false) override;
+		boaaa::cl_aa_store getAvailableAAs() override;
+
 	private:
 		void onLoad() override;
 		void onUnload() override;

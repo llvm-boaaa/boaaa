@@ -49,6 +49,11 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
+boaaa::cl_aa_store DLInterface90::getAvailableAAs()
+{
+	return boaaa::getInitalizedAAs_90();
+}
+
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/AliasAnalysisEvaluator.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
@@ -100,16 +105,16 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	boaaa::CountPass *cp = new boaaa::CountPass();
 	pm.add(tli);
 	pm.add(cp);
+	//pm.add(scev);
 	pm.add(tmscev);
 	//pm.add(scev);
 	//pm.add(basic_aa);
 
 	//pm.add(new llvm::ScalarEvolutionWrapperPass());
-	//pm.add(llvm::createSCEVAAWrapperPass());
-	//pm.add(boaaa::createSVECAAEVALWrapperPass());
+	//pm.add(scev);
 	//pm.add(llvm::createAAEvalPass());
 	pm.run(*context.loaded_module);
-	tmscev->printResult(*(context.basic_ostream));
+	//tmscev->printResult(*(context.basic_ostream));
 
 	llvm::AAResults result(tli->getTLI());
 	result.addAAResult(tmscev->getResult());
