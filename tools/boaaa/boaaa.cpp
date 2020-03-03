@@ -15,6 +15,7 @@
 //boaaa
 #include "boaaa/stdafx.h"
 
+#include "llvm/ADT/StringMap.h"
 #include "llvm/Support/CommandLine.h"
 
 #define NO_EXPORT //defines __export as nothing, to fix import problem of LLVMVersionManager
@@ -22,11 +23,13 @@
 #undef NO_EXPORT
 #include "boaaa/lvm/LLVMVersionManager.h"
 #include "boaaa/support/LLVMErrorOr.h"
+#include "boaaa/support/raw_type.h"
 
 #include <algorithm>
-#include <memory>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
+#include <utility>
 
 #include "filesystem_check.h"
 #include "command_line_seperator.h"
@@ -36,8 +39,6 @@ namespace fs = std::filesystem;
 
 
 //command line arg variables
-
-static char* boaaa_string = "boaaa";
 
 static cl::OptionCategory BoaaaCat("BOAAA options:");
 
@@ -69,7 +70,9 @@ static cl::opt<std::string>
 InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 	cl::init("-"), cl::value_desc("path/filename"), cl::cat(BoaaaCat));
 
+//global parameters
 
+static char* boaaa_string = "boaaa";
 
 std::shared_ptr<boaaa::DLInterface> llvm40;
 std::shared_ptr<boaaa::DLInterface> llvm50;
@@ -80,6 +83,11 @@ boaaa::StringRefVPM *sr_vp_man = nullptr;
 
 uint8_t versions_count = 0;
 uint16_t *versions_loaded;
+
+llvm::StringMap<boaaa::cl_aa_store> aa_cl_group;
+
+std::vector<int32_t>* aa_map;
+uint32_t aa_map_size;
 
 #ifdef DEBUG
 int testmain();
@@ -196,7 +204,7 @@ void setupLLVMVersion(boaaa::DLInterface &handle, std::vector<uint16_t>& v, uint
 	v.push_back(version);
 
 	handle.setBasicOStream(std::cout);
-	if (!sr_vp_man) {
+	if (!sr_vp_man) { //init only one time per execution
 		sr_vp_man = new boaaa::StringRefVPM();
 		llvm_man->registerStringRefVPM(sr_vp_man);
 	}
@@ -228,27 +236,113 @@ void setup()
 enum DummyClEnum : int32_t {
 };
 
-void addAAsToValuesClass(boaaa::cl_aa_store verAA, cl::list<DummyClEnum>& list, boaaa::llvm_version version)
+void addAAsToAAMap(boaaa::cl_aa_store verAA)
 {
 	for (boaaa::registeredAA raa : verAA) {
-		list.getParser().addLiteralOption(raa.get<0>(), raa.get<1>(), raa.get<2>());
+		auto it = aa_cl_group.find(raa.get<0>());
+		if (it != aa_cl_group.end())
+		{
+			it->getValue().push_back(raa);
+		}
+		else 
+		{
+			aa_cl_group.insert(std::make_pair(llvm::StringRef(raa.get<0>()), std::vector{ raa }));
+		}
+	}
+}
+
+llvm::StringRef buildCLArg(boaaa::registeredAA regAA)
+{
+	int32_t id = regAA.get<1>() & boaaa::version_mask;
+	switch (id) {
+	case boaaa::LLVM_30:
+		return std::string("30-").append(regAA.get<0>());
+	case boaaa::LLVM_35:
+		return std::string("35-").append(regAA.get<0>());
+	case boaaa::LLVM_40:
+		return std::string("40-").append(regAA.get<0>());
+	case boaaa::LLVM_50:
+		return std::string("50-").append(regAA.get<0>());
+	case boaaa::LLVM_60:
+		return std::string("60-").append(regAA.get<0>());
+	case boaaa::LLVM_70:
+		return std::string("70-").append(regAA.get<0>());
+	case boaaa::LLVM_80:
+		return std::string("80-").append(regAA.get<0>());
+	case boaaa::LLVM_90:
+		return std::string("90-").append(regAA.get<0>());
+	default:
+		return "illegal-definition";
+	}
+}
+
+std::string getVersionString(boaaa::registeredAA regAA)
+{
+	int32_t id = regAA.get<1>() & boaaa::version_mask;
+	switch (id) {
+	case boaaa::LLVM_30:
+		return "30 ";
+	case boaaa::LLVM_35:
+		return "35 ";
+	case boaaa::LLVM_40:
+		return "40 ";
+	case boaaa::LLVM_50:
+		return "50 ";
+	case boaaa::LLVM_60:
+		return "60 ";
+	case boaaa::LLVM_70:
+		return "70 ";
+	case boaaa::LLVM_80:
+		return "80 ";
+	case boaaa::LLVM_90:
+		return "90 ";
+	default:
+		return "illegal-definition";
+	}
+}
+
+void addAAsToCL(cl::list<DummyClEnum>& version_list, cl::list<DummyClEnum>& aa_list)
+{
+	uint32_t i = 0;
+	aa_map_size = aa_cl_group.size();
+	aa_map = new std::vector<int32_t>[aa_map_size];
+
+	for (auto& elem : aa_cl_group)
+	{
+		std::string arg = elem.first();
+		boaaa::cl_aa_store group = elem.second;
+		std::string versions;
+		int k = 0;
+		switch (group.size())
+		{
+		case 0: continue; //should not happen
+		default:
+			for (boaaa::registeredAA reg : group)
+			{
+				aa_list.getParser().addLiteralOption(buildCLArg(reg), reg.get<1>(), reg.get<2>());
+				versions += (k++ == 0 ? "\n" : "") //adds \n before each line except the first one
+							+ getVersionString(reg) + reg.get<2>();
+				aa_map[i].push_back(reg.get<1>());
+			}
+		case 1:
+			version_list.getParser().addLiteralOption(arg, i++, versions);
+		}
 	}
 }
 
 void initAAs()
 {
-	cl::list <DummyClEnum> aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run:"));
-	
-	boaaa::cl_aa_store store;
+	cl::list <DummyClEnum> version_list(cl::desc("Choose witch Alias-Analysis-Passes to run in all available versions:"));
+	cl::list <DummyClEnum> aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run in specific version:"));
 
 	if (llvm40)
-		addAAsToValuesClass(llvm40->getAvailableAAs(), aa_list, llvm40->getVersion());
+		addAAsToAAMap(llvm40->getAvailableAAs());
 	if (llvm50)
-		addAAsToValuesClass(llvm50->getAvailableAAs(), aa_list, llvm50->getVersion());
+		addAAsToAAMap(llvm50->getAvailableAAs());
 	if (llvm90)
-		addAAsToValuesClass(llvm90->getAvailableAAs(), aa_list, llvm90->getVersion());
-	//cl::list<boaaa::aa_id> aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run:"), val);
-	//aa_list.addArgument();
+		addAAsToAAMap(llvm90->getAvailableAAs());
+
+	addAAsToCL(version_list, aa_list);
 }
 
 void finalize()

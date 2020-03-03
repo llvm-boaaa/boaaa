@@ -10,11 +10,14 @@ namespace boaaa
 {
 	/*
 	 * LLVM_VERSION := MajorMinor (real llvm version Major.Minor.Patch)
-	 * [LLVM_VERSION][______Data__________________________________]
-	 * [12 bit      ][      20 bit                                ]
+	 * [+-][LLVM_VERSION][__________Data__________]
+	 * [1b][   11 bit   ][         20 bit         ]
 	 * 8 bit Major, 4 bit Minor
 	 */
 	typedef int32_t aa_id;
+
+	static aa_id version_mask = 0xFFF00000;
+	static aa_id      aa_mask = 0x000FFFFF;
 
 	typedef boaaa::data_store<char*, aa_id, char*>	registeredAA;
 	typedef std::vector<registeredAA>				cl_aa_store;
