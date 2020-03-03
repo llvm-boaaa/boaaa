@@ -25,10 +25,9 @@ namespace boaaa {
 		void registerStringRefVPM(StringRefVPM* manager) override;
 		void setBasicOStream(std::ostream& ostream, bool del = false) override;
 		boaaa::cl_aa_store getAvailableAAs() override;
-
-
-
+		
 		bool loadModule(uint64_t module_file_hash) override;
+		bool runAnalysis(boaaa::aa_id analysis) override;
 
 		llvm_version getVersion() override
 		{

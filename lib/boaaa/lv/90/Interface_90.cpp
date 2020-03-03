@@ -10,6 +10,20 @@
 
 #include "boaaa/support/dump_ostream.h"
 
+#include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/AliasAnalysisEvaluator.h"
+#include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
+#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
+#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
+#include "llvm/Analysis/ScopedNoAliasAA.h"
+#include "llvm/IR/LegacyPassManagers.h"
+
+#include "boaaa/lv/CountPass.h"
+#include "boaaa/lv/EvaluationPass.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
+#include "boaaa/lv/TimePass.h"
+
 using namespace boaaa;
 
 DLInterface90::DLInterface90()
@@ -54,20 +68,6 @@ boaaa::cl_aa_store DLInterface90::getAvailableAAs()
 	return boaaa::getInitalizedAAs_90();
 }
 
-#include "llvm/Analysis/AliasAnalysis.h"
-#include "llvm/Analysis/AliasAnalysisEvaluator.h"
-#include "llvm/Analysis/BasicAliasAnalysis.h"
-#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
-#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
-#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
-#include "llvm/Analysis/ScopedNoAliasAA.h"
-#include "llvm/IR/LegacyPassManagers.h"
-
-#include "boaaa/lv/CountPass.h"
-#include "boaaa/lv/EvaluationPass.h"
-#include "boaaa/lv/EvaluationPassDefinitions.h"
-#include "boaaa/lv/TimePass.h"
-
 bool DLInterface90::loadModule(uint64_t module_file_hash)
 {
 	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
@@ -81,6 +81,15 @@ bool DLInterface90::loadModule(uint64_t module_file_hash)
 		*(context.basic_ostream) << "Error: while loading LLVMModule " << bc_ref.str() << " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
+	return true;
+}
+
+bool DLInterface90::runAnalysis(boaaa::aa_id analysis)
+{
+	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_90) return false;
+
+	
+
 	return true;
 }
 

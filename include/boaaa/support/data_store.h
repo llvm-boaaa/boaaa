@@ -152,8 +152,8 @@ namespace boaaa
 		template<size_t idx>
 		type<idx> get()
 		{
-			assert((idx >= __n));
-			assert((!get_helper<idx, store>::template checkType<type<idx>>(data)));
+			assert((idx < n));
+			assert((get_helper<idx, store>::template checkType<type<idx>>(data)));
 
 			return get_helper<idx, store>::template get<type<idx>>(data);
 		}
@@ -161,8 +161,8 @@ namespace boaaa
 		template<size_t idx>
 		void set(const type<idx>& value)
 		{
-			assert((idx >= __n));
-			assert((!get_helper<idx, store>::template checkType<type<idx>>(data)));
+			assert((idx < n));
+			assert((get_helper<idx, store>::template checkType<type<idx>>(data)));
 
 			get_helper<idx, store>::template set<type<idx>>(data, value);
 		}

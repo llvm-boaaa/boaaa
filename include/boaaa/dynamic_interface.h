@@ -60,6 +60,7 @@ namespace boaaa {
 		virtual boaaa::cl_aa_store getAvailableAAs() = 0;
 		
 		virtual bool loadModule(uint64_t module_file_hash) = 0;
+		virtual bool runAnalysis(boaaa::aa_id analysis) = 0;
 
 
 		virtual llvm_version getVersion()

@@ -2,6 +2,25 @@
 
 #include "boaaa/support/dump_ostream.h"
 
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IRReader/IRReader.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/SourceMgr.h"
+
+#include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/AliasAnalysisEvaluator.h"
+#include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
+#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
+#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
+#include "llvm/Analysis/ScopedNoAliasAA.h"
+
+#include "boaaa/lv/CountPass.h"
+#include "boaaa/lv/EvaluationPass.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
+
 using namespace boaaa;
 
 DLInterface40::DLInterface40()
@@ -42,25 +61,6 @@ boaaa::cl_aa_store DLInterface40::getAvailableAAs()
 	return boaaa::getInitalizedAAs_40();
 }
 
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IRReader/IRReader.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/SourceMgr.h"
-
-#include "llvm/Analysis/AliasAnalysis.h"
-#include "llvm/Analysis/AliasAnalysisEvaluator.h"
-#include "llvm/Analysis/BasicAliasAnalysis.h"
-#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
-#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
-#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
-#include "llvm/Analysis/ScopedNoAliasAA.h"
-
-#include "boaaa/lv/CountPass.h"
-#include "boaaa/lv/EvaluationPass.h"
-#include "boaaa/lv/EvaluationPassDefinitions.h"
-
 bool DLInterface40::loadModule(uint64_t module_file_hash)
 {
 	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
@@ -74,6 +74,15 @@ bool DLInterface40::loadModule(uint64_t module_file_hash)
 		*(context.basic_ostream) << "Error: while loading LLVMModule " << bc_ref.str() << " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
+	return true;
+}
+
+bool DLInterface40::runAnalysis(boaaa::aa_id analysis)
+{
+	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_40) return false;
+
+
+
 	return true;
 }
 

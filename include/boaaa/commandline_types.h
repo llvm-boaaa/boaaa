@@ -37,6 +37,41 @@ namespace boaaa
 		LLVM_100 = (10 << 24) + (0 << 20),
 		LLVM_110 = (11 << 24) + (0 << 20)
 	};
+
+	enum LLVM_ORIGINAL_ANALYSIS : aa_id
+	{
+		BASIC_AA  = 0,
+		CFL_ANDERS_AA,
+		CFL_STEENS_AA,
+		OBJ_CARC_AA,
+		SCEV_AA,
+		SCOPED_NA_AA,
+		TBAA_AA
+	};
+
+	inline char* getDescription(aa_id aa_id)
+	{
+		using LOA = LLVM_ORIGINAL_ANALYSIS;
+
+		switch (aa_id & aa_mask)
+		{
+		case LOA::BASIC_AA:
+			return "LLVM_ORIGINAL Basic Alias Analysis";
+		case LOA::CFL_ANDERS_AA:
+			return "LLVM_ORIGINAL Andersen Alias Analysis";
+		case LOA::CFL_STEENS_AA:
+			return "LLVM ORIGINAL Steensgaard`s Alias Analysis";
+		case LOA::OBJ_CARC_AA:
+			return "LLVM ORIGINAL ARC-aware Alias Analysis (only for objectiv-c)";
+		case LOA::SCEV_AA:
+			return "LLVM ORIGINAL Scalar Evolution Alias Analysis";
+		case LOA::SCOPED_NA_AA:
+			return "LLVM ORIGINAL Scoped No Alias Alias Analysis";
+		case LOA::TBAA_AA:
+			return "LLVM ORIGINAL Type Based Alias Analysis";
+		}
+		return "unknown analysis id, if this is shown in -h, there is something wrong configured!";
+	}
 }
 
 #endif //!BOAAA_COMMANDLINE_TYPES_H

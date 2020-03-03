@@ -51,7 +51,7 @@ LogFilename("l", cl::desc("Specify log filename"),
 	cl::init("-"), cl::value_desc("path/filename"), cl::cat(BoaaaCat));
 
 static cl::opt<uint16_t>
-Version("-v", cl::desc("The version of the analysises"), 
+Version("v", cl::desc("The version of the analysises"), 
 	cl::init(0), cl::value_desc("XX") ,cl::cat(BoaaaCat));
 
 static cl::opt<bool>
@@ -61,8 +61,6 @@ AllVersions("all-Ver", cl::desc("If Flag is set, run all Analysis if available u
 static cl::opt<bool>
 AllAnalysis("all-AAs", cl::desc("If Flag is set, run all Analysis, for each version"),
 	cl::init(false), cl::cat(BoaaaCat));
-
-
 
 //copyied from opt
 
@@ -106,7 +104,7 @@ int main(int argc, char** argv) {
 
 #ifdef DEBUG
 	const int _argc = 2;
-	const char* _argv[] = { boaaa_string, "-h" }; // "../../../../bc_sources/libbmi160.a.bc" };
+	const char* _argv[] = { boaaa_string, "--help" }; // "../../../../bc_sources/libbmi160.a.bc" };
 
 	//const char* _argv[] = { "boaaa", "-help" };
 	cl::ParseCommandLineOptions(_argc, _argv);
@@ -251,26 +249,37 @@ void addAAsToAAMap(boaaa::cl_aa_store verAA)
 	}
 }
 
+char* strcatdup(char* c1, char* c2)
+{
+	size_t len_c1 = strlen(c1);
+	size_t len_c2 = strlen(c2);
+	char* cres = new char[len_c1 + len_c2 + 1];
+	strcpy(cres, c1);
+	strcpy(cres + len_c1, c2);
+	return cres;
+}
+
 llvm::StringRef buildCLArg(boaaa::registeredAA regAA)
 {
+	//memory leak, but is only called once so it should be ok
 	int32_t id = regAA.get<1>() & boaaa::version_mask;
 	switch (id) {
 	case boaaa::LLVM_30:
-		return std::string("30-").append(regAA.get<0>());
+		return strcatdup("30-", regAA.get<0>());
 	case boaaa::LLVM_35:
-		return std::string("35-").append(regAA.get<0>());
+		return strcatdup("35-", regAA.get<0>());
 	case boaaa::LLVM_40:
-		return std::string("40-").append(regAA.get<0>());
+		return strcatdup("40-", regAA.get<0>());
 	case boaaa::LLVM_50:
-		return std::string("50-").append(regAA.get<0>());
+		return strcatdup("50-", regAA.get<0>());
 	case boaaa::LLVM_60:
-		return std::string("60-").append(regAA.get<0>());
+		return strcatdup("60-", regAA.get<0>());
 	case boaaa::LLVM_70:
-		return std::string("70-").append(regAA.get<0>());
+		return strcatdup("70-", regAA.get<0>());
 	case boaaa::LLVM_80:
-		return std::string("80-").append(regAA.get<0>());
+		return strcatdup("80-", regAA.get<0>());
 	case boaaa::LLVM_90:
-		return std::string("90-").append(regAA.get<0>());
+		return strcatdup("90-", regAA.get<0>());
 	default:
 		return "illegal-definition";
 	}
@@ -319,12 +328,12 @@ void addAAsToCL(cl::list<DummyClEnum>& version_list, cl::list<DummyClEnum>& aa_l
 		default:
 			for (boaaa::registeredAA reg : group)
 			{
+				//todo check crash, copy char* or something
 				aa_list.getParser().addLiteralOption(buildCLArg(reg), reg.get<1>(), reg.get<2>());
-				versions += (k++ == 0 ? "\n" : "") //adds \n before each line except the first one
+				versions += (k++ == 0 ? "" : "\n") //adds \n before each line except the first one
 							+ getVersionString(reg) + reg.get<2>();
 				aa_map[i].push_back(reg.get<1>());
 			}
-		case 1:
 			version_list.getParser().addLiteralOption(arg, i++, versions);
 		}
 	}
@@ -332,8 +341,8 @@ void addAAsToCL(cl::list<DummyClEnum>& version_list, cl::list<DummyClEnum>& aa_l
 
 void initAAs()
 {
-	cl::list <DummyClEnum> version_list(cl::desc("Choose witch Alias-Analysis-Passes to run in all available versions:"));
-	cl::list <DummyClEnum> aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run in specific version:"));
+	cl::list <DummyClEnum> version_list(cl::desc("Choose witch Alias-Analysis-Passes to run in all available versions:"), cl::cat(BoaaaCat));
+	cl::list <DummyClEnum> aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run in specific version:"), cl::cat(BoaaaCat));
 
 	if (llvm40)
 		addAAsToAAMap(llvm40->getAvailableAAs());
@@ -343,6 +352,8 @@ void initAAs()
 		addAAsToAAMap(llvm90->getAvailableAAs());
 
 	addAAsToCL(version_list, aa_list);
+	version_list.addArgument();
+	aa_list.addArgument();
 }
 
 void finalize()
