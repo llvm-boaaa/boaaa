@@ -11,7 +11,6 @@
 
 #endif
 
-#define LLVM_VERSION_90 90
 //boaaa
 #include "boaaa/stdafx.h"
 
@@ -104,7 +103,7 @@ int main(int argc, char** argv) {
 
 #ifdef DEBUG
 	const int _argc = 2;
-	const char* _argv[] = { boaaa_string, "--help" }; // "../../../../bc_sources/libbmi160.a.bc" };
+	const char* _argv[] = { boaaa_string, "-h" }; // "../../../../bc_sources/libbmi160.a.bc" };
 
 	//const char* _argv[] = { "boaaa", "-help" };
 	cl::ParseCommandLineOptions(_argc, _argv);
@@ -170,10 +169,21 @@ int mainloop() {
 }
 
 #ifdef DEBUG
-int testmain() {
-	StringRef ref = "this is a test string";
+void passManagerTest()
+{
+	llvm::LLVMContext context;
+	llvm::SMDiagnostic Err;
+	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(InputFilename, Err, context);
 
-	uint64_t str_test_hash = llvm_man->registerData(ref);
+}
+
+int testmain() {
+
+	passManagerTest();
+
+	StringRef test_string = "says hello";
+
+	uint64_t str_test_hash = llvm_man->registerData(test_string);
 	uint64_t test_bc = llvm_man->registerData(InputFilename);
 
 	uint64_t* test_args = new uint64_t[2]{ str_test_hash, test_bc };
@@ -193,6 +203,7 @@ int testmain() {
 	llvm40->test(test_args, 2);
 	llvm50->test(test_args, 2);
 	llvm90->test(test_args, 2);
+
 	return 0;
 };
 
@@ -354,6 +365,8 @@ void initAAs()
 	addAAsToCL(version_list, aa_list);
 	version_list.addArgument();
 	aa_list.addArgument();
+	version_list.getParser().initialize();
+	aa_list.getParser().initialize();
 }
 
 void finalize()

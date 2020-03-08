@@ -32,15 +32,15 @@ LLVM_VERSION_ERROR_CODE
 
 namespace boaaa {
 
-	class AAResultEvaluationPassImpl
+	class EvaluationPassImpl
 	{
     public:
-		AAResultEvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
+		EvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
 			MustAliasCount(), NoModRefCount(), ModCount(), RefCount(), ModRefCount(), MustCount(), 
 			MustRefCount(),	MustModCount(), MustModRefCount() {}
 
-        void evaluateAAResult(llvm::AAResults &AAResult, LLVMModule& M);
-		void evaluateAAResultOnFunction(llvm::AAResults& AAResult, LLVMFunction& F);
+        void evaluateAAResultOnModule(LLVMModule& M, llvm::AAResults &AAResult);
+		void evaluateAAResultOnFunction(LLVMFunction& F, llvm::AAResults& AAResult);
 
 		void printResult(std::ostream &stream);
 

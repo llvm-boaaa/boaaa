@@ -24,7 +24,7 @@
 #include "boaaa/lv/EvaluationPassDefinitions.h"
 
 using namespace boaaa;
-
+void registerPasses();
 DLInterface50::DLInterface50()
 {
 
@@ -37,6 +37,7 @@ DLInterface50::~DLInterface50()
 
 void DLInterface50::onLoad()
 {
+	registerPasses();
 	context.string_ref_vp = new StringRefVP50();
 }
 
@@ -137,4 +138,36 @@ void DLInterface50::test(uint64_t* hash, uint8_t num)
 	//impl.evaluateAAResult(result, *module);	
 	impl.printResult(*(context.basic_ostream));
 	*/
+}
+
+void registerPasses()
+{
+	llvm::PassRegistry& registry = *llvm::PassRegistry::getPassRegistry();
+
+	//llvm specific
+		llvm::initializeAnalysis(registry);
+		llvm::initializeBasicAAWrapperPassPass(registry);
+		llvm::initializeCFLAndersAAWrapperPassPass(registry);
+		llvm::initializeCFLSteensAAWrapperPassPass(registry);
+		llvm::initializeObjCARCAAWrapperPassPass(registry);
+		llvm::initializeSCEVAAWrapperPassPass(registry);
+		llvm::initializeScopedNoAliasAAWrapperPassPass(registry);
+		llvm::initializeTypeBasedAAWrapperPassPass(registry);
+
+	//extern
+
+		//seadsa - copyied from main
+		llvm::initializeCallGraphWrapperPassPass(registry);
+		// XXX: porting to 5.0
+		//  llvm::initializeCallGraphPrinterPass(Registry);
+		llvm::initializeCallGraphViewerPass(registry);
+		// XXX: not sure if needed anymore
+		llvm::initializeGlobalsAAWrapperPassPass(registry);
+
+		//sfs
+
+
+	//boaaa specific
+
+
 }

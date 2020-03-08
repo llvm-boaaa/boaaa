@@ -19,6 +19,11 @@ target_link_libraries(boaaa PUBLIC boaaa.support boaaa.vp boaaa.lvm PRIVATE LLVM
 
 #add llvm_version to boaaa
 add_dependencies(boaaa LLVM_${llvm_boaaa})
+target_compile_definitions(boaaa
+	PRIVATE 
+		LLVM_VERSION=${llvm_boaaa}
+		LLVM_VERSION_${llvm_boaaa}=${llvm_boaaa})
+
 message(STATUS "||added tool boaaa")
 
 if(UNIX AND NOT APPLE)

@@ -18,7 +18,7 @@ std::string formatProzent(uint64_t count, uint64_t total) {
     return out;
 }
 
-void AAResultEvaluationPassImpl::evaluateAAResult(llvm::AAResults &AAResult, LLVMModule& M) {
+void EvaluationPassImpl::evaluateAAResultOnModule(LLVMModule& M, llvm::AAResults &AAResult) {
     //TODO remove
 #ifdef LLVM_VERSION_90
     using namespace llvm;
@@ -218,7 +218,7 @@ void AAResultEvaluationPassImpl::evaluateAAResult(llvm::AAResults &AAResult, LLV
 #endif
 }
 
-void AAResultEvaluationPassImpl::evaluateAAResultOnFunction(llvm::AAResults& AAResult, LLVMFunction& F)
+void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, llvm::AAResults& AAResult)
 {
 #ifdef LLVM_VERSION_90
     using namespace llvm;
@@ -414,7 +414,7 @@ void AAResultEvaluationPassImpl::evaluateAAResultOnFunction(llvm::AAResults& AAR
 #endif
 }
 
-void AAResultEvaluationPassImpl::printResult(std::ostream &stream) {
+void EvaluationPassImpl::printResult(std::ostream &stream) {
     uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
 
     stream << "AliasEvaluationPass Report:\n";

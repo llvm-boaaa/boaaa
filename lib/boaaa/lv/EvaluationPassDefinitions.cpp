@@ -1,48 +1,68 @@
 #include "boaaa/lv/EvaluationPassDefinitions.h"
-#include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
 
 #include "boaaa/lv/initalize_pass_end_boaaa.h"
 
-using namespace boaaa;
-
 using namespace llvm;
+/*
+ * Instanziation of all EvaluationPasses in Alphabetic order (LLVM-BUILT-IN)
+ */
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ANDERSAA
 
-char SVECAAEvalWrapperPass::ID = 0;
+BOAAA_CREATE_EVAL_PASS_SOURCE(AndersAAEvalWrapperPass, CFLAndersAAWrapperPass, 
+	"anders-aa-eval", "Anders Alias Analysis Evaluator")
 
-INITIALIZE_PASS_BEGIN(SVECAAEvalWrapperPass, "svec-aa-eval", "SVEC Alias Analysis Evaluator", false, false)
-INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)
-INITIALIZE_PASS_DEPENDENCY(SCEVAAWrapperPass)
-INITIALIZE_PASS_END_BOAAA(SVECAAEvalWrapperPass, "svec-aa-eval", "SVEC Alias Analysis Evaluator", false, false)
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ANDERSAA
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
 
+BOAAA_CREATE_EVAL_PASS_HEADER(BasicAAEvalWrapperPass, BasicAAWrapperPass, 
+	"basic-aa-eval", "BASIC AA Alias Analysis Evaluator")
 
-SVECAAEvalWrapperPass::SVECAAEvalWrapperPass() : impl(), LLVMModulePass(ID) 
-{
-    initializeSVECAAEvalWrapperPassPass(*PassRegistry::getPassRegistry());
-}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
+using namespace objcarc;
+BOAAA_CREATE_EVAL_PASS_SOURCE(ObjCARCAAEvalWrapperPass, ObjCARCAAWrapperPass, 
+	"objcarc-aa-eval", "ObjCARC Alias Analysis Evaluator")
 
-bool SVECAAEvalWrapperPass::runOnModule(LLVMModule& M) 
-{
-    auto& TLI = getAnalysis<TargetLibraryInfoWrapperPass>();
-    auto& WrapperPass = getAnalysis<SCEVAAWrapperPass>();
-    llvm::AAResults result(TLI.getTLI());
-    result.addAAResult(WrapperPass.getResult());
-    impl.evaluateAAResult(result, M);
-    return false;
-}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
 
-void SVECAAEvalWrapperPass::getAnalysisUsage(llvm::AnalysisUsage& AU) const
-{
-    AU.setPreservesAll();
-    AU.addRequired<TargetLibraryInfoWrapperPass>();
-    AU.addRequired<SCEVAAWrapperPass>();
-}
+BOAAA_CREATE_EVAL_PASS_SOURCE(SCEVAAEvalWrapperPass, SCEVAAWrapperPass, 
+	"scev-aa-eval", "SVEC Alias Analysis Evaluator")
 
-LLVMModulePass* boaaa::createSVECAAEVALWrapperPass()
-{
-    return new SVECAAEvalWrapperPass();
-}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
 
+BOAAA_CREATE_EVAL_PASS_SOURCE(ScopedNoAliasEvalWrapperPass, ScopedNoAliasAAWrapperPass, 
+	"sna-aa-eval", "Scoped no Alias Alias Analysis Evaluator")
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
+
+BOAAA_CREATE_EVAL_PASS_SOURCE(SteensAAEvalWrapperPass, CFLSteensAAWrapperPass, 
+	"steens-aa-eval", "Steens Alias Analysis Evaluator")
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
+
+BOAAA_CREATE_EVAL_PASS_SOURCE(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass, 
+	"tbaa-aa-eval", "Type based Alias Analysis Alias Analysis Evaluator")
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
+
+//======================================================================================================
+//||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||
+//======================================================================================================
+
+/*
+ * Instanziation of all EvaluationPasses in Alphabetic order (LLVM-EXTENDING)
+ */
+
+#ifdef LLVM_VERSION_50
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
+#endif //!LLVM_VERSION_50

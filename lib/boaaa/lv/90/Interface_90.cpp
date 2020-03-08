@@ -26,6 +26,8 @@
 
 using namespace boaaa;
 
+void registerPasses();
+
 DLInterface90::DLInterface90()
 {
 
@@ -38,11 +40,8 @@ DLInterface90::~DLInterface90()
 
 void DLInterface90::onLoad()
 {
+	registerPasses();
 	context.string_ref_vp = new StringRefVP90();
-	//cl passing no working or not printing
-	const int _argc = 1;
-	const char* _argv[] = { "--debug-pass=Structure" };
-	llvm::cl::ParseCommandLineOptions(_argc, _argv);
 }
 
 void DLInterface90::onUnload()
@@ -109,13 +108,16 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
 	llvm::TargetLibraryInfoWrapperPass* tli = new llvm::TargetLibraryInfoWrapperPass();
 	llvm::SCEVAAWrapperPass *scev = new llvm::SCEVAAWrapperPass();
-	llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
+	//llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
 	boaaa::TimePass<llvm::SCEVAAWrapperPass>* tmscev = new boaaa::TimePass<llvm::SCEVAAWrapperPass>();
-	boaaa::CountPass *cp = new boaaa::CountPass();
+	llvm::SCEVAAEvalWrapperPass* sceveval = new llvm::SCEVAAEvalWrapperPass();
+	
+	boaaa::CountPass *cp = new boaaa::CountPass(); 
 	pm.add(tli);
 	pm.add(cp);
-	//pm.add(scev);
-	pm.add(tmscev);
+	//pm.add(tmscev);
+	pm.add(sceveval);
+	//pm.add(tmscev);
 	//pm.add(scev);
 	//pm.add(basic_aa);
 
@@ -123,32 +125,29 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	//pm.add(scev);
 	//pm.add(llvm::createAAEvalPass());
 	pm.run(*context.loaded_module);
-	//tmscev->printResult(*(context.basic_ostream));
 
-	llvm::AAResults result(tli->getTLI());
-	result.addAAResult(tmscev->getResult());
+	//tmscev->printResult(*context.basic_ostream);
+	sceveval->printResult(*context.basic_ostream);
+}
 
-	boaaa::AAResultEvaluationPassImpl impl;
-	int i = 0;
-	int k = 0;
-	for (LLVMFunction& F : *context.loaded_module)
-	{
-		//i == 116/121 other error in find next
-		k++;
-		boaaa::data_store<const char*, int> hash(F.getName().str().c_str(), F.getNumOperands());
-		std::vector<uint64_t> v = tmscev->getFunctionHashes();
-		if (std::find(v.begin(), v.end(), hash.hash()) != v.end()) {
-			i++;
-			*(context.basic_ostream) << "+ same hash: "<< hash.hash() << " c: " << i << " / " << k << "\n";
-			if (i == 1 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6) continue;
-			impl.evaluateAAResultOnFunction(result, F);
-		}
-		
-		//if (i == 1 || i == 2 || i == 25 || i == 26 || i == 27 || i == 28 || i == 46 || i == 50 || i == 65 || i == 83 || i == 110 || i == 111 || i == 112 || i == 114 || i == 115 || i == 116 || i == 119 || i == 120 || i == 121 || i >= 124) continue;
-		//impl.evaluateAAResultOnFunction(result, F);
-	}
-	*(context.basic_ostream) << "hash_count same: " << i << "\n";
+void registerPasses()
+{
+	llvm::PassRegistry& registry = *llvm::PassRegistry::getPassRegistry();
 
-	//impl.evaluateAAResult(result, *module);	
-	impl.printResult(*(context.basic_ostream));
+	//llvm specific
+	llvm::initializeAnalysis(registry);
+	llvm::initializeBasicAAWrapperPassPass(registry);
+	llvm::initializeCFLAndersAAWrapperPassPass(registry);
+	llvm::initializeCFLSteensAAWrapperPassPass(registry);
+	llvm::initializeObjCARCAAWrapperPassPass(registry);
+	llvm::initializeSCEVAAWrapperPassPass(registry);
+	llvm::initializeScopedNoAliasAAWrapperPassPass(registry);
+	llvm::initializeTypeBasedAAWrapperPassPass(registry);
+
+	//extern
+
+
+	//boaaa specific
+
+
 }

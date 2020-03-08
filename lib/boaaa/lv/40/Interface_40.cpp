@@ -23,6 +23,8 @@
 
 using namespace boaaa;
 
+void registerPasses();
+
 DLInterface40::DLInterface40()
 {
 
@@ -35,6 +37,7 @@ DLInterface40::~DLInterface40()
 
 void DLInterface40::onLoad()
 {
+	registerPasses();
 	context.string_ref_vp = new StringRefVP40();
 }
 
@@ -123,4 +126,27 @@ void DLInterface40::test(uint64_t* hash, uint8_t num)
 	impl.printResult(*(context.basic_ostream));
 	
 	*/
+}
+
+void registerPasses()
+{
+	llvm::PassRegistry& registry = *llvm::PassRegistry::getPassRegistry();
+	
+	//llvm specific
+		llvm::initializeAnalysis(registry);
+		llvm::initializeBasicAAWrapperPassPass(registry);
+		llvm::initializeCFLAndersAAWrapperPassPass(registry);
+		llvm::initializeCFLSteensAAWrapperPassPass(registry);
+		llvm::initializeObjCARCAAWrapperPassPass(registry);
+		llvm::initializeSCEVAAWrapperPassPass(registry);
+		llvm::initializeScopedNoAliasAAWrapperPassPass(registry);
+		llvm::initializeTypeBasedAAWrapperPassPass(registry);
+
+
+	//extern
+
+
+	//boaaa specific
+
+
 }

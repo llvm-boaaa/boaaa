@@ -4,42 +4,186 @@
 #include "include_versions/LLVM_include_Pass_h.inc"
 #include "include_versions/LLVM_Module.inc"
 #include "include_versions/LLVM_ModulePass.inc"
+#include "include_versions/LLVM_FunctionPass.inc"
 
 #include "boaaa/lv/EvaluationPass.h"
+#include "boaaa/support/select_type.h"
+#include "boaaa/lv/TimePass.h"
 
-
-//Analysises
+//include analysis
+#include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/Analysis/CFLAndersAliasAnalysis.h"
+#include "llvm/Analysis/CFLSteensAliasAnalysis.h"
+#include "llvm/Analysis/ObjCARCAliasAnalysis.h"
 #include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
+#include "llvm/Analysis/ScopedNoAliasAA.h"
+#include "llvm/Analysis/TypeBasedAliasAnalysis.h"
 
 namespace boaaa {
 
+	namespace detail
+	{
+		template<class PASS>
+		class EvalModulePass : public LLVMModulePass
+		{
+		private:
+			EvaluationPassImpl* impl;
 
-	/*
-	 * Instanziation of all EvaluationPasses in Alphabetic order
-	 */
+		public:
+			EvalModulePass(char ID) : LLVMModulePass(ID) {}
+			~EvalModulePass() { delete impl; }
 
+			bool runOnModule(LLVMModule& M) override
+			{
+				auto& TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>();
+				auto& WrapperPass = getAnalysis<boaaa::TimePass<PASS>>();
+				llvm::AAResults result(TLI.getTLI());
+				result.addAAResult(WrapperPass.getResult());
+				impl->evaluateAAResultOnModule(M, result);
+				return false;
+			}
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
+			void printResult(std::ostream& stream) {
+				impl->printResult(stream);
+			}
+		};
 
-	class SVECAAEvalWrapperPass : public LLVMModulePass {
-	public:
-		static char ID;
+		template<class PASS>
+		class EvalFunctionPass : public LLVMFunctionPass
+		{
+		private:
+			EvaluationPassImpl* impl;
 
-		SVECAAEvalWrapperPass();
+		public:
+			EvalFunctionPass(char ID) : LLVMFunctionPass(ID) { impl = new EvaluationPassImpl(); }
+			~EvalFunctionPass() { delete impl; }
 
-		bool runOnModule(LLVMModule& M) override;
-		void getAnalysisUsage(llvm::AnalysisUsage& AU) const override;
+			bool runOnFunction(LLVMFunction& F) override
+			{
+				auto& TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>();
+				auto& WrapperPass = getAnalysis<boaaa::TimePass<PASS>>();
+				llvm::AAResults result(TLI.getTLI());
+				result.addAAResult(WrapperPass.getResult());
+				impl->evaluateAAResultOnFunction(F, result);
+				return false;
+			}
 
-	private:
-		AAResultEvaluationPassImpl impl;
-	};
+			void getAnalysisUsage(llvm::AnalysisUsage& AU) const override
+			{
+				AU.addRequired<llvm::TargetLibraryInfoWrapperPass>();
+				AU.addRequired<boaaa::TimePass<PASS>>();
+				AU.setPreservesAll();
+			}
 
-	LLVMModulePass* createSVECAAEVALWrapperPass();
+			void printResult(std::ostream& stream) {
+				impl->printResult(stream);
+			}
+		};
 
+		template<typename PASS>
+		struct select_eval_pass {
+			using type = typename select_type_reverse_for<std::is_base_of, PASS,
+														  LLVMModulePass, EvalModulePass<PASS>,
+														  LLVMFunctionPass, EvalFunctionPass<PASS>>::type;
+		};
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
+		template<class PASS>
+		using select_eval_pass_t = typename select_eval_pass<PASS>::type;
 
+		template<typename PASS>
+		struct select_base_pass {
+			using type = typename select_type_reverse<std::is_base_of, PASS,
+													  LLVMModulePass,
+													  LLVMFunctionPass>::type;
+		};
+
+		template<class PASS>
+		using select_base_pass_t = typename select_base_pass<PASS>::type;
+	}
 }
 
+#ifndef BOAAA_CREATE_EVAL_PASS_HEADER
+#define BOAAA_CREATE_EVAL_PASS_HEADER(passname, analysisname)										\
+	class passname : public boaaa::detail::select_eval_pass_t<analysisname>							\
+	{																								\
+	public:																							\
+		static char ID;																				\
+		passname();																					\
+	};																								\
+	boaaa::detail::select_base_pass_t<analysisname>*												\
+		create##passname();																			\
+	void initialize##passname##Pass(PassRegistry& Registry);
+#endif
+
+#ifndef BOAAA_CREATE_EVAL_PASS_SOURCE 
+#define BOAAA_CREATE_EVAL_PASS_SOURCE(passname, analysisname, arg, help)							\
+    char passname::ID = 0;                                                                          \
+    INITIALIZE_PASS_BEGIN(passname, arg, help, false, true)                                         \
+    INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
+    INITIALIZE_PASS_DEPENDENCY(analysisname)                                                        \
+    INITIALIZE_PASS_END(passname, arg, help, false, true)											\
+    passname::passname() : boaaa::detail::select_eval_pass_t<analysisname>(ID)                      \
+    { initialize##passname##Pass(*PassRegistry::getPassRegistry()); }                               \
+    boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
+#endif
+
+namespace llvm
+{
+	/*
+	 * Instanziation of all EvaluationPasses in Alphabetic order (LLVM-BUILT-IN)
+	 */
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++AndersAA
+
+	BOAAA_CREATE_EVAL_PASS_HEADER(AndersAAEvalWrapperPass, CFLAndersAAWrapperPass)
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++AndersAA
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
+	BOAAA_CREATE_EVAL_PASS_HEADER(BasicAAEvalWrapperPass, BasicAAWrapperPass)
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
+	using namespace objcarc;
+	BOAAA_CREATE_EVAL_PASS_HEADER(ObjCARCAAEvalWrapperPass, ObjCARCAAWrapperPass)
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SCEVAA
+
+	BOAAA_CREATE_EVAL_PASS_HEADER(SCEVAAEvalWrapperPass, SCEVAAWrapperPass)
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SCEVAA
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
+
+	BOAAA_CREATE_EVAL_PASS_HEADER(ScopedNoAliasEvalWrapperPass, ScopedNoAliasAAWrapperPass)
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
+
+	BOAAA_CREATE_EVAL_PASS_HEADER(SteensAAEvalWrapperPass, CFLSteensAAWrapperPass)
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
+		
+	BOAAA_CREATE_EVAL_PASS_HEADER(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass)
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
+
+	//======================================================================================================
+	//||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||==||
+	//======================================================================================================
+
+	/*
+	 * Instanziation of all EvaluationPasses in Alphabetic order (LLVM-EXTENDING)
+	 */
+
+#ifdef LLVM_VERSION_50
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
+#endif //!LLVM_VERSION_50
+}
 
 #endif
