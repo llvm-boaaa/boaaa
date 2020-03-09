@@ -28,6 +28,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string.h>
 #include <utility>
 
 #include "filesystem_check.h"
@@ -66,6 +67,15 @@ AllAnalysis("all-AAs", cl::desc("If Flag is set, run all Analysis, for each vers
 static cl::opt<std::string>
 InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 	cl::init("-"), cl::value_desc("path/filename"), cl::cat(BoaaaCat));
+
+enum DummyClEnum : int32_t {
+	DUMMY
+};
+
+static cl::list <DummyClEnum> 
+version_list(cl::desc("Choose witch Alias-Analysis-Passes to run in all available versions:"), cl::cat(BoaaaCat));
+static cl::list <DummyClEnum> 
+aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run in specific version:"), cl::cat(BoaaaCat));
 
 //global parameters
 
@@ -242,9 +252,6 @@ void setup()
 	std::copy(versions.begin(), versions.end(), versions_loaded);
 }
 
-enum DummyClEnum : int32_t {
-};
-
 void addAAsToAAMap(boaaa::cl_aa_store verAA)
 {
 	for (boaaa::registeredAA raa : verAA) {
@@ -341,20 +348,17 @@ void addAAsToCL(cl::list<DummyClEnum>& version_list, cl::list<DummyClEnum>& aa_l
 			{
 				//todo check crash, copy char* or something
 				aa_list.getParser().addLiteralOption(buildCLArg(reg), reg.get<1>(), reg.get<2>());
-				versions += (k++ == 0 ? "" : "\n") //adds \n before each line except the first one
+				versions += (k++ == 0 ? "" : "\n   ") //adds \n before each line except the first one
 							+ getVersionString(reg) + reg.get<2>();
 				aa_map[i].push_back(reg.get<1>());
 			}
-			version_list.getParser().addLiteralOption(arg, i++, versions);
+			version_list.getParser().addLiteralOption(strdup(arg.c_str()), i++, strdup(versions.c_str()));
 		}
 	}
 }
 
 void initAAs()
 {
-	cl::list <DummyClEnum> version_list(cl::desc("Choose witch Alias-Analysis-Passes to run in all available versions:"), cl::cat(BoaaaCat));
-	cl::list <DummyClEnum> aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run in specific version:"), cl::cat(BoaaaCat));
-
 	if (llvm40)
 		addAAsToAAMap(llvm40->getAvailableAAs());
 	if (llvm50)
