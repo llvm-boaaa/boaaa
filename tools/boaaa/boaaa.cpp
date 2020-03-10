@@ -28,6 +28,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <set>
 #include <string.h>
 #include <utility>
 
@@ -40,7 +41,8 @@ namespace fs = std::filesystem;
 
 //command line arg variables
 
-static cl::OptionCategory BoaaaCat("BOAAA options:");
+static cl::OptionCategory 
+BoaaaCat("BOAAA options:");
 
 static::cl::opt<std::string> 
 FileInput("f", cl::desc("Specifies the file of multiple commandline arguments"),
@@ -50,7 +52,11 @@ static cl::opt<std::string>
 LogFilename("l", cl::desc("Specify log filename"), 
 	cl::init("-"), cl::value_desc("path/filename"), cl::cat(BoaaaCat));
 
-static cl::opt<uint16_t>
+static cl::opt<std::string>
+PrefixFilePath("p", cl::desc("The prefix-path of the Bitecodefile, it will get concatet to: prefix${llvm_version}InputFile"),
+	cl::init(""), cl::value_desc("prefix"), cl::cat(BoaaaCat));
+
+static cl::opt<boaaa::llvm_version>
 Version("v", cl::desc("The version of the analysises"), 
 	cl::init(0), cl::value_desc("XX") ,cl::cat(BoaaaCat));
 
@@ -62,20 +68,20 @@ static cl::opt<bool>
 AllAnalysis("all-AAs", cl::desc("If Flag is set, run all Analysis, for each version"),
 	cl::init(false), cl::cat(BoaaaCat));
 
-//copyied from opt
-
 static cl::opt<std::string>
 InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 	cl::init("-"), cl::value_desc("path/filename"), cl::cat(BoaaaCat));
 
-enum DummyClEnum : int32_t {
+enum DummyClEnum : boaaa::aa_id {
 	DUMMY
 };
 
+//dynamic 
 static cl::list <DummyClEnum> 
-version_list(cl::desc("Choose witch Alias-Analysis-Passes to run in all available versions:"), cl::cat(BoaaaCat));
+version_list(cl::desc("Choose which Alias-Analysis-Passes to run in all available versions:"), cl::cat(BoaaaCat));
+
 static cl::list <DummyClEnum> 
-aa_list(cl::desc("Choose witch Alias-Analysis-Passes to run in specific version:"), cl::cat(BoaaaCat));
+aa_list(cl::desc("Choose which Alias-Analysis-Passes to run in specific version:"), cl::cat(BoaaaCat));
 
 //global parameters
 
@@ -88,18 +94,28 @@ std::shared_ptr<boaaa::DLInterface> llvm90;
 boaaa::LLVMVersionManager *llvm_man = nullptr;
 boaaa::StringRefVPM *sr_vp_man = nullptr;
 
-uint8_t versions_count = 0;
-uint16_t *versions_loaded;
+boaaa::llvm_version versions_count = 0;
+boaaa::llvm_version *versions_loaded;
 
 llvm::StringMap<boaaa::cl_aa_store> aa_cl_group;
 
-std::vector<int32_t>* aa_map;
+std::vector<boaaa::aa_id>* aa_map;
 uint32_t aa_map_size;
 
 #ifdef DEBUG
 int testmain();
 #endif // DEBUG
-int mainloop();
+
+enum class COROUTINESTATES_MAIN : int8_t
+{
+	ERROR_IN_ANALYSIS			= -3,
+	SKIP_ARGUMENTS				= -2,
+	ERROR_WHILE_LOAD_MODULE		= -1,
+	NORMAL						= 0,
+
+};
+
+COROUTINESTATES_MAIN mainloop();
 
 void setup();
 void initAAs();
@@ -125,7 +141,7 @@ int main(int argc, char** argv) {
 	cl::ParseCommandLineOptions(argc, argv);
 
 	if (FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
-		res = mainloop();
+		res = static_cast<int8_t>(mainloop());
 		finalize();
 		return res;
 	}
@@ -151,8 +167,10 @@ int main(int argc, char** argv) {
 	std::ifstream cl_inst(inputfile.c_str(), std::ios_base::in);
 	std::string line;
 	//while lines in file seperate arguments, parse them and run main loop to calculate what the arguments describe.
+	uint64_t line_count = 0;
 	while (std::getline(cl_inst, line)) {
 		cl::ResetAllOptionOccurrences();
+		line_count++;
 		int _argc;
 		char** _argv = boaaa::parse(boaaa_string, line.data(), &_argc);
 		if (_argc < 0) {
@@ -161,21 +179,184 @@ int main(int argc, char** argv) {
 			continue;
 		}
 		cl::ParseCommandLineOptions(_argc, _argv);
-		res -= mainloop() < 0 ? 1 : 0;
+		using CSM = COROUTINESTATES_MAIN;
+		if (auto state = mainloop(); static_cast<int8_t>(state) < 0) {
+			switch (state) {
+			case CSM::ERROR_WHILE_LOAD_MODULE:
+				std::cout << "Error while Load Module in LIne: " << line_count << "\n";
+				break;
+			case CSM::SKIP_ARGUMENTS:
+				std::cout << "Skipped Analysis defined in LIne: " << line_count << " because of failed Module loading\n";
+				break;
+			case CSM::ERROR_IN_ANALYSIS:
+				std::cout << "Error in at least one Analysis of Line:" << line_count << "\n";
+				break;
+			}
+			res--;
+		}
 		free(_argv); //delete them after mainloop, so all variables could be invalidated.
 	}
 	finalize();
 	return res;
 }
 
-//tea dsa branch of sea dsa
-//svf
+bool is_active_LLVM_40() {
+	return Version.getValue() == llvm40->getVersion();
+}
 
-int mainloop() {
+bool is_active_LLVM_50() {
+	return Version.getValue() == llvm50->getVersion();
+}
 
+bool is_active_LLVM_90() {
+	return Version.getValue() == llvm50->getVersion();
+}
 
+bool loadModule()
+{
+	uint64_t filehash = llvm_man->registerData(InputFilename);
+	uint64_t prefixhash = 0;
 
+	bool prefix = false;
+	if (!PrefixFilePath.isDefaultOption()) {
+		prefix = true;
+		prefixhash = llvm_man->registerData(PrefixFilePath);
+	}
+
+	bool error;
+	if (llvm40 && (AllVersions.getValue() || is_active_LLVM_40())) {
+		if (prefix) error = llvm40->loadModule(prefixhash, filehash);
+		else        error = llvm40->loadModule(filehash);
+		if (error)
+		{
+			std::cout << "       Error in Module llvm 40" << "\n";
+			return -1;
+		}
+	}
+
+	if (llvm50 && (AllVersions.getValue() || is_active_LLVM_50())) {
+		if (prefix) error = llvm50->loadModule(prefixhash, filehash);
+		else        error = llvm50->loadModule(filehash);
+		if (error)
+		{
+			std::cout << "       Error in Module llvm 50" << "\n";
+			return -1;
+		}
+	}
+
+	if (llvm90 && (AllVersions.getValue() || is_active_LLVM_90())) {
+		if (prefix) error = llvm90->loadModule(prefixhash, filehash);
+		else        error = llvm90->loadModule(filehash);
+		if (error)
+		{
+			std::cout << "       Error in Module llvm 90" << "\n";
+			return -1;
+		}
+	}
 	return 0;
+}
+
+boaaa::aa_id getCurrentVersionId()
+{
+	using LLV = boaaa::LLVM_VERSIONS;
+
+	switch (Version.getValue()) {
+	case 40:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_40);
+	case 50:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_50);
+	case 90:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_90);
+	default:
+		return 0;
+	}
+}
+
+bool runAnalysis(std::set<boaaa::aa_id> analysises)
+{
+	using LLV = boaaa::LLVM_VERSIONS;
+
+	bool res = true;
+	for (boaaa::aa_id aa : analysises)
+	{
+		switch (aa & boaaa::version_mask)
+		{
+		case LLV::LLVM_40:
+			res &= llvm40->runAnalysis(aa);
+			break;
+		case LLV::LLVM_50:
+			res &= llvm50->runAnalysis(aa);
+			break;
+		case LLV::LLVM_90:
+			res &= llvm90->runAnalysis(aa);
+			break;
+		}
+	}
+	return res;
+}
+
+COROUTINESTATES_MAIN mainloop() {
+
+	using CSM = COROUTINESTATES_MAIN;
+
+	static CSM coroutine_state = CSM::NORMAL;
+	
+	switch (coroutine_state) {
+		case CSM::ERROR_WHILE_LOAD_MODULE:
+			coroutine_state = CSM::SKIP_ARGUMENTS;
+		case CSM::SKIP_ARGUMENTS:
+			if (!InputFilename.isDefaultOption())
+				return coroutine_state; //skip because of previos error
+		case CSM::NORMAL:
+			if (!InputFilename.isDefaultOption())
+			{
+				if (loadModule()) 
+				{
+					coroutine_state = CSM::ERROR_WHILE_LOAD_MODULE;
+					return coroutine_state; //error while laod module
+				}
+			}
+
+			std::set<boaaa::aa_id> analysis_to_run;
+
+			if (AllAnalysis.getValue())
+			{
+				if (AllVersions.getValue()) {
+					for (int i = 0; i < aa_map_size; i++) {
+						analysis_to_run.insert(std::begin(aa_map[i]), std::end(aa_map[i]));
+					}
+				}
+				else 
+				{
+					if (!Version.isDefaultOption()) {
+						for(boaaa::aa_id i = 0; i < aa_map_size; i++)
+						{
+							boaaa::aa_id id = getCurrentVersionId();
+							for (boaaa::aa_id aa : aa_map[i])
+								if ((aa & boaaa::version_mask) == id)
+									analysis_to_run.insert(aa);
+						}
+					}
+				}
+			} 
+			else
+			{
+				if (aa_list.size() > 0) {
+					analysis_to_run.insert(std::begin(aa_list), std::end(aa_list));
+				}
+				if (version_list.size() > 0) {
+					for (boaaa::aa_id i : version_list) 
+						analysis_to_run.insert(std::begin(aa_map[i]), std::end(aa_map[i]));
+				}
+			}
+			if (!runAnalysis(analysis_to_run)) {
+				coroutine_state = CSM::ERROR_IN_ANALYSIS;
+				return coroutine_state;
+			}
+	}
+
+	coroutine_state = CSM::NORMAL;
+	return coroutine_state;
 }
 
 #ifdef DEBUG
@@ -219,7 +400,7 @@ int testmain() {
 
 #endif //!DEBUG
 
-void setupLLVMVersion(boaaa::DLInterface &handle, std::vector<uint16_t>& v, uint16_t version) {
+void setupLLVMVersion(boaaa::DLInterface &handle, std::vector<boaaa::llvm_version>& v, uint16_t version) {
 	v.push_back(version);
 
 	handle.setBasicOStream(std::cout);
@@ -238,7 +419,7 @@ void setup()
 	llvm50 = llvm_man->loadDL("boaaa.lv_50");
 	llvm90 = llvm_man->loadDL("boaaa.lv_90");
 
-	std::vector<uint16_t> versions;
+	std::vector<boaaa::llvm_version> versions;
 
 	if(llvm40)
 		setupLLVMVersion(*llvm40, versions, llvm40->getVersion());
@@ -248,7 +429,7 @@ void setup()
 		setupLLVMVersion(*llvm90, versions, llvm90->getVersion());
 
 	versions_count = versions.size();
-	versions_loaded = new uint16_t[versions_count];
+	versions_loaded = new boaaa::llvm_version[versions_count];
 	std::copy(versions.begin(), versions.end(), versions_loaded);
 }
 
@@ -280,7 +461,7 @@ char* strcatdup(char* c1, char* c2)
 llvm::StringRef buildCLArg(boaaa::registeredAA regAA)
 {
 	//memory leak, but is only called once so it should be ok
-	int32_t id = regAA.get<1>() & boaaa::version_mask;
+	boaaa::aa_id id = regAA.get<1>() & boaaa::version_mask;
 	switch (id) {
 	case boaaa::LLVM_30:
 		return strcatdup("30-", regAA.get<0>());
@@ -305,7 +486,7 @@ llvm::StringRef buildCLArg(boaaa::registeredAA regAA)
 
 std::string getVersionString(boaaa::registeredAA regAA)
 {
-	int32_t id = regAA.get<1>() & boaaa::version_mask;
+	boaaa::aa_id id = regAA.get<1>() & boaaa::version_mask;
 	switch (id) {
 	case boaaa::LLVM_30:
 		return "30 ";
@@ -332,7 +513,7 @@ void addAAsToCL(cl::list<DummyClEnum>& version_list, cl::list<DummyClEnum>& aa_l
 {
 	uint32_t i = 0;
 	aa_map_size = aa_cl_group.size();
-	aa_map = new std::vector<int32_t>[aa_map_size];
+	aa_map = new std::vector<boaaa::aa_id>[aa_map_size];
 
 	for (auto& elem : aa_cl_group)
 	{

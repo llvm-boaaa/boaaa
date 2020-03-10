@@ -103,6 +103,8 @@ void LLVMVersionManager::test(uint64_t* hash, uint8_t num)
 
 bool LLVMVersionManager::loadModule(uint64_t module_file_hash) { return false; };
 
+bool LLVMVersionManager::loadModule(uint64_t module_file_prefix, uint64_t module_file_hash) { return false; };
+
 boaaa::cl_aa_store getAvailableAAs() 
 {
 	cl_aa_store store;

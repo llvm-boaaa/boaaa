@@ -74,7 +74,31 @@ bool DLInterface50::loadModule(uint64_t module_file_hash)
 
 	context.loaded_module = llvm::parseIRFile(bc_ref, Err, *context.context_to_module);
 	if (!context.loaded_module) {
-		*(context.basic_ostream) << "Error: while loading LLVMModule " << bc_ref.str() << " \nMSG  : " << Err.getMessage().str() << "\n";
+		*(context.basic_ostream) << "Error: while loading LLVMModule " << bc_ref.str() 
+			<< " \nMSG  : " << Err.getMessage().str() << "\n";
+		return false;
+	}
+	return true;
+}
+
+bool DLInterface50::loadModule(uint64_t module_file_prefix, uint64_t module_file_hash)
+{
+	using store = typename _raw_type_inst(context.string_ref_vp)::store_t;
+	store storePrefix = context.string_ref_vp->generateStorage();
+	store storeBC = context.string_ref_vp->generateStorage();
+
+	llvm::StringRef prefix = context.string_ref_vp->parseRegistered(module_file_prefix, storePrefix);
+	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
+
+	std::string filename = prefix.str() + "90" + bc_ref.str();
+
+	context.context_to_module.reset(new LLVMLLVMContext());
+	llvm::SMDiagnostic Err;
+
+	context.loaded_module = llvm::parseIRFile(filename, Err, *context.context_to_module);
+	if (!context.loaded_module) {
+		*(context.basic_ostream) << "Error: while loading LLVMModule " << filename
+			<< " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
 	return true;

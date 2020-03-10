@@ -34,12 +34,12 @@ namespace boaaa
 
 		cl_aa_store raa;
 		raa.push_back(registeredAA(&_40::BASIC[0],      static_cast<aa_id>(L4::BASIC),      getDescription(L4::BASIC)));
-		//raa.push_back(registeredAA(&_40::CFL_ANDERS[0], static_cast<aa_id>(L4::CFL_ANDERS), getDescription(L4::CFL_ANDERS)));
+		raa.push_back(registeredAA(&_40::CFL_ANDERS[0], static_cast<aa_id>(L4::CFL_ANDERS), getDescription(L4::CFL_ANDERS)));
 		raa.push_back(registeredAA(&_40::CFL_STEENS[0], static_cast<aa_id>(L4::CFL_STEENS), getDescription(L4::CFL_STEENS)));
 		raa.push_back(registeredAA(&_40::OBJ_CARC[0],   static_cast<aa_id>(L4::OBJ_CARC),   getDescription(L4::OBJ_CARC)));
 		raa.push_back(registeredAA(&_40::SCEV[0],       static_cast<aa_id>(L4::SCEV),       getDescription(L4::SCEV)));
-		//raa.push_back(registeredAA(&_40::SCOPEDNA[0],   static_cast<aa_id>(L4::SCOPEDNA),   getDescription(L4::SCOPEDNA)));
-		//raa.push_back(registeredAA(&_40::TBAA[0],       static_cast<aa_id>(L4::TBAA),       getDescription(L4::TBAA)));
+		raa.push_back(registeredAA(&_40::SCOPEDNA[0],   static_cast<aa_id>(L4::SCOPEDNA),   getDescription(L4::SCOPEDNA)));
+		raa.push_back(registeredAA(&_40::TBAA[0],       static_cast<aa_id>(L4::TBAA),       getDescription(L4::TBAA)));
 		return raa;
 	}
 }

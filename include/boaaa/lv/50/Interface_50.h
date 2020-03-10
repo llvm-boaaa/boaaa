@@ -25,6 +25,8 @@ namespace boaaa {
 		boaaa::cl_aa_store getAvailableAAs() override;
 
 		bool loadModule(uint64_t module_file_hash) override;
+		bool loadModule(uint64_t module_file_prefix, 
+						uint64_t module_file_hash) override;
 		bool runAnalysis(boaaa::aa_id analysis) override;
 	
 		llvm_version getVersion() override
