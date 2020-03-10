@@ -40,7 +40,7 @@ namespace boaaa
 
 	enum LLVM_ORIGINAL_ANALYSIS : aa_id
 	{
-		BASIC_AA  = 0,
+		BASIC_AA		= 0,
 		CFL_ANDERS_AA,
 		CFL_STEENS_AA,
 		OBJ_CARC_AA,

@@ -1,5 +1,5 @@
 //debug flags
-#define DEBUG 1
+//#define DEBUG 1
 
 #ifdef _WIN32
 #define NOMINMAX
@@ -56,7 +56,7 @@ static cl::opt<std::string>
 PrefixFilePath("p", cl::desc("The prefix-path of the Bitecodefile, it will get concatet to: prefix${llvm_version}InputFile"),
 	cl::init(""), cl::value_desc("prefix"), cl::cat(BoaaaCat));
 
-static cl::opt<boaaa::llvm_version>
+static cl::opt<int>
 Version("v", cl::desc("The version of the analysises"), 
 	cl::init(0), cl::value_desc("XX") ,cl::cat(BoaaaCat));
 
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
 
 	cl::ParseCommandLineOptions(argc, argv);
 
-	if (FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
+	if (!FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
 		res = static_cast<int8_t>(mainloop());
 		finalize();
 		return res;
@@ -295,8 +295,8 @@ bool runAnalysis(std::set<boaaa::aa_id> analysises)
 	return res;
 }
 
-COROUTINESTATES_MAIN mainloop() {
-
+COROUTINESTATES_MAIN mainloop() 
+{
 	using CSM = COROUTINESTATES_MAIN;
 
 	static CSM coroutine_state = CSM::NORMAL;
