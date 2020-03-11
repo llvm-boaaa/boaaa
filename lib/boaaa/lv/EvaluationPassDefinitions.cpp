@@ -15,7 +15,7 @@ BOAAA_CREATE_EVAL_PASS_SOURCE(AndersAAEvalWrapperPass, CFLAndersAAWrapperPass,
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ANDERSAA
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
 
-BOAAA_CREATE_EVAL_PASS_HEADER(BasicAAEvalWrapperPass, BasicAAWrapperPass, 
+BOAAA_CREATE_EVAL_PASS_SOURCE(BasicAAEvalWrapperPass, BasicAAWrapperPass, 
 	"basic-aa-eval", "BASIC AA Alias Analysis Evaluator")
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA

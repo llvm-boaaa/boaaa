@@ -9,6 +9,7 @@
 #include "StringRefVersionParser50.h"
 
 #include "initalizeAAs_50.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
 
 namespace boaaa {
 

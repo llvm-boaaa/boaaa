@@ -115,7 +115,7 @@ namespace boaaa
 		template<class PASS>
 		class TimeModulePass : public PASS, TimeMessure {
 		public:
-			TimeModulePass(LLVMModulePass* pass) : PASS(), TimeMessure() {
+			TimeModulePass() : PASS(), TimeMessure() {
 
 			}
 

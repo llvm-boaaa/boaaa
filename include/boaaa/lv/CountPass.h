@@ -56,10 +56,6 @@ namespace boaaa {
 				function_count++;
 			}
 
-			llvm::errs() << "Function #" << function_count << "\n"
-				<< "BasicBlock #" << basic_block_count << "\n"
-				<< "Instructions #" << instruction_count <<  "\n";
-
 			return false;
 		}
 

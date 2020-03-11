@@ -11,6 +11,7 @@
 #include "StringRefVersionParser90.h"
 
 #include "initalizeAAs_90.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
 
 namespace boaaa {
 

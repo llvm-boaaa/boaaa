@@ -8,6 +8,7 @@
 
 #include "StringRefVersionParser40.h"
 #include "initalizeAAs_40.h"
+#include "boaaa/lv/EvaluationPassDefinitions.h"
 
 namespace boaaa {
 

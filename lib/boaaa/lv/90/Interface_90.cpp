@@ -81,6 +81,14 @@ bool DLInterface90::loadModule(uint64_t module_file_hash)
 			<< " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
+
+	//evaluate countpass result
+	llvm::legacy::PassManager pm;
+	CountPass* cp = new CountPass();
+	pm.add(cp);
+	pm.run(*context.loaded_module);
+	cp->printResult(*context.basic_ostream);
+
 	return true;
 }
 
@@ -104,15 +112,56 @@ bool DLInterface90::loadModule(uint64_t module_file_prefix, uint64_t module_file
 			<< " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
+
+	//evaluate countpass result
+	llvm::legacy::PassManager pm;
+	CountPass* cp = new CountPass();
+	pm.add(cp);
+	pm.run(*context.loaded_module);
+	cp->printResult(*context.basic_ostream);
+
 	return true;
 }
 
 bool DLInterface90::runAnalysis(boaaa::aa_id analysis)
 {
+	using LLV = boaaa::LLVM_90_AA;
+
+	auto run = [=](auto* pass, auto* timepass) -> auto {
+		llvm::legacy::PassManager pm;
+		pm.add(timepass);
+		pm.add(pass);
+		pm.run(*context.loaded_module);
+		timepass->printResult(*context.basic_ostream);
+		pass->printResult(*context.basic_ostream);
+		return pass;
+	};
+
 	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_90) return false;
-
-	
-
+	switch (analysis)
+	{
+	case LLV::CFL_ANDERS:
+		run(new llvm::AndersAAEvalWrapperPass(), new boaaa::TimePass<llvm::CFLAndersAAWrapperPass>());
+		break;
+	case LLV::BASIC:
+		run(new llvm::BasicAAEvalWrapperPass(), new boaaa::TimePass<llvm::BasicAAWrapperPass>());
+		break;
+	case LLV::OBJ_CARC:
+		run(new llvm::ObjCARCAAEvalWrapperPass(), new boaaa::TimePass<llvm::ObjCARCAAWrapperPass>());
+		break;
+	case LLV::SCEV:
+		run(new llvm::SCEVAAEvalWrapperPass(), new boaaa::TimePass<llvm::SCEVAAWrapperPass>());
+		break;
+	case LLV::SCOPEDNA:
+		run(new llvm::ScopedNoAliasEvalWrapperPass(), new boaaa::TimePass<llvm::ScopedNoAliasAAWrapperPass>());
+		break;
+	case LLV::CFL_STEENS:
+		run(new llvm::SteensAAEvalWrapperPass(), new boaaa::TimePass<llvm::CFLSteensAAWrapperPass>());
+		break;
+	case LLV::TBAA:
+		run(new llvm::TypeBasedAAEvalWrapperPass(), new boaaa::TimePass<llvm::TypeBasedAAWrapperPass>());
+		break;
+	}
 	return true;
 }
 

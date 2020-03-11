@@ -209,7 +209,7 @@ bool is_active_LLVM_50() {
 }
 
 bool is_active_LLVM_90() {
-	return Version.getValue() == llvm50->getVersion();
+	return Version.getValue() == llvm90->getVersion();
 }
 
 bool loadModule()
@@ -218,7 +218,7 @@ bool loadModule()
 	uint64_t prefixhash = 0;
 
 	bool prefix = false;
-	if (!PrefixFilePath.isDefaultOption()) {
+	if (!PrefixFilePath.empty()) {
 		prefix = true;
 		prefixhash = llvm_man->registerData(PrefixFilePath);
 	}
@@ -227,33 +227,33 @@ bool loadModule()
 	if (llvm40 && (AllVersions.getValue() || is_active_LLVM_40())) {
 		if (prefix) error = llvm40->loadModule(prefixhash, filehash);
 		else        error = llvm40->loadModule(filehash);
-		if (error)
+		if (!error)
 		{
 			std::cout << "       Error in Module llvm 40" << "\n";
-			return -1;
+			return false;
 		}
 	}
 
 	if (llvm50 && (AllVersions.getValue() || is_active_LLVM_50())) {
 		if (prefix) error = llvm50->loadModule(prefixhash, filehash);
 		else        error = llvm50->loadModule(filehash);
-		if (error)
+		if (!error)
 		{
 			std::cout << "       Error in Module llvm 50" << "\n";
-			return -1;
+			return false;
 		}
 	}
 
 	if (llvm90 && (AllVersions.getValue() || is_active_LLVM_90())) {
 		if (prefix) error = llvm90->loadModule(prefixhash, filehash);
 		else        error = llvm90->loadModule(filehash);
-		if (error)
+		if (!error)
 		{
 			std::cout << "       Error in Module llvm 90" << "\n";
-			return -1;
+			return false;
 		}
 	}
-	return 0;
+	return true;
 }
 
 boaaa::aa_id getCurrentVersionId()
@@ -305,13 +305,13 @@ COROUTINESTATES_MAIN mainloop()
 		case CSM::ERROR_WHILE_LOAD_MODULE:
 			coroutine_state = CSM::SKIP_ARGUMENTS;
 		case CSM::SKIP_ARGUMENTS:
-			if (!InputFilename.isDefaultOption())
+			if (!InputFilename.hasArgStr())
 				return coroutine_state; //skip because of previos error
 		case CSM::ERROR_IN_ANALYSIS:	//error in analysis is not a big deal, for running other analysises, so run like normal behavior
 		case CSM::NORMAL:
-			if (!InputFilename.isDefaultOption())
+			if (!InputFilename.hasArgStr())
 			{
-				if (loadModule()) 
+				if (!loadModule()) 
 				{
 					coroutine_state = CSM::ERROR_WHILE_LOAD_MODULE;
 					return coroutine_state; //error while laod module
@@ -461,24 +461,25 @@ char* strcatdup(char* c1, char* c2)
 
 llvm::StringRef buildCLArg(boaaa::registeredAA regAA)
 {
+	using LLV = boaaa::LLVM_VERSIONS;
 	//memory leak, but is only called once so it should be ok
 	boaaa::aa_id id = regAA.get<1>() & boaaa::version_mask;
 	switch (id) {
-	case boaaa::LLVM_30:
+	case LLV::LLVM_30:
 		return strcatdup("30-", regAA.get<0>());
-	case boaaa::LLVM_35:
+	case LLV::LLVM_35:
 		return strcatdup("35-", regAA.get<0>());
-	case boaaa::LLVM_40:
+	case LLV::LLVM_40:
 		return strcatdup("40-", regAA.get<0>());
-	case boaaa::LLVM_50:
+	case LLV::LLVM_50:
 		return strcatdup("50-", regAA.get<0>());
-	case boaaa::LLVM_60:
+	case LLV::LLVM_60:
 		return strcatdup("60-", regAA.get<0>());
-	case boaaa::LLVM_70:
+	case LLV::LLVM_70:
 		return strcatdup("70-", regAA.get<0>());
-	case boaaa::LLVM_80:
+	case LLV::LLVM_80:
 		return strcatdup("80-", regAA.get<0>());
-	case boaaa::LLVM_90:
+	case LLV::LLVM_90:
 		return strcatdup("90-", regAA.get<0>());
 	default:
 		return "illegal-definition";
@@ -487,23 +488,25 @@ llvm::StringRef buildCLArg(boaaa::registeredAA regAA)
 
 std::string getVersionString(boaaa::registeredAA regAA)
 {
+	using LLV = boaaa::LLVM_VERSIONS;
+
 	boaaa::aa_id id = regAA.get<1>() & boaaa::version_mask;
 	switch (id) {
-	case boaaa::LLVM_30:
+	case LLV::LLVM_30:
 		return "30 ";
-	case boaaa::LLVM_35:
+	case LLV::LLVM_35:
 		return "35 ";
-	case boaaa::LLVM_40:
+	case LLV::LLVM_40:
 		return "40 ";
-	case boaaa::LLVM_50:
+	case LLV::LLVM_50:
 		return "50 ";
-	case boaaa::LLVM_60:
+	case LLV::LLVM_60:
 		return "60 ";
-	case boaaa::LLVM_70:
+	case LLV::LLVM_70:
 		return "70 ";
-	case boaaa::LLVM_80:
+	case LLV::LLVM_80:
 		return "80 ";
-	case boaaa::LLVM_90:
+	case LLV::LLVM_90:
 		return "90 ";
 	default:
 		return "illegal-definition";

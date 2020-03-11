@@ -78,6 +78,14 @@ bool DLInterface40::loadModule(uint64_t module_file_hash)
 			<< " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
+
+	//evaluate countpass result
+	llvm::legacy::PassManager pm;
+	CountPass* cp = new CountPass();
+	pm.add(cp);
+	pm.run(*context.loaded_module);
+	cp->printResult(*context.basic_ostream);
+
 	return true;
 }
 
@@ -101,15 +109,54 @@ bool DLInterface40::loadModule(uint64_t module_file_prefix, uint64_t module_file
 			<< " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
+
+	//evaluate countpass result
+	llvm::legacy::PassManager pm;
+	CountPass* cp = new CountPass();
+	pm.add(cp);
+	pm.run(*context.loaded_module);
+	cp->printResult(*context.basic_ostream);
+
 	return true;
 }
 
 bool DLInterface40::runAnalysis(boaaa::aa_id analysis)
 {
+	using LLV = boaaa::LLVM_40_AA;
+
+	auto run = [=](auto* pass) {
+		llvm::legacy::PassManager pm;
+		pm.add(pass);
+		pm.run(*context.loaded_module);
+		pass->printResult(*context.basic_ostream);
+		return pass;
+	};
+
 	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_40) return false;
-
-
-
+	switch (analysis)
+	{
+	case LLV::CFL_ANDERS:
+		run(new llvm::AndersAAEvalWrapperPass());
+		break;
+	case LLV::BASIC:
+		run(new llvm::BasicAAEvalWrapperPass());
+		break;
+	case LLV::OBJ_CARC:
+		run(new llvm::ObjCARCAAEvalWrapperPass());
+		break;
+	case LLV::SCEV:
+		run(new llvm::SCEVAAEvalWrapperPass());
+		break;
+	case LLV::SCOPEDNA:
+		run(new llvm::ScopedNoAliasEvalWrapperPass());
+		break;
+	case LLV::CFL_STEENS:
+		run(new llvm::SteensAAEvalWrapperPass());
+		break;
+	case LLV::TBAA:
+		run(new llvm::TypeBasedAAEvalWrapperPass());
+		break;
+	}
 	return true;
 }
 
