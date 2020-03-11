@@ -307,6 +307,7 @@ COROUTINESTATES_MAIN mainloop()
 		case CSM::SKIP_ARGUMENTS:
 			if (!InputFilename.isDefaultOption())
 				return coroutine_state; //skip because of previos error
+		case CSM::ERROR_IN_ANALYSIS:	//error in analysis is not a big deal, for running other analysises, so run like normal behavior
 		case CSM::NORMAL:
 			if (!InputFilename.isDefaultOption())
 			{
