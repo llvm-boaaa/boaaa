@@ -208,6 +208,19 @@ void registerPasses()
 	llvm::PassRegistry& registry = *llvm::PassRegistry::getPassRegistry();
 
 	//llvm specific
+	llvm::initializeCore(registry);
+	llvm::initializeCoroutines(registry);
+	llvm::initializeScalarOpts(registry);
+	llvm::initializeObjCARCOpts(registry);
+	llvm::initializeVectorization(registry);
+	llvm::initializeIPO(registry);
+	llvm::initializeAnalysis(registry);
+	llvm::initializeTransformUtils(registry);
+	llvm::initializeInstCombine(registry);
+	llvm::initializeAggressiveInstCombine(registry);
+	llvm::initializeInstrumentation(registry);
+	llvm::initializeTarget(registry);
+
 	llvm::initializeAnalysis(registry);
 	llvm::initializeBasicAAWrapperPassPass(registry);
 	llvm::initializeCFLAndersAAWrapperPassPass(registry);

@@ -30,7 +30,7 @@ namespace boaaa {
 			EvaluationPassImpl* impl;
 
 		public:
-			EvalModulePass(char ID) : LLVMModulePass(ID) {}
+			EvalModulePass(char ID) : LLVMModulePass(ID) { impl = new EvaluationPassImpl(); }
 			~EvalModulePass() { delete impl; }
 
 			bool runOnModule(LLVMModule& M) override
@@ -41,6 +41,13 @@ namespace boaaa {
 				result.addAAResult(WrapperPass.getResult());
 				impl->evaluateAAResultOnModule(M, result);
 				return false;
+			}
+
+			void getAnalysisUsage(llvm::AnalysisUsage& AU) const override
+			{
+				AU.addRequired<llvm::TargetLibraryInfoWrapperPass>();
+				AU.addRequired<boaaa::TimePass<PASS>>();
+				AU.setPreservesAll();
 			}
 
 			void printResult(std::ostream& stream) {

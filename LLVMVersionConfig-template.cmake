@@ -10,7 +10,7 @@
 # in the following two lines, all valid versions of LLVM are listed(at the moment).
 # The Standart configuration for BOAAA is defined in build_llvm_version, this versions are implemented and tested, 
 # but of course you could add a other versions aswell, by implementing the dll.
-set(all_llvm_versions "30;31;32;33;34;35;36;37;38;39;40;50;60;70;80;90")
+set(all_llvm_versions "30;31;32;33;34;35;36;37;38;39;40;50;60;70;71;80;90")
 set(build_llvm_version "40;50;90")
 
 set(llvm_boaaa "90")

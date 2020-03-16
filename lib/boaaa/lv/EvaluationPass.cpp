@@ -24,14 +24,13 @@ void EvaluationPassImpl::evaluateAAResultOnModule(LLVMModule& M, llvm::AAResults
     using namespace llvm;
     llvm::DataLayout DL = M.getDataLayout();
 
-    LLVMSetVector<Value*> Pointers;
-    LLVMSmallSetVector<CallBase*, 16> Calls; //llvm 50 CallInst
-    LLVMSetVector<Value*> Loads;
-    LLVMSetVector<Value*> Stores;
-
-
     for (LLVMFunction& F : M)
     {
+        LLVMSetVector<Value*> Pointers;
+        LLVMSmallSetVector<CallBase*, 16> Calls; //llvm 50 CallInst
+        LLVMSetVector<Value*> Loads;
+        LLVMSetVector<Value*> Stores;
+
         FunctionCount++;
 
         //argument pointes
