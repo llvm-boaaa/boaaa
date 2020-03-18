@@ -5,7 +5,6 @@
 #include <type_traits>
 
 #include "boaaa/lv/sup_LLVM_VERSION.h"
-#include "boaaa/support/dump_ostream.h"
 #include "boaaa/vp/StringRefVersionParser.h"
 
 namespace boaaa {
