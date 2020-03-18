@@ -31,7 +31,8 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
     LLVMSetVector<LLVMValue*> Pointers;
     LLVMSmallSetVector<LLVMCallUnifyer*, 16> Calls;
 #if LLVM_VERSION < 80
-    //deletes all pointers before vector gets destroyed, because autodelete gets destroyed before Calls
+    //deletes all pointers before vector gets destroyed, because autodelete gets destroyed before Calls,
+    //only needed in 70 and earlier because in newer version Calls get casted and not created new(only for evaluation). 
     boaaa::support::AutoDeleter<LLVMSmallSetVector<LLVMCallUnifyer*, 16>> 
            autodelete(Calls, [](LLVMSmallSetVector<LLVMCallUnifyer*, 16> v) {for (LLVMCallUnifyer* p : v) delete p; });
 #endif
@@ -54,7 +55,9 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             Stores.insert(&*I);
         LLVMInstruction& Inst = *I;
 #if LLVM_VERSION < 80
-        if (auto Call = new CallSite(&Inst)) {
+        //create on heap to use operator bool and then create obj again on heap to store it
+        if (auto Call_ = CallSite(&Inst)) {
+            auto* Call = new CallSite(&Inst);
 #else
         if (auto* Call = dyn_cast<LLVMCallUnifyer>(&Inst)) {
 #endif
