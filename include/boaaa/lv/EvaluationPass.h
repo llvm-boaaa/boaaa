@@ -3,12 +3,26 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ combine versions
 
+//define LLVMAAResults
+#include "include_versions/LLVM_AAResults.inc"
+//define LLVMAliasResult
+#include "include_versions/LLVM_AliasResult.inc"
+//define LLVMCallUnifyer
+#include "include_versions/LLVM_CallVersionUnifyer.inc"
 //define LLVMFunction
 #include "include_versions/LLVM_Function.inc"
 //define LLVMModule
 #include "include_versions/LLVM_Module.inc"
 //include llvm/Pass.h
 #include "include_versions/LLVM_include_Pass_h.inc"
+//define LLVMInstruction
+#include "include_versions/LLVM_Instruction.inc"
+//define LLVMLoadInst
+#include "include_versions/LLVM_LoadInst.inc"
+//define LLVMLocationSize
+#include "include_versions/LLVM_LocationSize.inc"
+//define LLVMMemoryLocation
+#include "include_versions/LLVM_MemoryLocation.inc"
 //define LLVMModulePass
 #include "include_versions/LLVM_ModulePass.inc"
 //define LLVMRegisterPass
@@ -17,10 +31,20 @@
 #include "include_versions/LLVM_SetVector.inc"
 //define LLVMSmallSetVector
 #include "include_versions/LLVM_SmallSetVector.inc"
+//define LLVMStoreInst
+#include "include_versions/LLVM_StoreInst.inc"
+//define LLVMType
+#include "include_versions/LLVM_Type.inc"
+//define LLVMUse
+#include "include_versions/LLVM_Use.inc"
+//define LLVMValue
+#include "include_versions/LLVM_Value.inc"
 
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/Analysis/AliasAnalysis.h"
+
+#include "boaaa/support/AutoDeleter.h"
 
 #include <iostream>
 
