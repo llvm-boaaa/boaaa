@@ -16,6 +16,34 @@
 #undef NOT_SUPPORTED_LLVM_VERSION
 #endif //!LLVM_VERSION_50
 
+#ifdef LLVM_VERSION_60
+#ifndef NOT_SUPPORTED_LLVM_VERSION
+#define LLVM_TWO_VERSIONS_ LLVM_VERSION_60
+#endif
+#undef NOT_SUPPORTED_LLVM_VERSION
+#endif //!LLVM_VERSION_60
+
+#ifdef LLVM_VERSION_70
+#ifndef NOT_SUPPORTED_LLVM_VERSION
+#define LLVM_TWO_VERSIONS_ LLVM_VERSION_70
+#endif
+#undef NOT_SUPPORTED_LLVM_VERSION
+#endif //!LLVM_VERSION_70
+
+#ifdef LLVM_VERSION_71
+#ifndef NOT_SUPPORTED_LLVM_VERSION
+#define LLVM_TWO_VERSIONS_ LLVM_VERSION_71
+#endif
+#undef NOT_SUPPORTED_LLVM_VERSION
+#endif //!LLVM_VERSION_71
+
+#ifdef LLVM_VERSION_80
+#ifndef NOT_SUPPORTED_LLVM_VERSION
+#define LLVM_TWO_VERSIONS_ LLVM_VERSION_80
+#endif
+#undef NOT_SUPPORTED_LLVM_VERSION
+#endif //!LLVM_VERSION_80
+
 #ifdef LLVM_VERSION_90
 #ifndef NOT_SUPPORTED_LLVM_VERSION
 #define LLVM_TWO_VERSIONS_ LLVM_VERSION_90
@@ -64,7 +92,7 @@ namespace {
 		return 0;
 	}
 
-	const int __error__ = compile_error();
+	const int __error__ = compile_error(); //evaluate to create error at compile time
 }
 #endif
 //nicer way to print error, but currently not supported
