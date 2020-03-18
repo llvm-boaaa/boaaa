@@ -127,8 +127,8 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
     // iterate over all pairs of load, store
     for (LLVMValue* Load : Loads) {
         for (LLVMValue* Store : Stores) {
-            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LoadInst>(Load)),
-                LLVMMemoryLocation::get(cast<StoreInst>(Store)));
+            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMLoadInst>(Load)),
+                LLVMMemoryLocation::get(cast<LLVMStoreInst>(Store)));
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
@@ -150,8 +150,8 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
     for (LLVMSetVector<LLVMValue*>::iterator I1 = Stores.begin(), E = Stores.end();
         I1 != E; ++I1) {
         for (LLVMSetVector<LLVMValue*>::iterator I2 = Stores.begin(); I2 != I1; ++I2) {
-            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<StoreInst>(*I1)),
-                LLVMMemoryLocation::get(cast<StoreInst>(*I2)));
+            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMStoreInst>(*I1)),
+                LLVMMemoryLocation::get(cast<LLVMStoreInst>(*I2)));
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
