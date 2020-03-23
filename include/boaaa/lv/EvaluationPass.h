@@ -9,6 +9,8 @@
 #include "include_versions/LLVM_AliasResult.inc"
 //define LLVMCallUnifyer
 #include "include_versions/LLVM_CallVersionUnifyer.inc"
+//define LLVMDenseMapInfo
+#include "include_versions/LLVM_DenseMapInfo.inc"
 //define LLVMFunction
 #include "include_versions/LLVM_Function.inc"
 //define LLVMModule
@@ -29,6 +31,8 @@
 #include "include_versions/LLVM_RegisterPass.inc"
 //define LLVMSetVector
 #include "include_versions/LLVM_SetVector.inc"
+//define LLVMSmallVector
+#include "include_versions/LLVM_SmallVector.inc"
 //define LLVMSmallSetVector
 #include "include_versions/LLVM_SmallSetVector.inc"
 //define LLVMStoreInst
@@ -44,7 +48,11 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/Analysis/AliasAnalysis.h"
 
+#include "boaaa/lv/EvaluationContainer.h"
+#include "boaaa/lv/version_context.h"
 #include "boaaa/support/AutoDeleter.h"
+#include "boaaa/support/UnionFind.h"
+#include "boaaa/support/UnionFindMap.h"
 
 #include <iostream>
 
@@ -56,17 +64,44 @@ LLVM_VERSION_ERROR_CODE
 
 namespace boaaa {
 
+	namespace {
+		const auto LLVMValueHashFunction = [](const LLVMValue* value) -> unsigned {
+			return LLVMDenseMapInfo<const LLVMValue*>::getHashValue(value);
+		};
+
+		class LLVMValueUnionFindComperator 
+		{
+		public:
+			LLVMValueUnionFindComperator() = default;
+			bool operator()(const LLVMValue* lhs, const LLVMValue* rhs) const {
+				return LLVMValueHashFunction(lhs) < LLVMValueHashFunction(rhs);
+			}
+		};
+	}
+
 	class EvaluationPassImpl
 	{
+	private:
+		using UFM = boaaa::support::UnionFindMap<LLVMValue*, unsigned, boaaa::support::UnionFindComparator<LLVMValue*, LLVMValueUnionFindComperator>>;
+		using UF = boaaa::support::UnionFind<LLVMValue*>;
+
+		UFM m_alias_sets;
+		UFM m_no_alias_sets;
     public:
 		EvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
 			MustAliasCount(), NoModRefCount(), ModCount(), RefCount(), ModRefCount(), MustCount(), 
-			MustRefCount(),	MustModCount(), MustModRefCount() {}
+			MustRefCount(), MustModCount(), MustModRefCount(), 
+			m_alias_sets(boaaa::support::KeyHelper<unsigned, LLVMValue*>(LLVMValueHashFunction)),
+			m_no_alias_sets(boaaa::support::KeyHelper<unsigned, LLVMValue*>(LLVMValueHashFunction)) {};
 
-        void evaluateAAResultOnModule(LLVMModule& M, llvm::AAResults &AAResult);
-		void evaluateAAResultOnFunction(LLVMFunction& F, llvm::AAResults& AAResult);
+		static void scanPointers(LLVMModule& M, evaluation_storage& storage);
+
+        void evaluateAAResultOnModule(LLVMModule& M, llvm::AAResults &AAResult, evaluation_storage& storage);
+		void evaluateAAResultOnFunction(LLVMFunction& F, llvm::AAResults& AAResult, boaaa::EvaluationContainer& container);
 
 		void printResult(std::ostream &stream);
+
+		//UFM& getUnionFindMap() { return m_ufm; }
 
 	private:
 		int64_t FunctionCount;

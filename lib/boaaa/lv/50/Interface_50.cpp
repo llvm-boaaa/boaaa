@@ -84,6 +84,10 @@ bool DLInterface50::loadModule(uint64_t module_file_hash)
 	pm.run(*context.loaded_module);
 	cp->printResult(*context.basic_ostream);
 
+	//scan pointers for evaluation
+	context.relevant_pointers = std::map<uint64_t, std::unique_ptr<EvaluationContainer>>();
+	EvaluationPassImpl::scanPointers(*context.loaded_module, context.relevant_pointers);
+
 	return true;
 }
 
@@ -115,6 +119,10 @@ bool DLInterface50::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	pm.run(*context.loaded_module);
 	cp->printResult(*context.basic_ostream);
 
+	//scan pointers for evaluation
+	context.relevant_pointers = std::map<uint64_t, std::unique_ptr<EvaluationContainer>>();
+	EvaluationPassImpl::scanPointers(*context.loaded_module, context.relevant_pointers);
+
 	return true;
 }
 
@@ -124,6 +132,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 
 	auto run = [=](auto* pass) {
 		llvm::legacy::PassManager pm;
+		pass->setContext(&context);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
 		pass->printResult(*context.basic_ostream);

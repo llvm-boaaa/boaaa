@@ -7,8 +7,9 @@
 #include "include_versions/LLVM_FunctionPass.inc"
 
 #include "boaaa/lv/EvaluationPass.h"
-#include "boaaa/support/select_type.h"
 #include "boaaa/lv/TimePass.h"
+#include "boaaa/lv/version_context.h"
+#include "boaaa/support/select_type.h"
 
 //include analysis
 #include "llvm/Analysis/BasicAliasAnalysis.h"
@@ -28,6 +29,7 @@ namespace boaaa {
 		{
 		private:
 			EvaluationPassImpl* impl;
+			version_context* context;
 
 		public:
 			EvalModulePass(char ID) : LLVMModulePass(ID) { impl = new EvaluationPassImpl(); }
@@ -39,7 +41,7 @@ namespace boaaa {
 				auto& WrapperPass = getAnalysis<boaaa::TimePass<PASS>>();
 				llvm::AAResults result(TLI.getTLI());
 				result.addAAResult(WrapperPass.getResult());
-				impl->evaluateAAResultOnModule(M, result);
+				impl->evaluateAAResultOnModule(M, result, context->relevant_pointers);
 				return false;
 			}
 
@@ -49,6 +51,8 @@ namespace boaaa {
 				AU.addRequired<boaaa::TimePass<PASS>>();
 				AU.setPreservesAll();
 			}
+
+			void setContext(version_context* _context) { context = _context; }
 
 			void printResult(std::ostream& stream) {
 				impl->printResult(stream);
@@ -60,6 +64,7 @@ namespace boaaa {
 		{
 		private:
 			EvaluationPassImpl* impl;
+			version_context* context;
 
 		public:
 			EvalFunctionPass(char ID) : LLVMFunctionPass(ID) { impl = new EvaluationPassImpl(); }
@@ -71,7 +76,7 @@ namespace boaaa {
 				auto& WrapperPass = getAnalysis<boaaa::TimePass<PASS>>();
 				llvm::AAResults result(TLI.getTLI());
 				result.addAAResult(WrapperPass.getResult());
-				impl->evaluateAAResultOnFunction(F, result);
+				impl->evaluateAAResultOnFunction(F, result, *context->relevant_pointers[F.getGUID()]);
 				return false;
 			}
 
@@ -81,6 +86,8 @@ namespace boaaa {
 				AU.addRequired<boaaa::TimePass<PASS>>();
 				AU.setPreservesAll();
 			}
+
+			void setContext(version_context* _context) { context = _context; }
 
 			void printResult(std::ostream& stream) {
 				impl->printResult(stream);
@@ -129,7 +136,8 @@ namespace boaaa {
     INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
     INITIALIZE_PASS_DEPENDENCY(analysisname)                                                        \
     INITIALIZE_PASS_END(passname, arg, help, false, true)											\
-    passname::passname() : boaaa::detail::select_eval_pass_t<analysisname>(ID)                      \
+    passname::passname()													\
+			: boaaa::detail::select_eval_pass_t<analysisname>(ID)		                    \
     { initialize##passname##Pass(*PassRegistry::getPassRegistry()); }                               \
     boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
 #endif

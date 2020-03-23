@@ -7,56 +7,74 @@
 namespace boaaa {
 namespace support {
 
-	template<class Type, class Comperator = std::less<Type>>
+	template<class Type, class TypeComperator = std::less<Type>>
 	class UnionFind {
 	private:
-		using UF = typename UnionFind<Type, Comperator>;
-		Type& m_value;
-		UnionFind<Type>& m_union;
+		using UF = typename UnionFind<Type, TypeComperator>;
+
+		const Type& m_value;
+		UF* m_union;
 		size_t m_num;
-
+		TypeComperator m_comp;
 	public:
-		UnionFind(Type& value) : m_value(value),  m_union(this), m_num(0) {}
+		UnionFind(const Type& value, TypeComperator comp = TypeComperator()) : m_value(value), m_num(1), m_comp(comp) { m_union = this; }
+		~UnionFind() {}
 
-		UF& concat(UF& other) {
-			UF  p = parent();
-			UF op = other.parent();
-			//this and other are in same UnionFind, so no concat
-			if (Comperator(p, op) && Comperator(op, p)) return p;
+		UF* concat(UF& other) {
+			UF*  p = parent();
+			UF* op = other.parent();
+			//this and other are the same UnionFind, so no concat
+			if (p == op) return p;
 
-			if (p.size() < op.size()) 
+			if (p->size() < op->size()) 
 			{
-				p.m_union = op;
-				op.m_num  += p.m_num;
-				p.m_num   = 0;
+				p->parent(op);
+				op->m_num  += p->m_num;
+				p->m_num   = 0;
 			}
 			else 
 			{
-				op.m_union = p;
-				p.m_num    += op.m_num;
-				op.m_num   = 0;
+				op->parent(p);
+				p->m_num    += op->m_num;
+				op->m_num   = 0;
 			}
 			//if p is parent of UnionFind, it contains itself as parent, when not it contains the new head as parent.
-			return p.m_union;
+			return p->m_union;
 		}
 
-		UF& parent() {
-			if (m_union != this) m_union = m_union.parent();
+		void parent(UF* value) {
+			m_union = value;
+		}
+
+		UF* parent() {
+			if (m_union != this) m_union = m_union->parent();
 			return m_union;
 		}
 
 		size_t size() {
-			return parent().size();
+			if (m_union == this) return m_num;
+			return parent()->size();
+		}
+
+		const Type& value() {
+			return m_value;
+		}
+
+		operator const Type&() {
+			return value();
 		}
 	};
 
-	template<class Type, class Comperator = std::less<Type>>
+	template<class Type, class TypeComperator = std::less<Type>>
 	class UnionFindComparator {
 	private:
-		using UF = UnionFind<Type, Comperator>;
+		using UF = UnionFind<Type, TypeComperator>;
+		TypeComperator m_comp;
 	public:
-		bool operator() (const UF& lhs, const UF& rhs) const {
-			return Comperator(lhs.parent(), rhs.parent());
+		UnionFindComparator(TypeComperator comp = TypeComperator()) : m_comp(comp) {}
+
+		bool operator() (UF& lhs, UF& rhs) const {
+			return m_comp(lhs.parent(), rhs.parent());
 		}
 	};
 

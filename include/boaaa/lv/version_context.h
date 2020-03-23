@@ -1,10 +1,8 @@
 #ifndef BOAAA_VERSION_CONTEXT_H
 #define BOAAA_VERSION_CONTEXT_H
 
-#include <memory>
-#include <type_traits>
-
 #include "boaaa/lv/sup_LLVM_VERSION.h"
+#include "boaaa/lv/EvaluationContainer.h"
 #include "boaaa/vp/StringRefVersionParser.h"
 
 namespace boaaa {
@@ -22,6 +20,10 @@ namespace boaaa {
 #ifdef LLVM_VERSION_ERROR_CODE
 LLVM_VERSION_ERROR_CODE
 #endif
+
+#include <memory>
+#include <type_traits>
+#include <map>
 
 /*
 #ifdef LLVM_VERSION_40
@@ -61,6 +63,8 @@ using BOAAAStringRefVP = boaaa::StringRefVP90;
 
 namespace boaaa {
 
+	typedef std::map<uint64_t, std::unique_ptr<boaaa::EvaluationContainer>> evaluation_storage;
+
 	struct version_context
 	{
 //-------------------------------------------------------LLVM_VERSION dependent
@@ -68,12 +72,15 @@ namespace boaaa {
 		BOAAAStringRefVP* string_ref_vp;
 		std::unique_ptr<LLVMModule> loaded_module;
 		std::unique_ptr<LLVMLLVMContext> context_to_module;
+		evaluation_storage relevant_pointers;
+		//std::map< aa_id, std::map<uint64_t, EvaluationContainer>> container;
+
 
 //-----------------------------------------------------LLVM_VERSION independent
 		std::ostream* basic_ostream;
 		bool del_strm_after_use;
 		
-		version_context()
+		version_context() : relevant_pointers()
 		{
 			string_ref_vp = nullptr;
 			loaded_module.reset(nullptr);

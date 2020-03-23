@@ -1,5 +1,10 @@
 #include "boaaa/lv/EvaluationPass.h"
 
+#define DEBUG
+#ifdef DEBUG
+#include <set>
+#endif
+
 using namespace boaaa;
 
 bool isInterestingPointer(LLVMValue* V) {
@@ -18,166 +23,206 @@ std::string formatPercentage(uint64_t count, uint64_t total) {
     return out;
 }
 
-void EvaluationPassImpl::evaluateAAResultOnModule(LLVMModule& M, LLVMAAResults &AAResult) {
-    for (LLVMFunction& F : M)
-        evaluateAAResultOnFunction(F, AAResult);                 
+void EvaluationPassImpl::scanPointers(LLVMModule& M, evaluation_storage& storage)
+{
+    using namespace llvm;
+    llvm::DataLayout DL = M.getDataLayout();
+
+    for (LLVMFunction& F : M) {
+        LLVMSetVector<LLVMValue*> Pointers;
+        LLVMSmallSetVector<LLVMCallUnifyer*, 16> Calls;
+        LLVMSetVector<LLVMValue*> Loads;
+        LLVMSetVector<LLVMValue*> Stores;
+
+        //argument pointes
+        for (auto& I : F.args())
+            if (I.getType()->isPointerTy())
+                Pointers.insert(&I);
+
+        for (auto I = inst_begin(F), E = inst_end(F); I != E; ++I) {
+            if (I->getType()->isPointerTy()) // Add all pointer instructions.
+                Pointers.insert(&*I);
+            if (isa<LLVMLoadInst>(&*I))
+                Loads.insert(&*I);
+            if (isa<LLVMStoreInst>(&*I))
+                Stores.insert(&*I);
+            LLVMInstruction& Inst = *I;
+#if LLVM_VERSION < 80
+            //create on heap to use operator bool and then create obj again on heap to store it
+            if (auto Call_ = CallSite(&Inst)) {
+                auto* Call = new CallSite(&Inst);
+#else
+            if (auto* Call = dyn_cast<LLVMCallUnifyer>(&Inst)) {
+#endif
+                LLVMValue* Callee = Call->getCalledValue();
+                // Skip actual functions for direct function calls.
+                if (!isa<LLVMFunction>(Callee) && isInterestingPointer(Callee))
+                    Pointers.insert(Callee);
+                // Consider formals.
+                for (LLVMUse& DataOp : Call->data_ops())
+                    if (isInterestingPointer(DataOp))
+                        Pointers.insert(DataOp);
+                Calls.insert(Call);
+            }
+            else {
+                // Consider all operands.
+                for (LLVMInstruction::op_iterator OI = Inst.op_begin(), OE = Inst.op_end();
+                    OI != OE; ++OI)
+                    if (isInterestingPointer(*OI))
+                        Pointers.insert(*OI);
+            }
+        }
+
+        using PLS = boaaa::EvaluationContainer::PLS;
+
+        storage.insert({ F.getGUID(), std::unique_ptr<boaaa::EvaluationContainer>(
+            new boaaa::EvaluationContainer(Pointers.size(), Loads.size(), Stores.size(), Calls.size())) });
+        boaaa::EvaluationContainer& c = *storage[F.getGUID()];
+        using pvec = std::vector<LLVMValue*>;
+
+        pvec vec_p = Pointers.takeVector();
+        pvec vec_l = Loads.takeVector();
+        pvec vec_s = Stores.takeVector();
+        LLVMSmallVector<LLVMCallUnifyer*, 16> vec_c = Calls.takeVector();
+
+
+        assert((c.store(PLS::P, vec_p.begin(), vec_p.end())));
+        assert((c.store(PLS::L, vec_l.begin(), vec_l.end())));
+        assert((c.store(PLS::S, vec_s.begin(), vec_s.end())));
+        assert((c.storeCalls(vec_c.begin(), vec_c.end())));
+
+#if LLVM_VERSION < 80
+        //deletes all pointers before array gets destroyed, because autodelete gets destroyed before Calls,
+        //only needed in 71 and earlier because in newer version Calls get casted and not created new. 
+        c.autodeleter = new boaaa::support::AutoDeleter<LLVMCallUnifyer**>(c.calls, [num = c.num_calls](LLVMCallUnifyer** calls) { for (int i = 0; i < num; i++) delete calls[i]; });
+#endif
+    }
 }
 
-void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResults& AAResult)
+void EvaluationPassImpl::evaluateAAResultOnModule(LLVMModule& M, LLVMAAResults& AAResult, evaluation_storage& storage)
+{
+    for (LLVMFunction& F : M)
+        evaluateAAResultOnFunction(F, AAResult, *storage[F.getGUID()]);
+}
+
+void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResults& AAResult, boaaa::EvaluationContainer& container)
 {
     using namespace llvm;
     llvm::DataLayout DL = F.getParent()->getDataLayout();
 
-    LLVMSetVector<LLVMValue*> Pointers;
-    LLVMSmallSetVector<LLVMCallUnifyer*, 16> Calls;
-#if LLVM_VERSION < 80
-    //deletes all pointers before vector gets destroyed, because autodelete gets destroyed before Calls,
-    //only needed in 70 and earlier because in newer version Calls get casted and not created new(only for evaluation). 
-    boaaa::support::AutoDeleter<LLVMSmallSetVector<LLVMCallUnifyer*, 16>> 
-           autodelete(Calls, [](LLVMSmallSetVector<LLVMCallUnifyer*, 16> v) {for (LLVMCallUnifyer* p : v) delete p; });
-#endif
-    LLVMSetVector<LLVMValue*> Loads;
-    LLVMSetVector<LLVMValue*> Stores;
-
     ++FunctionCount;
 
-    //argument pointes
-    for (auto& I : F.args())
-        if (I.getType()->isPointerTy())
-            Pointers.insert(&I);
-
-    for (auto I = inst_begin(F), E = inst_end(F); I != E; ++I) {
-        if (I->getType()->isPointerTy()) // Add all pointer instructions.
-            Pointers.insert(&*I);
-        if (isa<LLVMLoadInst>(&*I))
-            Loads.insert(&*I);
-        if (isa<LLVMStoreInst>(&*I))
-            Stores.insert(&*I);
-        LLVMInstruction& Inst = *I;
+    // iterate over the worklist, and run the full (n^2)/2 disambiguations 
+    for (int y = 0; y < container.num_pointers; y++) {
+        LLVMValue* I1 = container.pointers[y];
 #if LLVM_VERSION < 80
-        //create on heap to use operator bool and then create obj again on heap to store it
-        if (auto Call_ = CallSite(&Inst)) {
-            auto* Call = new CallSite(&Inst);
-#else
-        if (auto* Call = dyn_cast<LLVMCallUnifyer>(&Inst)) {
-#endif
-            LLVMValue* Callee = Call->getCalledValue();
-            // Skip actual functions for direct function calls.
-            if (!isa<LLVMFunction>(Callee) && isInterestingPointer(Callee))
-                Pointers.insert(Callee);
-            // Consider formals.
-            for (LLVMUse& DataOp : Call->data_ops())
-                if (isInterestingPointer(DataOp))
-                    Pointers.insert(DataOp);
-            Calls.insert(Call);
-        }
-        else {
-            // Consider all operands.
-            for (LLVMInstruction::op_iterator OI = Inst.op_begin(), OE = Inst.op_end();
-                OI != OE; ++OI)
-                if (isInterestingPointer(*OI))
-                    Pointers.insert(*OI);
-        }
-    }
-    
-#if LLVM_VERSION < 80
-    for (SetVector<Value*>::iterator I1 = Pointers.begin(), E = Pointers.end();
-        I1 != E; ++I1) {
-        uint64_t I1Size = MemoryLocation::UnknownSize;
-        Type* I1ElTy = cast<PointerType>((*I1)->getType())->getElementType();
+        uint64_t I1Size = LLVMMemoryLocation::UnknownSize;
+        LLVMType* I1ElTy = cast<PointerType>(I1->getType())->getElementType();
         if (I1ElTy->isSized()) I1Size = DL.getTypeStoreSize(I1ElTy);
-
-        for (SetVector<Value*>::iterator I2 = Pointers.begin(); I2 != I1; ++I2) {
-            uint64_t I2Size = MemoryLocation::UnknownSize;
-            Type* I2ElTy = cast<PointerType>((*I2)->getType())->getElementType();
-            if (I2ElTy->isSized()) I2Size = DL.getTypeStoreSize(I2ElTy);
-#else
-    // iterate over the worklist, and run the full (n^2)/2 disambiguations
-    for (LLVMSetVector<LLVMValue*>::iterator I1 = Pointers.begin(), E = Pointers.end();
-        I1 != E; ++I1) {
+#else 
         auto I1Size = LLVMLocationSize::unknown();
-        LLVMType* I1ElTy = cast<PointerType>((*I1)->getType())->getElementType();
+        LLVMType* I1ElTy = cast<PointerType>(I1->getType())->getElementType();
         if (I1ElTy->isSized())
             I1Size = LLVMLocationSize::precise(DL.getTypeStoreSize(I1ElTy));
-
-        for (LLVMSetVector<LLVMValue*>::iterator I2 = Pointers.begin(); I2 != I1; ++I2) {
+#endif
+        for (int x = 0; x < y; x++) {
+            LLVMValue* I2 = container.pointers[x];
+#if LLVM_VERSION < 80
+            uint64_t I2Size = LLVMMemoryLocation::UnknownSize;
+            LLVMType* I2ElTy = cast<PointerType>(I2->getType())->getElementType();
+            if (I2ElTy->isSized()) I2Size = DL.getTypeStoreSize(I2ElTy);
+#else
             auto I2Size = LLVMLocationSize::unknown();
-            LLVMType* I2ElTy = cast<PointerType>((*I2)->getType())->getElementType();
+            LLVMType* I2ElTy = cast<PointerType>(I2->getType())->getElementType();
             if (I2ElTy->isSized())
                 I2Size = LLVMLocationSize::precise(DL.getTypeStoreSize(I2ElTy));
 #endif
-            LLVMAliasResult AR = AAResult.alias(*I1, I1Size, *I2, I2Size);
+            LLVMAliasResult AR = AAResult.alias(I1, I1Size, I2, I2Size);
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
+                //m_no_alias_sets.concat(I1, I2);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
+                //m_alias_sets.concat(I1, I2);
                 break;
             case MustAlias:
                 ++MustAliasCount;
+                //m_alias_sets.concat(I1, I2);
                 break;
             }
         }
     }
 
     // iterate over all pairs of load, store
-    for (LLVMValue* Load : Loads) {
-        for (LLVMValue* Store : Stores) {
-            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMLoadInst>(Load)),
-                LLVMMemoryLocation::get(cast<LLVMStoreInst>(Store)));
+    for (int y = 0; y < container.num_loads; ++y) {
+        LLVMValue* load = container.loads[y];
+        for (int x = 0; x < container.num_stores; ++x) {
+            LLVMValue* store = container.stores[x];
+            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMLoadInst>(load)),
+                LLVMMemoryLocation::get(cast<LLVMStoreInst>(store)));
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
+                //m_no_alias_sets.concat(load, store);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
+                //m_alias_sets.concat(load, store);
                 break;
             case MustAlias:
                 ++MustAliasCount;
+                //m_alias_sets.concat(Load, Store);
                 break;
             }
         }
     }
 
     // iterate over all pairs of store, store
-    for (LLVMSetVector<LLVMValue*>::iterator I1 = Stores.begin(), E = Stores.end();
-        I1 != E; ++I1) {
-        for (LLVMSetVector<LLVMValue*>::iterator I2 = Stores.begin(); I2 != I1; ++I2) {
-            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMStoreInst>(*I1)),
-                LLVMMemoryLocation::get(cast<LLVMStoreInst>(*I2)));
+    for (int y = 0; y < container.num_stores; ++y) {
+        LLVMValue* I1 = container.stores[y];
+        for (int x = 0; x < y; ++x) {
+            LLVMValue* I2 = container.stores[x];
+            LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMStoreInst>(I1)),
+                LLVMMemoryLocation::get(cast<LLVMStoreInst>(I2)));
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
+                //m_no_alias_sets.concat(*I1, *I2);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
+                //m_alias_sets.concat(*I1, *I2);
                 break;
             case MustAlias:
                 ++MustAliasCount;
+                //m_alias_sets.concat(*I1, *I2);
                 break;
             }
         }
     }
 
     // Mod/ref alias analysis: compare all pairs of calls and values
-    for (LLVMCallUnifyer* Call : Calls) {
+    for (int y = 0; y < container.num_calls; ++y) {
+        LLVMCallUnifyer* call = container.calls[y];
+        for (int x = 0; x < container.num_pointers; ++x) {
+            LLVMValue* pointer = container.pointers[x];
 #if LLVM_VERSION < 80
-        for (auto Pointer : Pointers) {
-            uint64_t Size = MemoryLocation::UnknownSize;
-            Type* ElTy = cast<PointerType>(Pointer->getType())->getElementType();
+            uint64_t Size = LLVMMemoryLocation::UnknownSize;
+            LLVMType* ElTy = cast<PointerType>(pointer->getType())->getElementType();
             if (ElTy->isSized()) Size = DL.getTypeStoreSize(ElTy);
 
-            switch (AAResult.getModRefInfo(llvm::ImmutableCallSite(Call->getInstruction()), Pointer, Size)) {
+            switch (AAResult.getModRefInfo(llvm::ImmutableCallSite(call->getInstruction()), pointer, Size)) {
             case MRI_NoModRef:
                 ++NoModRefCount;
                 break;
@@ -193,12 +238,11 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             }
         }
 #else
-        for (auto Pointer : Pointers) {
             auto Size = LLVMLocationSize::unknown();
-            LLVMType* ElTy = cast<PointerType>(Pointer->getType())->getElementType();
+            LLVMType* ElTy = cast<PointerType>(pointer->getType())->getElementType();
             if (ElTy->isSized())
                 Size = LLVMLocationSize::precise(DL.getTypeStoreSize(ElTy));
-            switch (AAResult.getModRefInfo(Call, Pointer, Size)) {
+            switch (AAResult.getModRefInfo(call, pointer, Size)) {
             case ModRefInfo::NoModRef:
                 ++NoModRefCount;
                 break;
@@ -230,10 +274,12 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
     
 
     // Mod/ref alias analysis: compare all pairs of calls
-    for (auto CallA : Calls) {
-        for (auto CallB : Calls) {
-            if (CallA == CallB)
+    for (int y = 0; y < container.num_calls; ++y) {
+        LLVMCallUnifyer* CallA = container.calls[y];
+        for (int x = 0; x < container.num_calls; ++x) {
+            if (y == x)
                 continue;
+            LLVMCallUnifyer* CallB = container.calls[x];
 #if LLVM_VERSION < 80
                 switch (AAResult.getModRefInfo(*CallA, *CallB)) {
             case MRI_NoModRef:
