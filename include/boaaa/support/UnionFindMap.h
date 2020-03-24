@@ -5,7 +5,8 @@
 
 #include <functional>
 #include <list>
-#include <map>
+#include <set>
+#include <utility>
 
 namespace boaaa {
 namespace support {
@@ -14,82 +15,76 @@ namespace support {
 #define _NODISCARD [[nodiscard]]
 #endif
 
-	template<class KeyReference, class Key>
-	struct KeyHelper {
-		using  _Key          = typename std::conditional_t<std::is_pointer<Key>::value, Key, Key&>;
-		typedef KeyReference key_component;
-		typedef Key			 key_value;
-
-		typedef std::function<KeyReference(const _Key)> generateKey;
-
-		KeyHelper(generateKey gen = 
-			//assuming Key == KeyReference it is well defined, otherwise assuming Key contains operator KeyReference operator (Key value)
-			[](const _Key value) -> KeyReference { return value; }) : m_gen(gen) {}
-
-		KeyReference gen(const _Key key) {
-			return m_gen(key);
-		}
-	private:
-		generateKey m_gen;
-	};
-
-	template<class Key, class KeyReference = Key, class KeyComperator = std::less<Key>, class KeyReferenceComperator = std::less<KeyReference>>
+	template<class Key, class KeyComperator = std::less<Key>>
 	class UnionFindMap {
 	private:
-		using _Key						= typename std::conditional_t<std::is_pointer<Key>::value, Key, Key&>;
-		using UF						= typename UnionFind<Key, KeyComperator>;
-		using UFM						= typename std::map<KeyReference, UF>;
-		using UFL						= typename std::list<UF>;
-		using iterator					= typename UFM::iterator;
-		using const_iterator			= typename UFM::const_iterator;
-		using const_reverse_iterator	= typename UFM::const_reverse_iterator;
-		using head_iterator				= typename UFL::const_iterator;
+		using _Key = typename std::conditional_t<std::is_pointer<Key>::value || std::is_integral<Key>::value, Key, Key&>;
+		using UF = typename UnionFind<Key, KeyComperator>;
+		using UFM = typename std::map<Key, UF*>;
+		using UFL = typename std::list<UF*>;
+		using iterator = typename UFM::iterator;
+		using const_iterator = typename UFM::const_iterator;
+		using const_reverse_iterator = typename UFM::const_reverse_iterator;
+		using head_iterator = typename UFL::const_iterator;
 
 		//don`t use names defined above because of autocomplete of vs
 
 		UFM m_ufs;
 		UFL m_heads;
-		KeyHelper<KeyReference, Key> m_helper;
+		UnionFindComparator<Key, KeyComperator> m_uf_comp;
 
-		constexpr auto hash(const _Key value) -> KeyReference {
-			return m_helper.gen(value);
-		}
-
-		void _add(UF value, bool ishead = true) {
-			if (contains(value)) return;
-			m_ufs.insert({hash( value.value()), value }); //UF contains key inside it data and asigns it when it is needed as key-type
+		UF* _add(UF* uf, bool ishead = true) {
+			iterator it = m_ufs.find(uf->value());
+			if (it != m_ufs.end())
+			{
+				delete uf;
+				return it->second;
+			}
+			m_ufs.insert(std::make_pair(uf->value(), uf)); //UF contains key inside it data and asigns it when it is needed as key-type
 			if (ishead)
-				m_heads.push_back(value);
+				m_heads.push_back(uf);
+			return uf;
 		}
 	public:
 
-		UnionFindMap(KeyHelper<KeyReference, Key> _KeyHelper = KeyHelper<KeyReference, Key>()) : m_ufs(), m_heads(), m_helper(_KeyHelper) {}
+		UnionFindMap() : m_ufs(), m_heads(), m_uf_comp() {}
+
+		~UnionFindMap()
+		{
+			m_heads.clear();
+			for (auto it = m_ufs.begin(), end = m_ufs.end(); it != end; ++it)
+				delete it->second;
+			m_ufs.clear();
+		}
 
 		void add(_Key value) {
-			_add(UF(value));
+			_add(new UF(value));
 		}
 
 		void concat(_Key lhs, _Key rhs) {
 
-			auto init_or_asign = [=](_Key val, bool& hs) -> UF& {
-				iterator f_hs = m_ufs.find(hash(val));
-				if (f_hs != end()) { hs = true; return f_hs->second; }
-				UF uf = UF(val);
-				_add(uf, false);
-				return uf;
+			auto init_or_asign = [=](_Key val) -> UF* {
+				iterator f_hs = m_ufs.find(val);
+				if (f_hs != end()) { return f_hs->second->parent(); }
+				return _add(new UF(val), false);
 			};
 
-			bool lhs_in = false;
-			bool rhs_in = false;
-			UF _lhs = init_or_asign(lhs, lhs_in);
-			UF _rhs = init_or_asign(rhs, rhs_in);
-			if (&_lhs == &_rhs) return;
-			UF* _res = _lhs.concat(_rhs);
-			if (!contains(*_res)) _add(*_res); //assures _res is inside the map, !important use _add, because not construct _res again.
-			if (_res != &_lhs) m_heads.remove_if([=](const UF& other) { return &_lhs == &other; }); //compare pointers
-			if (_res != &_rhs) m_heads.remove_if([=](const UF& other) { return &_rhs == &other; });
-			if (!lhs_in) _add(_lhs, false); //add lhs or rhs to list if not onside the map
-			if (!rhs_in) _add(_rhs, false);
+			UF* _lhs = init_or_asign(lhs);
+			UF* _rhs = init_or_asign(rhs);
+			if (!m_uf_comp(*_lhs, *_rhs) && !m_uf_comp(*_rhs, *_lhs)) return;
+			UF* _res = _lhs->concat(_rhs);
+			if (!m_uf_comp(*_res, *_lhs) && m_uf_comp(*_lhs, *_res))
+			{
+				m_heads.remove(_rhs);
+			}
+			else if (!m_uf_comp(*_res, *_rhs) && !m_uf_comp(*_rhs, *_res))
+			{
+				m_heads.remove(_lhs);
+			}
+			else
+			{
+				assert(false); //one cases of above should get excecuted
+			}
 		}
 
 		size_t size() {

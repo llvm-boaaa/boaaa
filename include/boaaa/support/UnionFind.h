@@ -16,13 +16,18 @@ namespace support {
 		UF* m_union;
 		size_t m_num;
 		TypeComperator m_comp;
+
+		void parent(UF* value) { m_union = value; }
+
 	public:
 		UnionFind(const Type& value, TypeComperator comp = TypeComperator()) : m_value(value), m_num(1), m_comp(comp) { m_union = this; }
 		~UnionFind() {}
 
-		UF* concat(UF& other) {
+		UnionFind(const UnionFind<Type, TypeComperator>& obj) = delete;
+
+		UF* concat(UF* other) {
 			UF*  p = parent();
-			UF* op = other.parent();
+			UF* op = other->parent();
 			//this and other are the same UnionFind, so no concat
 			if (p == op) return p;
 
@@ -41,13 +46,14 @@ namespace support {
 			//if p is parent of UnionFind, it contains itself as parent, when not it contains the new head as parent.
 			return p->m_union;
 		}
-
-		void parent(UF* value) {
-			m_union = value;
-		}
-
+		
 		UF* parent() {
 			if (m_union != this) m_union = m_union->parent();
+			return m_union;
+		}
+
+		const UF* parent() const {
+			if (m_union != this) return m_union->parent();
 			return m_union;
 		}
 
@@ -60,21 +66,28 @@ namespace support {
 			return m_value;
 		}
 
+		const Type& value() const {
+			return m_value;
+		}
+
 		operator const Type&() {
+			return value();
+		}
+
+		operator const Type& () const {
 			return value();
 		}
 	};
 
 	template<class Type, class TypeComperator = std::less<Type>>
-	class UnionFindComparator {
+	struct UnionFindComparator {
 	private:
 		using UF = UnionFind<Type, TypeComperator>;
-		TypeComperator m_comp;
 	public:
-		UnionFindComparator(TypeComperator comp = TypeComperator()) : m_comp(comp) {}
 
-		bool operator() (UF& lhs, UF& rhs) const {
-			return m_comp(lhs.parent(), rhs.parent());
+		constexpr bool operator ()(const UF& lhs, const UF& rhs) const {
+			static TypeComperator comp = TypeComperator();
+			return comp(lhs.parent()->value(), rhs.parent()->value());
 		}
 	};
 

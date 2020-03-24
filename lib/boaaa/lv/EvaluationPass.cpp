@@ -101,14 +101,22 @@ void EvaluationPassImpl::scanPointers(LLVMModule& M, evaluation_storage& storage
 
 void EvaluationPassImpl::evaluateAAResultOnModule(LLVMModule& M, LLVMAAResults& AAResult, evaluation_storage& storage)
 {
+    //no checkInitSets call, becuase unneeded, call always evaluateAAResultOnFunction
     for (LLVMFunction& F : M)
         evaluateAAResultOnFunction(F, AAResult, *storage[F.getGUID()]);
 }
 
 void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResults& AAResult, boaaa::EvaluationContainer& container)
 {
+    checkInitSets();
+    unionfind_map* aa_set = initAASet(F.getGUID());
+    unionfind_map* no_aa_set = initNoAASets(F.getGUID());
     using namespace llvm;
     llvm::DataLayout DL = F.getParent()->getDataLayout();
+
+    size_t pointer_offset = 0;
+    size_t load_offset = container.num_pointers;
+    size_t store_offset = container.num_pointers + container.num_loads;
 
     ++FunctionCount;
 
@@ -141,18 +149,18 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
-                //m_no_alias_sets.concat(I1, I2);
+                no_aa_set->concat(pointer_offset + x, pointer_offset + y);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
-                //m_alias_sets.concat(I1, I2);
+                aa_set->concat(pointer_offset + x, pointer_offset + y);
                 break;
             case MustAlias:
                 ++MustAliasCount;
-                //m_alias_sets.concat(I1, I2);
+                aa_set->concat(pointer_offset + x, pointer_offset + y);
                 break;
             }
         }
@@ -168,18 +176,18 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
-                //m_no_alias_sets.concat(load, store);
+                no_aa_set->concat(store_offset + x, load_offset + y);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
-                //m_alias_sets.concat(load, store);
+                aa_set->concat(store_offset + x, load_offset + y);
                 break;
             case MustAlias:
                 ++MustAliasCount;
-                //m_alias_sets.concat(Load, Store);
+                aa_set->concat(store_offset + x, load_offset + y);
                 break;
             }
         }
@@ -195,18 +203,18 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
-                //m_no_alias_sets.concat(*I1, *I2);
+                no_aa_set->concat(store_offset + x, store_offset + y);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
-                //m_alias_sets.concat(*I1, *I2);
+                aa_set->concat(store_offset + x, store_offset + y);
                 break;
             case MustAlias:
                 ++MustAliasCount;
-                //m_alias_sets.concat(*I1, *I2);
+                aa_set->concat(store_offset + x, store_offset + y);
                 break;
             }
         }

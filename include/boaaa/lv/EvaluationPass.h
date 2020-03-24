@@ -64,50 +64,81 @@ LLVM_VERSION_ERROR_CODE
 
 namespace boaaa {
 
-	namespace {
-		const auto LLVMValueHashFunction = [](const LLVMValue* value) -> unsigned {
-			return LLVMDenseMapInfo<const LLVMValue*>::getHashValue(value);
-		};
-
-		class LLVMValueUnionFindComperator 
-		{
-		public:
-			LLVMValueUnionFindComperator() = default;
-			bool operator()(const LLVMValue* lhs, const LLVMValue* rhs) const {
-				return LLVMValueHashFunction(lhs) < LLVMValueHashFunction(rhs);
-			}
-		};
-	}
-
 	class EvaluationPassImpl
 	{
-	private:
-		using UFM = boaaa::support::UnionFindMap<LLVMValue*, unsigned, boaaa::support::UnionFindComparator<LLVMValue*, LLVMValueUnionFindComperator>>;
-		using UF = boaaa::support::UnionFind<LLVMValue*>;
-
-		UFM m_alias_sets;
-		UFM m_no_alias_sets;
     public:
 		EvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
 			MustAliasCount(), NoModRefCount(), ModCount(), RefCount(), ModRefCount(), MustCount(), 
-			MustRefCount(), MustModCount(), MustModRefCount(), 
-			m_alias_sets(boaaa::support::KeyHelper<unsigned, LLVMValue*>(LLVMValueHashFunction)),
-			m_no_alias_sets(boaaa::support::KeyHelper<unsigned, LLVMValue*>(LLVMValueHashFunction)) {};
+			MustRefCount(), MustModCount(), MustModRefCount(),
+			delete_aa_set(false), delete_no_aa_set(false), alias_set(nullptr), no_alias_set(nullptr) {};
+
+		~EvaluationPassImpl() { deleteSets(); }
 
 		static void scanPointers(LLVMModule& M, evaluation_storage& storage);
 
-        void evaluateAAResultOnModule(LLVMModule& M, llvm::AAResults &AAResult, evaluation_storage& storage);
-		void evaluateAAResultOnFunction(LLVMFunction& F, llvm::AAResults& AAResult, boaaa::EvaluationContainer& container);
+		void deleteSets() {
+			if (alias_set && delete_aa_set) {
+				delete alias_set;
+				delete_aa_set = false;
+			}
+			if (no_alias_set && delete_no_aa_set) {
+				delete no_alias_set;
+				delete_no_aa_set = false;
+			}
+		}
 
-		void printResult(std::ostream &stream);
+		void setSets(evaluation_sets* alias, evaluation_sets* no_alias) {
+			deleteSets();
+			alias_set = alias;
+			no_alias_set = no_alias;
+		}
+
+        void evaluateAAResultOnModule(LLVMModule& M, LLVMAAResults &AAResult, evaluation_storage& storage);
+		void evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResults& AAResult, EvaluationContainer& container);
+
+		void printResult(::std::ostream &stream);
 
 		//UFM& getUnionFindMap() { return m_ufm; }
 
 	private:
+		void checkInitSets() 
+		{
+			if (!alias_set)
+			{
+				delete_aa_set = true;
+				alias_set = new evaluation_sets();
+			}
+			if (!no_alias_set)
+			{
+				delete_no_aa_set = true;
+				no_alias_set = new evaluation_sets();
+			}
+		}
+
+		//assumes alias_set and no_alias_set are initalized
+		unionfind_map* initAASet(uint64_t GUID)
+		{
+			return alias_set->insert(std::make_pair(
+				GUID, std::unique_ptr<unionfind_map>(new unionfind_map())
+				)).first->second.get();
+		}
+
+		unionfind_map* initNoAASets(uint64_t GUID)
+		{
+			return no_alias_set->insert(std::make_pair(
+				GUID, std::unique_ptr<unionfind_map>(new unionfind_map())
+				)).first->second.get();
+		}
+
 		int64_t FunctionCount;
 		int64_t NoAliasCount, MayAliasCount, PartialAliasCount, MustAliasCount;
 		int64_t NoModRefCount, ModCount, RefCount, ModRefCount;
 		int64_t MustCount, MustRefCount, MustModCount, MustModRefCount;
+
+		evaluation_sets* alias_set;
+		evaluation_sets* no_alias_set;
+		bool delete_aa_set;
+		bool delete_no_aa_set;
 	};
 }
 

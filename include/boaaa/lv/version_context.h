@@ -1,9 +1,11 @@
 #ifndef BOAAA_VERSION_CONTEXT_H
 #define BOAAA_VERSION_CONTEXT_H
 
+#include "boaaa/commandline_types.h"
 #include "boaaa/lv/sup_LLVM_VERSION.h"
 #include "boaaa/lv/EvaluationContainer.h"
 #include "boaaa/vp/StringRefVersionParser.h"
+#include "boaaa/support/UnionFindMap.h"
 
 namespace boaaa {
 	struct version_context;
@@ -23,47 +25,16 @@ LLVM_VERSION_ERROR_CODE
 
 #include <memory>
 #include <type_traits>
-#include <map>
-
-/*
-#ifdef LLVM_VERSION_40
-//#include "llvm/IR/Module.h"
-#include "boaaa/lv/40/StringRefVersionParser40.h"
-using BOAAAStringRefVP = boaaa::StringRefVP40;
-#endif
-#ifdef LLVM_VERSION_50
-//#include "llvm/IR/Module.h"
-#include "boaaa/lv/50/StringRefVersionParser50.h"
-using BOAAAStringRefVP = boaaa::StringRefVP50;
-#endif
-#ifdef LLVM_VERSION_90
-//#include "llvm/IR/Module.h"
-#include "boaaa/lv/90/StringRefVersionParser90.h"
-using BOAAAStringRefVP = boaaa::StringRefVP90;
-#endif
-*/
-
-//using LLVMModule = llvm::Module;
-	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ combine versions
-//define BOAAAStringRefVP
-//#include "include_versions/BOAAA_StringRefVP.inc"
-
-//define LLVMModule
-//#include "include_versions/LLVM_Module.inc"
-
-
-#ifdef LLVM_VERSION_ERROR_CODE
-	LLVM_VERSION_ERROR_CODE
-#endif
-
-//#define BOAAA_MACROLIST_LIST_VER_MAX 0002
-//#include "boaaa/lv/macrolist/MACROLIST_EVAL.inc"
+#include <set>
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 namespace boaaa {
-
-	typedef std::map<uint64_t, std::unique_ptr<boaaa::EvaluationContainer>> evaluation_storage;
+	
+	typedef std::map<uint64_t, std::unique_ptr<boaaa::EvaluationContainer>>				evaluation_storage;
+	typedef support::UnionFindMap<size_t>												unionfind_map;
+	typedef std::map<size_t,   std::unique_ptr<unionfind_map>>							evaluation_sets;
+	typedef std::map<aa_id,    std::unique_ptr<evaluation_sets>>						evaluation_aa_sets;
 
 	struct version_context
 	{
@@ -73,22 +44,27 @@ namespace boaaa {
 		std::unique_ptr<LLVMModule> loaded_module;
 		std::unique_ptr<LLVMLLVMContext> context_to_module;
 		evaluation_storage relevant_pointers;
-		//std::map< aa_id, std::map<uint64_t, EvaluationContainer>> container;
 
 
 //-----------------------------------------------------LLVM_VERSION independent
+		evaluation_aa_sets alias_sets;
+		evaluation_aa_sets no_alias_sets;
 		std::ostream* basic_ostream;
 		bool del_strm_after_use;
 		
-		version_context() : relevant_pointers()
+		version_context() : relevant_pointers(), alias_sets(), no_alias_sets()
 		{
 			string_ref_vp = nullptr;
 			loaded_module.reset(nullptr);
 			context_to_module.reset(nullptr);
-            basic_ostream = nullptr; //new dump_ostream(std::_Uninitialized::_Noinit);
+            basic_ostream = nullptr;
 			del_strm_after_use = false;
 		}
 
+		~version_context() {
+			if (string_ref_vp)
+				delete string_ref_vp;
+		}
 	};
 }
 
