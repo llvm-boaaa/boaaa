@@ -10,6 +10,7 @@
 #define LLVM_VERSION_90_INCLUDE "llvm/IR/InstrTypes.h"
 
 #define LLVM_VERSION_UNIFY using LLVMCallUnifyer =
+
 #define LLVM_VERSION_40_UNIFY llvm::CallSite
 #define LLVM_VERSION_50_UNIFY llvm::CallSite
 #define LLVM_VERSION_60_UNIFY llvm::CallSite

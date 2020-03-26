@@ -89,6 +89,9 @@ static char* boaaa_string = "boaaa";
 
 std::shared_ptr<boaaa::DLInterface> llvm40;
 std::shared_ptr<boaaa::DLInterface> llvm50;
+std::shared_ptr<boaaa::DLInterface> llvm60;
+std::shared_ptr<boaaa::DLInterface> llvm71;
+std::shared_ptr<boaaa::DLInterface> llvm80;
 std::shared_ptr<boaaa::DLInterface> llvm90;
 
 boaaa::LLVMVersionManager *llvm_man = nullptr;
@@ -208,6 +211,18 @@ bool is_active_LLVM_50() {
 	return Version.getValue() == llvm50->getVersion();
 }
 
+bool is_active_LLVM_60() {
+	return Version.getValue() == llvm60->getVersion();
+}
+
+bool is_active_LLVM_71() {
+	return Version.getValue() == llvm71->getVersion();
+}
+
+bool is_active_LLVM_80() {
+	return Version.getValue() == llvm80->getVersion();
+}
+
 bool is_active_LLVM_90() {
 	return Version.getValue() == llvm90->getVersion();
 }
@@ -244,6 +259,36 @@ bool loadModule()
 		}
 	}
 
+	if (llvm60 && (AllVersions.getValue() || is_active_LLVM_60())) {
+		if (prefix) error = llvm40->loadModule(prefixhash, filehash);
+		else        error = llvm40->loadModule(filehash);
+		if (!error)
+		{
+			std::cout << "       Error in Module llvm 40" << "\n";
+			return false;
+		}
+	}
+
+	if (llvm71 && (AllVersions.getValue() || is_active_LLVM_71())) {
+		if (prefix) error = llvm50->loadModule(prefixhash, filehash);
+		else        error = llvm50->loadModule(filehash);
+		if (!error)
+		{
+			std::cout << "       Error in Module llvm 50" << "\n";
+			return false;
+		}
+	}
+
+	if (llvm80 && (AllVersions.getValue() || is_active_LLVM_80())) {
+		if (prefix) error = llvm90->loadModule(prefixhash, filehash);
+		else        error = llvm90->loadModule(filehash);
+		if (!error)
+		{
+			std::cout << "       Error in Module llvm 90" << "\n";
+			return false;
+		}
+	}
+
 	if (llvm90 && (AllVersions.getValue() || is_active_LLVM_90())) {
 		if (prefix) error = llvm90->loadModule(prefixhash, filehash);
 		else        error = llvm90->loadModule(filehash);
@@ -265,6 +310,12 @@ boaaa::aa_id getCurrentVersionId()
 		return static_cast<boaaa::aa_id>(LLV::LLVM_40);
 	case 50:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_50);
+	case 60:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_60);
+	case 71:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_71);
+	case 80:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_80);
 	case 90:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_90);
 	default:
@@ -288,6 +339,18 @@ bool runAnalysis(std::set<boaaa::aa_id> analysises)
 		case LLV::LLVM_50:
 			if (!is_active_LLVM_50()) break;
 			res &= llvm50->runAnalysis(aa);
+			break;
+		case LLV::LLVM_60:
+			if (!is_active_LLVM_60()) break;
+			res &= llvm60->runAnalysis(aa);
+			break;
+		case LLV::LLVM_71:
+			if (!is_active_LLVM_71()) break;
+			res &= llvm71->runAnalysis(aa);
+			break;
+		case LLV::LLVM_80:
+			if (!is_active_LLVM_80()) break;
+			res &= llvm80->runAnalysis(aa);
 			break;
 		case LLV::LLVM_90:
 			if (!is_active_LLVM_90()) break;
@@ -421,6 +484,9 @@ void setup()
 
 	llvm40 = llvm_man->loadDL("boaaa.lv_40");
 	llvm50 = llvm_man->loadDL("boaaa.lv_50");
+	llvm60 = llvm_man->loadDL("boaaa.lv_60");
+	llvm71 = llvm_man->loadDL("boaaa.lv_71");
+	llvm80 = llvm_man->loadDL("boaaa.lv_80");
 	llvm90 = llvm_man->loadDL("boaaa.lv_90");
 
 	std::vector<boaaa::llvm_version> versions;
@@ -429,6 +495,12 @@ void setup()
 		setupLLVMVersion(*llvm40, versions, llvm40->getVersion());
 	if (llvm50)
 		setupLLVMVersion(*llvm50, versions, llvm50->getVersion());
+	if (llvm60)
+		setupLLVMVersion(*llvm60, versions, llvm60->getVersion());
+	if (llvm71)
+		setupLLVMVersion(*llvm71, versions, llvm71->getVersion());
+	if (llvm80)
+		setupLLVMVersion(*llvm80, versions, llvm80->getVersion());
 	if (llvm90)
 		setupLLVMVersion(*llvm90, versions, llvm90->getVersion());
 
@@ -480,6 +552,8 @@ llvm::StringRef buildCLArg(boaaa::registeredAA regAA)
 		return strcatdup("60-", regAA.get<0>());
 	case LLV::LLVM_70:
 		return strcatdup("70-", regAA.get<0>());
+	case LLV::LLVM_71:
+		return strcatdup("71-", regAA.get<0>());
 	case LLV::LLVM_80:
 		return strcatdup("80-", regAA.get<0>());
 	case LLV::LLVM_90:
@@ -507,6 +581,8 @@ std::string getVersionString(boaaa::registeredAA regAA)
 		return "60 ";
 	case LLV::LLVM_70:
 		return "70 ";
+	case LLV::LLVM_71:
+		return "71 ";
 	case LLV::LLVM_80:
 		return "80 ";
 	case LLV::LLVM_90:
@@ -551,6 +627,12 @@ void initAAs()
 		addAAsToAAMap(llvm40->getAvailableAAs());
 	if (llvm50)
 		addAAsToAAMap(llvm50->getAvailableAAs());
+	if (llvm60)
+		addAAsToAAMap(llvm60->getAvailableAAs());
+	if (llvm71)
+		addAAsToAAMap(llvm71->getAvailableAAs());
+	if (llvm80)
+		addAAsToAAMap(llvm80->getAvailableAAs());
 	if (llvm90)
 		addAAsToAAMap(llvm90->getAvailableAAs());
 
@@ -566,8 +648,11 @@ void finalize()
 	if (sr_vp_man)
 		delete sr_vp_man;
 
-	llvm90.reset();
-	llvm50.reset();
 	llvm40.reset();
+	llvm50.reset();
+	llvm60.reset();
+	llvm71.reset();
+	llvm80.reset();
+	llvm90.reset();
 	delete llvm_man;
 }

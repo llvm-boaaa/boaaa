@@ -224,8 +224,15 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             uint64_t Size = LLVMMemoryLocation::UnknownSize;
             LLVMType* ElTy = cast<PointerType>(pointer->getType())->getElementType();
             if (ElTy->isSized()) Size = DL.getTypeStoreSize(ElTy);
-
             switch (AAResult.getModRefInfo(llvm::ImmutableCallSite(call->getInstruction()), pointer, Size)) {
+#else 
+            auto Size = LLVMLocationSize::unknown();
+            LLVMType* ElTy = cast<PointerType>(pointer->getType())->getElementType();
+            if (ElTy->isSized())
+                Size = LLVMLocationSize::precise(DL.getTypeStoreSize(ElTy));
+            switch (AAResult.getModRefInfo(call, pointer, Size)) {
+#endif
+#if LLVM_VERSION < 60
             case MRI_NoModRef:
                 ++NoModRefCount;
                 break;
@@ -240,12 +247,8 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
                 break;
             }
         }
+
 #else
-            auto Size = LLVMLocationSize::unknown();
-            LLVMType* ElTy = cast<PointerType>(pointer->getType())->getElementType();
-            if (ElTy->isSized())
-                Size = LLVMLocationSize::precise(DL.getTypeStoreSize(ElTy));
-            switch (AAResult.getModRefInfo(call, pointer, Size)) {
             case ModRefInfo::NoModRef:
                 ++NoModRefCount;
                 break;
@@ -284,7 +287,12 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
                 continue;
             LLVMCallUnifyer* CallB = container.calls[x];
 #if LLVM_VERSION < 80
-                switch (AAResult.getModRefInfo(*CallA, *CallB)) {
+            switch (AAResult.getModRefInfo(*CallA, *CallB)) {
+#else
+            switch (AAResult.getModRefInfo(CallA, CallB)) {
+#endif
+
+#if LLVM_VERSION < 60
             case MRI_NoModRef:
                 ++NoModRefCount;
                 break;
@@ -298,7 +306,6 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
                 ++ModRefCount;
                 break;
 #else 
-            switch (AAResult.getModRefInfo(CallA, CallB)) {
             case ModRefInfo::NoModRef:
                 ++NoModRefCount;
                 break;
