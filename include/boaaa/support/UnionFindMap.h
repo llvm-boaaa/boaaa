@@ -17,7 +17,7 @@ namespace support {
 
 	template<class Key, class KeyComperator = std::less<Key>>
 	class UnionFindMap {
-	private:
+	public:
 		using _Key = typename std::conditional_t<std::is_pointer<Key>::value || std::is_integral<Key>::value, Key, Key&>;
 		using UF = typename UnionFind<Key, KeyComperator>;
 		using UFM = typename std::map<Key, UF*>;
@@ -28,7 +28,7 @@ namespace support {
 		using head_iterator = typename UFL::const_iterator;
 
 		//don`t use names defined above because of autocomplete of vs
-
+	private:
 		UFM m_ufs;
 		UFL m_heads;
 		UnionFindComparator<Key, KeyComperator> m_uf_comp;
@@ -69,21 +69,33 @@ namespace support {
 				return _add(new UF(val), false);
 			};
 
+			auto checkInside = [=](UF* uf) -> bool {
+				for (auto it = m_heads.begin(), end = m_heads.end(); it != end; ++it)
+				{
+					if ((*it)->value() == uf->value())
+						return true;
+				}
+				return false;
+			};
+
 			UF* _lhs = init_or_asign(lhs);
 			UF* _rhs = init_or_asign(rhs);
-			if (!m_uf_comp(*_lhs, *_rhs) && !m_uf_comp(*_rhs, *_lhs)) return;
 			UF* _res = _lhs->concat(_rhs);
-			if (!m_uf_comp(*_res, *_lhs) && m_uf_comp(*_lhs, *_res))
+			if (!m_uf_comp(*_res, *_lhs) && !m_uf_comp(*_lhs, *_res))
 			{
 				m_heads.remove(_rhs);
-			}
+				if (!checkInside(_lhs))
+					m_heads.push_front(_lhs);
+			} 
 			else if (!m_uf_comp(*_res, *_rhs) && !m_uf_comp(*_rhs, *_res))
 			{
 				m_heads.remove(_lhs);
+				if (!checkInside(_rhs))
+					m_heads.push_front(_rhs);
 			}
-			else
-			{
-				assert(false); //one cases of above should get excecuted
+			else {
+				if (!checkInside(_res))
+					m_heads.push_front(_res);
 			}
 		}
 
@@ -96,11 +108,11 @@ namespace support {
 		}
 
 		//iterator forwarding
-		_NODISCARD head_iterator heads() const {
+		_NODISCARD head_iterator heads() {
 			return m_heads.begin();
 		}
 
-		_NODISCARD head_iterator headsend() const {
+		_NODISCARD head_iterator headsend() {
 			return m_heads.end();
 		}
 

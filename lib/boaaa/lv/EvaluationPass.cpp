@@ -1,10 +1,5 @@
 #include "boaaa/lv/EvaluationPass.h"
 
-#define DEBUG
-#ifdef DEBUG
-#include <set>
-#endif
-
 using namespace boaaa;
 
 bool isInterestingPointer(LLVMValue* V) {
@@ -335,32 +330,95 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
 }
 
 void EvaluationPassImpl::printResult(std::ostream &stream) {
-    uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
+
+    uint64_t sum_alias = 0, sum_alias_head = 0, sum_no_alias = 0, sum_no_alias_head = 0;
+    uint64_t sum_alias_squared = 0, sum_no_alias_squared = 0;
+
+    for (_raw_type_inst(alias_set)::iterator it = alias_set->begin(), end = alias_set->end(); it != end; ++it)
+    {
+        sum_alias_head += it->second->headssize();
+        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
+        {
+            size_t size = (*it2)->size();
+            sum_alias += size;
+            sum_alias_squared += size * size;
+        }
+
+#ifdef DEBUG
+        size_t check_num = 0;
+
+        for (_raw_type_inst(it->second->begin()) it2 = it->second->begin(), end2 = it->second->end(); it2 != end2; ++it2)
+        {
+            if (it2->second->parent() == it2->second) {
+                check_num++;
+            }
+        }
+
+        assert((check_num == it->second->headssize()));
+#endif
+    }
+
+    for (_raw_type_inst(no_alias_set)::iterator it = alias_set->begin(), end = alias_set->end(); it != end; ++it)
+    {
+        sum_no_alias_head += it->second->headssize();
+        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
+        {
+            size_t size = (*it2)->size();
+            sum_no_alias += size;
+            sum_no_alias_squared += size * size;
+        }
+
+#ifdef DEBUG
+        size_t check_num = 0;
+
+        for (_raw_type_inst(it->second->begin()) it2 = it->second->begin(), end2 = it->second->end(); it2 != end2; ++it2)
+        {
+            if (it2->second->parent() == it2->second) {
+                check_num++;
+            }
+        }
+
+        assert((check_num == it->second->headssize()));
+#endif
+    }
 
     stream << "AliasEvaluationPass Report:\n";
+    
+    uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
+
+    double mean_alias        = (double)sum_alias / (double)sum_alias_head;
+    double variance_alias    = ((double)(sum_alias_squared - sum_alias)) / (double)sum_alias_head;
+    double mean_no_alias     = (double)sum_no_alias / (double)sum_no_alias_head;
+    double variance_no_alias = ((double)(sum_alias_squared - sum_no_alias)) / (double)sum_no_alias_head;
 
     if (AliasSum <= 0) {
         stream << "AliasSum = 0 ...skipping\n";
         return;
     }
-    stream << "AliasSum     : " << "         " << " " << AliasSum << "\n";
+    stream << "AliasSum      : " << "         " << " " << AliasSum << "\n";
     stream << "\n";
-    stream << "No Alias     : " << formatPercentage(NoAliasCount, AliasSum) << " " << NoAliasCount << "\n";
-    stream << "May Alias    : " << formatPercentage(MayAliasCount, AliasSum) << " " << MayAliasCount << "\n";
-    stream << "Partial Alias: " << formatPercentage(PartialAliasCount, AliasSum) << " " << PartialAliasCount << "\n";
-    stream << "Must Alias   : " << formatPercentage(MustAliasCount, AliasSum) << " " << MustAliasCount << "\n";
+    stream << "No Alias      : " << formatPercentage(NoAliasCount, AliasSum) << " " << NoAliasCount << "\n";
+    stream << "May Alias     : " << formatPercentage(MayAliasCount, AliasSum) << " " << MayAliasCount << "\n";
+    stream << "Partial Alias : " << formatPercentage(PartialAliasCount, AliasSum) << " " << PartialAliasCount << "\n";
+    stream << "Must Alias    : " << formatPercentage(MustAliasCount, AliasSum) << " " << MustAliasCount << "\n";
+    stream << "\n";
+    stream << "Alias Sets    : " << "         "   << " "  << sum_alias_head << "\n";
+    stream << "mean, var     : " << mean_alias    << ", " << variance_alias << "\n";
+    stream << "No Alias Sets : " << "         "   << " "  << sum_no_alias_head << "\n";
+    stream << "mean, var     : " << mean_no_alias << ", " << variance_no_alias << "\n";
     stream << "\n";
 
-    int64_t ModRefSum = NoModRefCount + RefCount + ModCount + ModRefCount + MustCount + MustRefCount + MustModCount + MustModRefCount;
+    uint64_t ModRefSum = NoModRefCount + RefCount + ModCount + ModRefCount + MustCount + MustRefCount + MustModCount + MustModRefCount;
 
-    stream << "ModRefSum    : " << "         " << " " << ModRefSum << "\n";
+    stream << "ModRefSum     : " << "         " << " " << ModRefSum << "\n";
     stream << "\n";
-    stream << "No ModRef    : " << formatPercentage(NoModRefCount, ModRefSum) << " " << NoModRefCount << "\n";
-    stream << "Mod          : " << formatPercentage(ModCount, ModRefSum) << " " << ModCount << "\n";
-    stream << "Ref          : " << formatPercentage(RefCount, ModRefSum) << " " << RefCount << "\n";
-    stream << "ModRef       : " << formatPercentage(ModRefCount, ModRefSum) << " " << ModRefCount << "\n";
-    stream << "Must         : " << formatPercentage(MustCount, ModRefSum) << " " << MustCount << "\n";
-    stream << "MustMod      : " << formatPercentage(MustModCount, ModRefSum) << " " << MustModCount << "\n";
-    stream << "MustRef      : " << formatPercentage(MustRefCount, ModRefSum) << " " << MustRefCount << "\n";
-    stream << "MustModRef   : " << formatPercentage(MustModRefCount, ModRefSum) << " " << MustModRefCount << "\n";
+    stream << "No ModRef     : " << formatPercentage(NoModRefCount, ModRefSum) << " " << NoModRefCount << "\n";
+    stream << "Mod           : " << formatPercentage(ModCount, ModRefSum) << " " << ModCount << "\n";
+    stream << "Ref           : " << formatPercentage(RefCount, ModRefSum) << " " << RefCount << "\n";
+    stream << "ModRef        : " << formatPercentage(ModRefCount, ModRefSum) << " " << ModRefCount << "\n";
+    stream << "Must          : " << formatPercentage(MustCount, ModRefSum) << " " << MustCount << "\n";
+    stream << "MustMod       : " << formatPercentage(MustModCount, ModRefSum) << " " << MustModCount << "\n";
+    stream << "MustRef       : " << formatPercentage(MustRefCount, ModRefSum) << " " << MustRefCount << "\n";
+    stream << "MustModRef    : " << formatPercentage(MustModRefCount, ModRefSum) << " " << MustModRefCount << "\n";
+    stream << "\n";
 }

@@ -53,6 +53,7 @@
 #include "boaaa/support/AutoDeleter.h"
 #include "boaaa/support/UnionFind.h"
 #include "boaaa/support/UnionFindMap.h"
+#include "boaaa/support/raw_type.h"
 
 #include <iostream>
 
