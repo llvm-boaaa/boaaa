@@ -282,12 +282,15 @@ bool runAnalysis(std::set<boaaa::aa_id> analysises)
 		switch (aa & boaaa::version_mask)
 		{
 		case LLV::LLVM_40:
+			if (!is_active_LLVM_40()) break;
 			res &= llvm40->runAnalysis(aa);
 			break;
 		case LLV::LLVM_50:
+			if (!is_active_LLVM_50()) break;
 			res &= llvm50->runAnalysis(aa);
 			break;
 		case LLV::LLVM_90:
+			if (!is_active_LLVM_90()) break;
 			res &= llvm90->runAnalysis(aa);
 			break;
 		}
