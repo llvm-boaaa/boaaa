@@ -361,11 +361,11 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
             }
         }
 
-        assert((check_num == it->second->headssize()));
+//        assert((check_num == it->second->headssize()));
 #endif
     }
 
-    for (_raw_type_inst(no_alias_set)::iterator it = alias_set->begin(), end = alias_set->end(); it != end; ++it)
+    for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
     {
         sum_no_alias_head += it->second->headssize();
         for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
@@ -385,7 +385,7 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
             }
         }
 
-        assert((check_num == it->second->headssize()));
+ //       assert((check_num == it->second->headssize()));
 #endif
     }
 

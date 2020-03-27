@@ -100,7 +100,7 @@ bool DLInterface71::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	llvm::StringRef prefix = context.string_ref_vp->parseRegistered(module_file_prefix, storePrefix);
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
 
-	std::string filename = prefix.str() + "90" + bc_ref.str();
+	std::string filename = prefix.str() + "71" + bc_ref.str();
 
 	context.context_to_module.reset(new LLVMLLVMContext());
 	llvm::SMDiagnostic Err;
@@ -139,7 +139,7 @@ bool DLInterface71::runAnalysis(boaaa::aa_id analysis)
 		return pass;
 	};
 
-	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_40) return false;
+	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_71) return false;
 	switch (analysis)
 	{
 	case LLV::CFL_ANDERS:

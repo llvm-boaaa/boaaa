@@ -260,8 +260,8 @@ bool loadModule()
 	}
 
 	if (llvm60 && (AllVersions.getValue() || is_active_LLVM_60())) {
-		if (prefix) error = llvm40->loadModule(prefixhash, filehash);
-		else        error = llvm40->loadModule(filehash);
+		if (prefix) error = llvm60->loadModule(prefixhash, filehash);
+		else        error = llvm60->loadModule(filehash);
 		if (!error)
 		{
 			std::cout << "       Error in Module llvm 40" << "\n";
@@ -270,8 +270,8 @@ bool loadModule()
 	}
 
 	if (llvm71 && (AllVersions.getValue() || is_active_LLVM_71())) {
-		if (prefix) error = llvm50->loadModule(prefixhash, filehash);
-		else        error = llvm50->loadModule(filehash);
+		if (prefix) error = llvm71->loadModule(prefixhash, filehash);
+		else        error = llvm71->loadModule(filehash);
 		if (!error)
 		{
 			std::cout << "       Error in Module llvm 50" << "\n";
@@ -280,8 +280,8 @@ bool loadModule()
 	}
 
 	if (llvm80 && (AllVersions.getValue() || is_active_LLVM_80())) {
-		if (prefix) error = llvm90->loadModule(prefixhash, filehash);
-		else        error = llvm90->loadModule(filehash);
+		if (prefix) error = llvm80->loadModule(prefixhash, filehash);
+		else        error = llvm80->loadModule(filehash);
 		if (!error)
 		{
 			std::cout << "       Error in Module llvm 90" << "\n";
@@ -333,27 +333,27 @@ bool runAnalysis(std::set<boaaa::aa_id> analysises)
 		switch (aa & boaaa::version_mask)
 		{
 		case LLV::LLVM_40:
-			if (!is_active_LLVM_40()) break;
+			if (!AllVersions.getValue() && !is_active_LLVM_40()) break;
 			res &= llvm40->runAnalysis(aa);
 			break;
 		case LLV::LLVM_50:
-			if (!is_active_LLVM_50()) break;
+			if (!AllVersions.getValue() && !is_active_LLVM_50()) break;
 			res &= llvm50->runAnalysis(aa);
 			break;
 		case LLV::LLVM_60:
-			if (!is_active_LLVM_60()) break;
+			if (!AllVersions.getValue() && !is_active_LLVM_60()) break;
 			res &= llvm60->runAnalysis(aa);
 			break;
 		case LLV::LLVM_71:
-			if (!is_active_LLVM_71()) break;
+			if (!AllVersions.getValue() && !is_active_LLVM_71()) break;
 			res &= llvm71->runAnalysis(aa);
 			break;
 		case LLV::LLVM_80:
-			if (!is_active_LLVM_80()) break;
+			if (!AllVersions.getValue() && !is_active_LLVM_80()) break;
 			res &= llvm80->runAnalysis(aa);
 			break;
 		case LLV::LLVM_90:
-			if (!is_active_LLVM_90()) break;
+			if (!AllVersions.getValue() && !is_active_LLVM_90()) break;
 			res &= llvm90->runAnalysis(aa);
 			break;
 		}

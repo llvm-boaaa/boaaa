@@ -100,7 +100,7 @@ bool DLInterface50::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	llvm::StringRef prefix = context.string_ref_vp->parseRegistered(module_file_prefix, storePrefix);
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
 
-	std::string filename = prefix.str() + "90" + bc_ref.str();
+	std::string filename = prefix.str() + "50" + bc_ref.str();
 
 	context.context_to_module.reset(new LLVMLLVMContext());
 	llvm::SMDiagnostic Err;
