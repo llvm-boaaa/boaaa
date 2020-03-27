@@ -211,7 +211,7 @@ do
     ${config[wllvm_path]}/extract-bc -b $lib
     filename=$(basename $lib)
 
-    cp "${lib}.bc" "${filebase}/${filename}"
+    cp "${lib}.bc" "${filebase}/${filename}.bc"
     echo "copied ${filename}"
 done
 
