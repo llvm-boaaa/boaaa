@@ -25,3 +25,4 @@ __tmp/
 LLVMVersionConfig.cmake
 /MACROLIST_GEN/.idea
 /MACROLIST_GEN/.idea
+mac_bc_build/config.conf
