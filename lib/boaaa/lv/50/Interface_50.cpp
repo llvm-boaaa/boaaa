@@ -130,11 +130,13 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 {
 	using LLV = boaaa::LLVM_50_AA;
 
-	auto run = [=](auto* pass) {
+	auto run = [=](auto* pass, auto* timepass) -> auto {
 		llvm::legacy::PassManager pm;
 		pass->setContext(&context);
+		pm.add(timepass);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
+		timepass->printResult(*context.basic_ostream);
 		pass->printResult(*context.basic_ostream);
 		return pass;
 	};
@@ -143,25 +145,32 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 	switch (analysis)
 	{
 	case LLV::CFL_ANDERS:
-		run(new llvm::AndersAAEvalWrapperPass());
+		run(new llvm::AndersAAEvalWrapperPass(),
+			new boaaa::TimePass<llvm::CFLAndersAAWrapperPass>());
 		break;
 	case LLV::BASIC:
-		run(new llvm::BasicAAEvalWrapperPass());
+		run(new llvm::BasicAAEvalWrapperPass(),
+			new boaaa::TimePass<llvm::BasicAAWrapperPass>());
 		break;
 	case LLV::OBJ_CARC:
-		run(new llvm::ObjCARCAAEvalWrapperPass());
+		run(new llvm::ObjCARCAAEvalWrapperPass(),
+			new boaaa::TimePass<llvm::ObjCARCAAWrapperPass>());
 		break;
 	case LLV::SCEV:
-		run(new llvm::SCEVAAEvalWrapperPass());
+		run(new llvm::SCEVAAEvalWrapperPass(),
+			new boaaa::TimePass<llvm::SCEVAAWrapperPass>());
 		break;
 	case LLV::SCOPEDNA:
-		run(new llvm::ScopedNoAliasEvalWrapperPass());
+		run(new llvm::ScopedNoAliasEvalWrapperPass(),
+			new boaaa::TimePass<llvm::ScopedNoAliasAAWrapperPass>());
 		break;
 	case LLV::CFL_STEENS:
-		run(new llvm::SteensAAEvalWrapperPass());
+		run(new llvm::SteensAAEvalWrapperPass(),
+			new boaaa::TimePass<llvm::CFLSteensAAWrapperPass>());
 		break;
 	case LLV::TBAA:
-		run(new llvm::TypeBasedAAEvalWrapperPass());
+		run(new llvm::TypeBasedAAEvalWrapperPass(),
+			new boaaa::TimePass<llvm::TypeBasedAAWrapperPass>());
 		break;
 	}
 	return true;
