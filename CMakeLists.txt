@@ -30,6 +30,7 @@ include(cmake/replaceLast.cmake)
 include(cmake/copyAndRename.cmake)
 include(cmake/checkOrCreateFoulder.cmake)
 include(cmake/createLLVMWrapperTarget.cmake)
+include(cmake/addAnalysis.cmake)
 
 message(STATUS "||")
 message(STATUS "|| BOAAA is generated with following supported versions:")
@@ -100,7 +101,15 @@ message(STATUS "||")
 	# googletests, remove googletest error of some kind, but currently not important
 	#nm_add_gtest()
 
-#add
+#add analysis
+message(STATUS "||=======add Analysis to verisons=======||")
+message(STATUS "||")
+
+add_subdirectory(analysis)
+
+message(STATUS "||") #seperator
+
+#add version libs and link the analysis
 add_subdirectory(lib)
 
 #add tools

@@ -45,7 +45,7 @@ file(GLOB DL_VERSION_files
 	boaaa_add_llvm_library(${REGISTERED} boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${DL_VERSION_files} ${_dl_files})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
 	target_link_libraries(boaaa.lv_${version_}
-							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp)
+							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp ${LLVM_${version_}_ANALYSISES})
 
 	set_property(TARGET boaaa.lv_${version_} PROPERTY CXX_STANDARD 14)
 
