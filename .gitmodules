@@ -13,3 +13,6 @@
 [submodule "cmake/cmake_git_clone"]
 	path = cmake/cmake_git_clone
 	url = https://github.com/tschuchortdev/cmake_git_clone.git
+[submodule "analysis/Sea-Dsa"]
+	path = analysis/Sea-Dsa
+	url = http://knorr.global:8080/tfs/private/_git/Sea-Dsa
