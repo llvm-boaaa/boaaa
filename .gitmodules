@@ -4,9 +4,6 @@
 [submodule "llvm/current"]
 	path = llvm/current
 	url = https://github.com/llvm-mirror/llvm.git
-[submodule "analysis/sea-dsa"]
-	path = analysis/sea-dsa
-	url = https://github.com/seahorn/sea-dsa.git
 [submodule "analysis/sfs"]
 	path = analysis/sfs
 	url = https://github.com/hotpeperoncino/sfs.git
