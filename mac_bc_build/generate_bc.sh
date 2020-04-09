@@ -16,6 +16,7 @@ config=( #init default values
     [wllvm_path]=/usr/local/bin
 )
 
+#read config
 while read line
 do
     if echo $line | grep -F = &>/dev/null
@@ -24,8 +25,6 @@ do
         then
             read -r -a versions <<< $( echo $line | cut -d "(" -f 2 | cut -d ")" -f 1)
         else
-            echo $line
-            
             varname=$(echo $line | cut -d '=' -f 1)
             config[$varname]=$(echo $line | cut -d '=' -f 2-)
         fi
@@ -154,9 +153,12 @@ fi
 #copy build files for each version to its build destination
 if [[ $AUTOCONF = $true ]] || [[ $CONFIGURE = $true ]] || [[ $MAKE = $true ]]
 then
-echo "copy files"
+echo "copy files..."
     cp -r $FOULDER $build_foulder
+    echo "done."
 fi
+
+#use flag, so wllvm performs like clang in configuration
 
 if [[ $CMAKE = $true ]] && [[ $MAKE = $false ]]
 then
@@ -167,7 +169,7 @@ then
     echo "wllvm path:   " $wllvm_path
     echo "wllvm++ path: " $wllvmpp_path
     echo "clang path:   " $LLVM_COMPILER_PATH
-    cmake $FOULDER -G"Unix Makefiles" -DCMAKE_C_COMPILER=$wllvm_path -DCMAKE_CXX_COMPILER=$wllvmpp_path
+    WLLVM_CONFIGURE_ONLY=1 cmake $FOULDER -G"Unix Makefiles" -DCMAKE_C_COMPILER=$wllvm_path -DCMAKE_CXX_COMPILER=$wllvmpp_path
     MAKE=$true
 fi
 
@@ -175,50 +177,100 @@ if [[ $AUTOCONF = $true ]] && [[ $MAKE = $false ]]
 then
     echo "autoconf..."
     cd $build_foulder
-    autoreconf -i -f
+    WLLVM_CONFIGURE_ONLY=1 autoreconf -i -f
 fi
 
 if [[ $CONFIGURE = $true ]] && [[ $MAKE = $false ]]
 then
     echo "configure..."
     cd $build_foulder
-    ./configure
+    WLLVM_CONFIGURE_ONLY=1 ./configure
     MAKE=$true
 fi
+
+log_file=$build_foulder/log_$ver.txt
+
+#reset wllvm flag
 
 #build bc-file
 if [[ $MAKE = $true ]]
 then
     echo "make build..."
     cd $build_foulder
-     make
+    make -j $(nproc) 2>&1 | tee $log_file
     echo "done."
 fi
 
 #generate bc from builded files
-
-#write all libs in array
-mapfile -d $'\0' liblist < <(find -E $build_foulder -regex '.*/.*[.](a|dylib)' -print | tr '\n' ' ' )
-
 filebase=${config[bc_foulder]}/$basename/$ver
 if [ ! -d $filebase ]
 then 
     mkdir -p $filebase
 fi
 
-for lib in ${liblist[@]}
+while read line
 do
-    ${config[wllvm_path]}/extract-bc -b $lib
-    filename=$(basename $lib)
+    matchregex="\[.*\][ ]Linking[ ].*[ ]" #[ ]Linking[ ].*(executable|library)[].*"
+    match_executable="executable[ ]"
+    match_static="static[ ]"
+    match_shared="shared[ ]"
+    match_lib="library[ ]"
+    match_module="module[ ]"
 
-    cp "${lib}.bc" "${filebase}/${filename}.bc"
-    echo "copied ${filename}"
-done
+    if [[  $line =~  $matchregex ]]
+    then
+        info=$(echo $line | cut -d ' ' -f 4-)
+        target=""
+
+        if   [[ $info =~ $match_executable ]] #executable
+        then
+
+            target=$(echo $info | cut -d ' ' -f 2-)
+
+            while [[ $target =~ $match_executable ]]
+            do
+                target=$(echo $target| cut -d ' ' -f 2-)
+            done
+
+        elif [[ $info =~ $match_shared ]] || [[ $info =~ $match_static ]] #shared lib
+        then
+
+            target=$(echo $info | cut -d ' ' -f 2-)
+
+            while [[ $target =~ $match_module ]] || [[ $target =~ $match_lib ]]
+            do
+                target=$(echo $target | cut -d ' ' -f 2-)
+            done
+
+        fi
+        #set type matching to caseinsensitiv
+        shopt -s nocasematch
+
+        if [[ -z $target ]] || [[ $target =~ "test" ]]
+        then
+            continue
+        fi 
+        #unset type matching
+        shopt -u nocasematch
+
+        #remove folder structor from target
+        target=$(basename $target)
+
+        target_path=$(find $build_foulder -name $target -type f )
+        relativ_path=${target_path/$build_foulder/$filebase}
+
+        ${config[wllvm_path]}/extract-bc -b $target_path
+        filename=$(basename $target_path)
+
+        cp "${target_path}.bc" "${filebase}/${filename}.bc"
+        echo "copied ${filename}.bc"       
+    fi
+done < $log_file
 
 done
 #           version - loop            #
  ####                             ####
      #############################
 else
-    echo "skip generation, because foulder wasn't defined"
+    echo "skip generation, because foulder(s) wasn't defined"
 fi
