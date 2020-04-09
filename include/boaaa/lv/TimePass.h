@@ -11,6 +11,8 @@
 #include "include_versions/LLVM_ModulePass.inc"
 //define LLVMFunctionPass
 #include "include_versions/LLVM_FunctionPass.inc"
+//define LLVMImmutablePass
+#include "include_versions/LLVM_ImmutablePass.inc"
 
 #include "boaaa/support/select_type.h"
 #include "boaaa/support/data_store.h"
@@ -101,14 +103,14 @@ namespace boaaa
 				uint8_t  sum_micros  = std::chrono::duration_cast<std::chrono::microseconds>(m_end - m_start).count() % 1000;
 				uint8_t  sum_millis  = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start).count() % 1000;
 				uint64_t sum_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_end - m_start).count();
+				
+				stream << "Total PM Time : " << sum_seconds << "," << (sum_millis < 100 ? "0" : "") << +(sum_millis < 10 ? "0" : "") << (int) sum_millis
+															<< "." << (sum_micros < 100 ? "0" : "") << +(sum_micros < 10 ? "0" : "") << (int) sum_micros
+															<< "." << (sum_nanos  < 100 ? "0" : "") << +(sum_nanos  < 10 ? "0" : "") << (int) sum_nanos << "\n";
 
-				stream << "Real Time:" << sum_seconds << "," << (sum_millis < 100 ? "0" : "") << +(sum_millis < 10 ? "0" : "") << (int) sum_millis
-													  << "." << (sum_micros < 100 ? "0" : "") << +(sum_micros < 10 ? "0" : "") << (int) sum_micros
-													  << "." << (sum_nanos  < 100 ? "0" : "") << +(sum_nanos  < 10 ? "0" : "") << (int) sum_nanos << "\n";
-
-				stream << "Full Time:" << m_seconds << "," << (m_millis < 100 ? "0" : "") << +(m_millis < 10 ? "0" : "") << (int) m_millis
-													<< "." << (m_micros < 100 ? "0" : "") << +(m_micros < 10 ? "0" : "") << (int) m_micros
-													<< "." << (m_nanos  < 100 ? "0" : "") << +(m_nanos  < 10 ? "0" : "") << (int) m_nanos << "\n";
+				stream << "Funtion Time  : " << m_seconds << "," << (m_millis < 100 ? "0" : "") << +(m_millis < 10 ? "0" : "") << (int) m_millis
+														  << "." << (m_micros < 100 ? "0" : "") << +(m_micros < 10 ? "0" : "") << (int) m_micros
+														  << "." << (m_nanos  < 100 ? "0" : "") << +(m_nanos  < 10 ? "0" : "") << (int) m_nanos << "\n";
 			}
 		};
 
@@ -154,7 +156,7 @@ namespace boaaa
 			}
 
 			void printResult(std::ostream& stream) override {
-				stream << "TimePass Report for " << typeid(PASS).name() << ":\n";
+				stream << "Report for " << typeid(PASS).name() << ":\n";
 				TimeMessure::printResult(stream);
 			}
 
@@ -163,10 +165,30 @@ namespace boaaa
 			}
 
 		};
+
+		template<class PASS>
+		class TimeImmutablePass : public PASS, TimeMessure {
+
+		public:
+			TimeImmutablePass() : PASS(), TimeMessure() { }
+
+			//messure no time, because no work is done.
+			bool runOnModule(LLVMModule& M) override {
+				return PASS::runOnModule(M);
+			}
+
+			void printResult(std::ostream& stream) override {
+				stream << "TimePass Report for " << typeid(PASS).name() << ":\n";
+				stream << "Total PM Time : --\n";
+				stream << "Funtion Time  : --\n";
+			}
+
+		};
 		
 		template<class PASS>
 		struct select_time_pass {
 			using type = typename select_type_reverse_for<std::is_base_of, PASS,
+				LLVMImmutablePass, detail::TimeImmutablePass<PASS>,
 				LLVMModulePass, detail::TimeModulePass<PASS>,
 				LLVMFunctionPass, detail::TimeFunctionPass<PASS>>::type;
 		};

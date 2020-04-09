@@ -1,0 +1,31 @@
+CountPass Report:
+Function #446513
+BasicBlock #1561598
+Instructions #13046235
+TimePass Report for class llvm::BasicAAWrapperPass:
+count:446178
+Real Time:172203,166.212.132
+Full Time:8,394.923.200
+AliasEvaluationPass Report:
+AliasSum      :           2337041632
+
+No Alias      : [041.19%] 962770916
+May Alias     : [055.56%] 1298589020
+Partial Alias : [000.38%] 9036218
+Must Alias    : [002.85%] 66645478
+
+Alias Sets    :           440676
+mean, var     : 2.96659, 97.117
+No Alias Sets :           441406
+mean, var     : 16.2506, 83.6675
+
+ModRefSum     :           3235713526
+
+No ModRef     : [009.49%] 307236118
+Mod           : [000.51%] 16805151
+Ref           : [002.33%] 75512880
+ModRef        : [087.64%] 2836097864
+Must          : [000.00%] 0
+MustMod       : [000.00%] 61513
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0

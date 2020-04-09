@@ -47,6 +47,8 @@ file(GLOB DL_VERSION_files
 	target_link_libraries(boaaa.lv_${version_}
 							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp ${LLVM_${version_}_ANALYSISES})
 
+	target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_${version_}_ADDITIONAL_INCLUDE})
+
 	set_property(TARGET boaaa.lv_${version_} PROPERTY CXX_STANDARD 14)
 
 	if(UNIX AND NOT APPLE)
@@ -71,7 +73,7 @@ file(GLOB DL_VERSION_files
 
 	#add_custom_target(${LLVM_NAME})
 
-	add_dependencies(boaaa.lv_${version_} LLVM_${version_})
+	add_dependencies(boaaa.lv_${version_} LLVM_${version_} ${LLVM_${version_}_ANALYSISES})
 	message(STATUS "||added dynamic lib with llvm_version ${version_}: lv_${version_}")
 endforeach(version_)
 

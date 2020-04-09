@@ -140,7 +140,9 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             if (I2ElTy->isSized())
                 I2Size = LLVMLocationSize::precise(DL.getTypeStoreSize(I2ElTy));
 #endif
+            timestamp start = begin();
             LLVMAliasResult AR = AAResult.alias(I1, I1Size, I2, I2Size);
+            addAliasTime(start);
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
@@ -166,8 +168,11 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
         LLVMValue* load = container.loads[y];
         for (int x = 0; x < container.num_stores; ++x) {
             LLVMValue* store = container.stores[x];
+
+            timestamp start = begin();
             LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMLoadInst>(load)),
                 LLVMMemoryLocation::get(cast<LLVMStoreInst>(store)));
+            addAliasTime(start);
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
@@ -193,8 +198,11 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
         LLVMValue* I1 = container.stores[y];
         for (int x = 0; x < y; ++x) {
             LLVMValue* I2 = container.stores[x];
+
+            timestamp start = begin();
             LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMStoreInst>(I1)),
                 LLVMMemoryLocation::get(cast<LLVMStoreInst>(I2)));
+            addAliasTime(start);
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
@@ -224,13 +232,21 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             uint64_t Size = LLVMMemoryLocation::UnknownSize;
             LLVMType* ElTy = cast<PointerType>(pointer->getType())->getElementType();
             if (ElTy->isSized()) Size = DL.getTypeStoreSize(ElTy);
-            switch (AAResult.getModRefInfo(llvm::ImmutableCallSite(call->getInstruction()), pointer, Size)) {
+
+            timestamp start = begin();
+            LLVMModRefInfo info = AAResult.getModRefInfo(llvm::ImmutableCallSite(call->getInstruction()), pointer, Size);
+            addModRefTime(start);
+            switch (info) {
 #else 
             auto Size = LLVMLocationSize::unknown();
             LLVMType* ElTy = cast<PointerType>(pointer->getType())->getElementType();
             if (ElTy->isSized())
                 Size = LLVMLocationSize::precise(DL.getTypeStoreSize(ElTy));
-            switch (AAResult.getModRefInfo(call, pointer, Size)) {
+
+            timestamp start = begin();
+            LLVMModRefInfo info = AAResult.getModRefInfo(call, pointer, Size);
+            addModRefTime(start);
+            switch (info) {
 #endif
 #if LLVM_VERSION < 60
             case MRI_NoModRef:
@@ -286,12 +302,16 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             if (y == x)
                 continue;
             LLVMCallUnifyer* CallB = container.calls[x];
-#if LLVM_VERSION < 80
-            switch (AAResult.getModRefInfo(*CallA, *CallB)) {
-#else
-            switch (AAResult.getModRefInfo(CallA, CallB)) {
-#endif
 
+            timestamp start = begin();
+            LLVMModRefInfo info =
+#if LLVM_VERSION < 80
+                AAResult.getModRefInfo(*CallA, *CallB);
+#else
+                AAResult.getModRefInfo(CallA, CallB);
+#endif
+            addModRefTime(start);
+            switch (info) {
 #if LLVM_VERSION < 60
             case MRI_NoModRef:
                 ++NoModRefCount;
@@ -389,8 +409,15 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
 #endif
     }
 
-    stream << "AliasEvaluationPass Report:\n";
-    
+    stream << "Alias Time    : " << m_seconds_alias << "," << (m_millis_alias < 100 ? "0" : "") << +(m_millis_alias < 10 ? "0" : "") << (int)m_millis_alias
+                                                    << "." << (m_micros_alias < 100 ? "0" : "") << +(m_micros_alias < 10 ? "0" : "") << (int)m_micros_alias
+                                                    << "." << (m_nanos_alias  < 100 ? "0" : "") << +(m_nanos_alias  < 10 ? "0" : "") << (int)m_nanos_alias << "\n";
+
+    stream << "ModRef Time   : " << m_seconds_modref << "," << (m_millis_modref < 100 ? "0" : "") << +(m_millis_modref < 10 ? "0" : "") << (int)m_millis_modref
+                                                     << "." << (m_micros_modref < 100 ? "0" : "") << +(m_micros_modref < 10 ? "0" : "") << (int)m_micros_modref
+                                                     << "." << (m_nanos_modref  < 100 ? "0" : "") << +(m_nanos_modref  < 10 ? "0" : "") << (int)m_nanos_modref << "\n";
+    stream << "=========================================\n";
+
     uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
 
     double mean_alias        = (double)sum_alias / (double)sum_alias_head;
@@ -398,27 +425,26 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
     double mean_no_alias     = (double)sum_no_alias / (double)sum_no_alias_head;
     double variance_no_alias = ((double)(sum_alias_squared - sum_no_alias)) / (double)sum_no_alias_head;
 
-    if (AliasSum <= 0) {
+    if (AliasSum == 0) {
         stream << "AliasSum = 0 ...skipping\n";
         return;
     }
-    stream << "AliasSum      : " << "         " << " " << AliasSum << "\n";
-    stream << "\n";
     stream << "No Alias      : " << formatPercentage(NoAliasCount, AliasSum) << " " << NoAliasCount << "\n";
     stream << "May Alias     : " << formatPercentage(MayAliasCount, AliasSum) << " " << MayAliasCount << "\n";
     stream << "Partial Alias : " << formatPercentage(PartialAliasCount, AliasSum) << " " << PartialAliasCount << "\n";
     stream << "Must Alias    : " << formatPercentage(MustAliasCount, AliasSum) << " " << MustAliasCount << "\n";
-    stream << "\n";
-    stream << "Alias Sets    : " << "         "   << " "  << sum_alias_head << "\n";
-    stream << "mean, var     : " << mean_alias    << ", " << variance_alias << "\n";
-    stream << "No Alias Sets : " << "         "   << " "  << sum_no_alias_head << "\n";
-    stream << "mean, var     : " << mean_no_alias << ", " << variance_no_alias << "\n";
-    stream << "\n";
+    stream << "-----------------------------------------\n";
+    stream << "AliasSum      : " << "         " << " " << AliasSum << "\n";
+
+    stream << "=========================================\n";
 
     uint64_t ModRefSum = NoModRefCount + RefCount + ModCount + ModRefCount + MustCount + MustRefCount + MustModCount + MustModRefCount;
 
-    stream << "ModRefSum     : " << "         " << " " << ModRefSum << "\n";
-    stream << "\n";
+    if (ModRefSum == 0) {
+        stream << "ModRefSum = 0 ...skipping\n";
+        return;
+    }
+
     stream << "No ModRef     : " << formatPercentage(NoModRefCount, ModRefSum) << " " << NoModRefCount << "\n";
     stream << "Mod           : " << formatPercentage(ModCount, ModRefSum) << " " << ModCount << "\n";
     stream << "Ref           : " << formatPercentage(RefCount, ModRefSum) << " " << RefCount << "\n";
@@ -427,5 +453,14 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
     stream << "MustMod       : " << formatPercentage(MustModCount, ModRefSum) << " " << MustModCount << "\n";
     stream << "MustRef       : " << formatPercentage(MustRefCount, ModRefSum) << " " << MustRefCount << "\n";
     stream << "MustModRef    : " << formatPercentage(MustModRefCount, ModRefSum) << " " << MustModRefCount << "\n";
+    stream << "-----------------------------------------\n";
+    stream << "ModRefSum     : " << "         " << " " << ModRefSum << "\n";
+
+    stream << "=========================================\n";
+
+    stream << "Alias Sets    : " << "         " << " " << sum_alias_head << "\n";
+    stream << "mean, var     : " << mean_alias << ", " << variance_alias << "\n";
+    stream << "No Alias Sets : " << "         " << " " << sum_no_alias_head << "\n";
+    stream << "mean, var     : " << mean_no_alias << ", " << variance_no_alias << "\n";
     stream << "\n";
 }

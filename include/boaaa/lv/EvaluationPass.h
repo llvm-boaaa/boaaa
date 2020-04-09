@@ -25,6 +25,8 @@
 #include "include_versions/LLVM_LocationSize.inc"
 //define LLVMMemoryLocation
 #include "include_versions/LLVM_MemoryLocation.inc"
+//define LLVMModRefInfo
+#include "include_versions/LLVM_ModRefInfo.inc"
 //define LLVMModulePass
 #include "include_versions/LLVM_ModulePass.inc"
 //define LLVMRegisterPass
@@ -56,6 +58,7 @@
 #include "boaaa/support/raw_type.h"
 
 #include <iostream>
+#include <chrono>
 
 #ifdef LLVM_VERSION_ERROR_CODE
 LLVM_VERSION_ERROR_CODE
@@ -68,9 +71,60 @@ namespace boaaa {
 	class EvaluationPassImpl
 	{
     public:
+		using timestamp = typename std::chrono::time_point<std::chrono::high_resolution_clock>;
+
+	private:
+
+		uint16_t m_nanos_alias;
+		uint16_t m_micros_alias;
+		uint16_t m_millis_alias;
+		uint64_t m_seconds_alias;
+		uint16_t m_nanos_modref;
+		uint16_t m_micros_modref;
+		uint16_t m_millis_modref;
+		uint64_t m_seconds_modref;
+
+		void addTime(timestamp start, timestamp end, uint16_t& nanos, uint16_t& micros, uint16_t& millis, uint64_t& seconds) {
+			nanos += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() % 1000;
+			if (nanos >= 1000) {
+				nanos -= 1000U;
+				micros++;
+			}
+			micros += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() % 1000;
+			if (micros >= 1000) {
+				micros -= 1000U;
+				millis++;
+			}
+
+			millis += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() % 1000;
+			if (millis >= 1000) {
+				millis -= 1000U;
+				seconds++;
+			}
+
+			seconds += std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+		}
+
+		timestamp begin() {
+			return std::chrono::high_resolution_clock::now();
+		}
+
+		void addAliasTime(timestamp start) {
+			timestamp end = std::chrono::high_resolution_clock::now();
+			addTime(start, end, m_nanos_alias, m_micros_alias, m_millis_alias, m_seconds_alias);
+		}
+
+		void addModRefTime(timestamp start) {
+			timestamp end = std::chrono::high_resolution_clock::now();
+			addTime(start, end, m_nanos_modref, m_micros_modref, m_millis_modref, m_seconds_modref);
+		}
+
+	public:
 		EvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
 			MustAliasCount(), NoModRefCount(), ModCount(), RefCount(), ModRefCount(), MustCount(), 
-			MustRefCount(), MustModCount(), MustModRefCount(),
+			MustRefCount(), MustModCount(), MustModRefCount(), 
+			m_nanos_alias(), m_micros_alias(), m_millis_alias(), m_seconds_alias(),
+			m_nanos_modref(), m_micros_modref(), m_millis_modref(),m_seconds_modref(),
 			delete_aa_set(false), delete_no_aa_set(false), alias_set(nullptr), no_alias_set(nullptr) {};
 
 		~EvaluationPassImpl() { deleteSets(); }
