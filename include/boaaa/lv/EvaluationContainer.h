@@ -72,6 +72,7 @@ namespace boaaa {
 			} break;
 			default:
 				assert(false);
+				num = 0; //remove warning below
 			}
 			return it == end && i == num;
 		}

@@ -12,7 +12,7 @@ namespace support {
 	private:
 		using UF = typename UnionFind<Type, TypeComperator>;
 
-		const Type& m_value;
+		const Type m_value;
 		UF* m_union;
 		size_t m_num;
 		TypeComperator m_comp;
@@ -20,7 +20,7 @@ namespace support {
 		void parent(UF* value) { m_union = value; }
 
 	public:
-		UnionFind(const Type& value, TypeComperator comp = TypeComperator()) : m_value(value), m_num(1), m_comp(comp) { m_union = this; }
+		UnionFind(const Type value, TypeComperator comp = TypeComperator()) : m_value(value), m_num(1), m_comp(comp) { m_union = this; }
 		~UnionFind() {}
 
 		UnionFind(const UnionFind<Type, TypeComperator>& obj) = delete;
@@ -62,19 +62,19 @@ namespace support {
 			return parent()->size();
 		}
 
-		const Type& value() {
+		const Type value() {
 			return m_value;
 		}
 
-		const Type& value() const {
+		const Type value() const {
 			return m_value;
 		}
 
-		operator const Type&() {
+		operator const Type() {
 			return value();
 		}
 
-		operator const Type& () const {
+		operator const Type() const {
 			return value();
 		}
 	};
