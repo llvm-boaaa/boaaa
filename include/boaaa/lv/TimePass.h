@@ -130,7 +130,7 @@ namespace boaaa
 			}
 
 			void printResult(std::ostream& stream) override {
-				stream << "TimePass Report for " << typeid(PASS).name() << ":\n";
+				stream << "Report for " << typeid(PASS).name() << ":\n";
 				TimeMessure::printResult(stream);
 			}
 		};

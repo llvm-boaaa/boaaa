@@ -1,0 +1,591 @@
+CountPass Report:
+Function #402
+BasicBlock #15937
+Instructions #100923
+CountPass Report:
+Function #381
+BasicBlock #14055
+Instructions #110177
+CountPass Report:
+Function #380
+BasicBlock #14177
+Instructions #110697
+CountPass Report:
+Function #379
+BasicBlock #14957
+Instructions #125709
+CountPass Report:
+Function #381
+BasicBlock #14681
+Instructions #126869
+CountPass Report:
+Function #383
+BasicBlock #14690
+Instructions #127085
+Report for class llvm::BasicAAWrapperPass:
+count:342
+Total PM Time : 581,118.033.144
+Funtion Time  : 0,006.583.600
+Alias Time    : 514,754.741.700
+ModRef Time   : 53,416.236.500
+=========================================
+No Alias      : [007.43%] 483195
+May Alias     : [088.34%] 5739004
+Partial Alias : [003.91%] 254452
+Must Alias    : [000.29%] 19269
+-----------------------------------------
+AliasSum      :           6495920
+=========================================
+No ModRef     : [028.88%] 170663
+Mod           : [007.79%] 46045
+Ref           : [001.99%] 11769
+ModRef        : [061.32%] 362338
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           590815
+=========================================
+Alias Sets    :           4947
+mean, var     : 9.19972, 235.527
+No Alias Sets :           8071
+mean, var     : 52.1854, 97.816
+
+TimePass Report for class llvm::CFLAndersAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 56,803.834.900
+ModRef Time   : 0,421.829.300
+=========================================
+No Alias      : [001.17%] 76410
+May Alias     : [098.79%] 6417807
+Partial Alias : [000.00%] 0
+Must Alias    : [000.02%] 1721
+-----------------------------------------
+AliasSum      :           6495938
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 590815
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           590815
+=========================================
+Alias Sets    :           820
+mean, var     : 3.56707, 17.7902
+No Alias Sets :           2370
+mean, var     : 51.4236, 7.78344e+15
+
+TimePass Report for class llvm::CFLSteensAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 21,720.057.500
+ModRef Time   : 0,414.928.000
+=========================================
+No Alias      : [000.87%] 56726
+May Alias     : [099.10%] 6437491
+Partial Alias : [000.00%] 0
+Must Alias    : [000.02%] 1721
+-----------------------------------------
+AliasSum      :           6495938
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 590815
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           590815
+=========================================
+Alias Sets    :           820
+mean, var     : 3.56707, 17.7902
+No Alias Sets :           1689
+mean, var     : 30.4985, 1.09217e+16
+
+Report for class llvm::SCEVAAWrapperPass:
+count:342
+Total PM Time : 2263,210.112.032
+Funtion Time  : 0,000.433.300
+Alias Time    : 2250,686.185.400
+ModRef Time   : 0,419.457.200
+=========================================
+No Alias      : [002.83%] 184290
+May Alias     : [096.87%] 6292711
+Partial Alias : [000.00%] 0
+Must Alias    : [000.29%] 18919
+-----------------------------------------
+AliasSum      :           6495920
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 590815
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           590815
+=========================================
+Alias Sets    :           10204
+mean, var     : 2.40455, 5.15131
+No Alias Sets :           8441
+mean, var     : 7.67291, 1.46108
+
+Report for class llvm::BasicAAWrapperPass:
+count:321
+Total PM Time : 969,097.079.088
+Funtion Time  : 0,006.206.100
+Alias Time    : 886,760.480.000
+ModRef Time   : 65,712.182.000
+=========================================
+No Alias      : [005.98%] 581155
+May Alias     : [093.67%] 9093007
+Partial Alias : [000.10%] 9835
+Must Alias    : [000.23%] 23253
+-----------------------------------------
+AliasSum      :           9707250
+=========================================
+No ModRef     : [029.63%] 208672
+Mod           : [008.32%] 58586
+Ref           : [001.93%] 13604
+ModRef        : [060.10%] 423216
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           704078
+=========================================
+Alias Sets    :           11297
+mean, var     : 2.83597, 16.2096
+No Alias Sets :           7749
+mean, var     : 58.2025, 2.38053e+15
+
+TimePass Report for class llvm::CFLAndersAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 77,832.504.600
+ModRef Time   : 0,356.802.000
+=========================================
+No Alias      : [001.20%] 116952
+May Alias     : [098.77%] 9588835
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1481
+-----------------------------------------
+AliasSum      :           9707268
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 704078
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           704078
+=========================================
+Alias Sets    :           750
+mean, var     : 3.352, 16.5653
+No Alias Sets :           2504
+mean, var     : 70.6062, 7.36691e+15
+
+TimePass Report for class llvm::CFLSteensAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 27,423.382.500
+ModRef Time   : 0,359.051.800
+=========================================
+No Alias      : [000.86%] 84167
+May Alias     : [099.11%] 9621620
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1481
+-----------------------------------------
+AliasSum      :           9707268
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 704078
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           704078
+=========================================
+Alias Sets    :           750
+mean, var     : 3.352, 16.5653
+No Alias Sets :           1710
+mean, var     : 38.9749, 1.07876e+16
+
+SCEV crashed in lv_50
+
+Report for class llvm::BasicAAWrapperPass:
+count:319
+Total PM Time : 977,152.037.188
+Funtion Time  : 0,006.035.500
+Alias Time    : 894,291.624.900
+ModRef Time   : 66,952.129.900
+=========================================
+No Alias      : [005.93%] 580405
+May Alias     : [093.72%] 9170339
+Partial Alias : [000.10%] 9932
+Must Alias    : [000.24%] 23722
+-----------------------------------------
+AliasSum      :           9784398
+=========================================
+No ModRef     : [029.38%] 206216
+Mod           : [008.31%] 58370
+Ref           : [001.97%] 13872
+ModRef        : [059.10%] 414857
+Must          : [000.00%] 0
+MustMod       : [000.06%] 442
+MustRef       : [000.00%] 7
+MustModRef    : [001.15%] 8120
+-----------------------------------------
+ModRefSum     :           701884
+=========================================
+Alias Sets    :           11338
+mean, var     : 2.89363, 16.9192
+No Alias Sets :           7794
+mean, var     : 57.9338, 2.36679e+15
+
+TimePass Report for class llvm::CFLAndersAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 79,470.850.000
+ModRef Time   : 0,376.243.800
+=========================================
+No Alias      : [001.18%] 115786
+May Alias     : [098.79%] 9666730
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1900
+-----------------------------------------
+AliasSum      :           9784416
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 701884
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           701884
+=========================================
+Alias Sets    :           771
+mean, var     : 4.11803, 26.2205
+No Alias Sets :           2450
+mean, var     : 71.498, 7.52928e+15
+
+TimePass Report for class llvm::CFLSteensAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 28,019.201.700
+ModRef Time   : 0,375.914.800
+=========================================
+No Alias      : [000.87%] 85362
+May Alias     : [099.10%] 9697154
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1900
+-----------------------------------------
+AliasSum      :           9784416
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 701884
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           701884
+=========================================
+Alias Sets    :           771
+mean, var     : 4.11803, 26.2205
+No Alias Sets :           1678
+mean, var     : 39.9505, 1.09933e+16
+
+SCEV crashed for lv_60
+
+Report for class llvm::BasicAAWrapperPass:
+count:318
+Total PM Time : 1204,188.077.032
+Funtion Time  : 0,006.608.100
+Alias Time    : 1104,807.239.900
+ModRef Time   : 79,880.365.400
+=========================================
+No Alias      : [005.78%] 625135
+May Alias     : [093.88%] 10149132
+Partial Alias : [000.09%] 10194
+Must Alias    : [000.23%] 25663
+-----------------------------------------
+AliasSum      :           10810124
+=========================================
+No ModRef     : [026.71%] 203100
+Mod           : [008.13%] 61847
+Ref           : [001.78%] 13582
+ModRef        : [062.26%] 473466
+Must          : [000.00%] 0
+MustMod       : [000.03%] 302
+MustRef       : [000.00%] 6
+MustModRef    : [001.06%] 8066
+-----------------------------------------
+ModRefSum     :           760369
+=========================================
+Alias Sets    :           12291
+mean, var     : 2.84224, 17.1612
+No Alias Sets :           8880
+mean, var     : 58.7524, 2.07734e+15
+
+TimePass Report for class llvm::CFLAndersAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 87,991.863.100
+ModRef Time   : 0,403.468.200
+=========================================
+No Alias      : [001.12%] 121593
+May Alias     : [098.85%] 10686685
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1864
+-----------------------------------------
+AliasSum      :           10810142
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 760369
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           760369
+=========================================
+Alias Sets    :           768
+mean, var     : 4.06641, 25.5938
+No Alias Sets :           2450
+mean, var     : 73.5824, 7.52928e+15
+
+TimePass Report for class llvm::CFLSteensAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 31,515.338.300
+ModRef Time   : 0,406.133.300
+=========================================
+No Alias      : [000.87%] 94317
+May Alias     : [099.11%] 10713961
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1864
+-----------------------------------------
+AliasSum      :           10810142
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 760369
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           760369
+=========================================
+Alias Sets    :           768
+mean, var     : 4.06641, 25.5938
+No Alias Sets :           1759
+mean, var     : 42.714, 1.04871e+16
+
+scev crashed for lv_71
+
+Report for class llvm::BasicAAWrapperPass:
+count:320
+Total PM Time : 1376,200.011.244
+Funtion Time  : 0,007.114.800
+Alias Time    : 1274,535.376.100
+ModRef Time   : 81,198.979.800
+=========================================
+No Alias      : [006.03%] 653347
+May Alias     : [093.64%] 10140448
+Partial Alias : [000.09%] 10201
+Must Alias    : [000.23%] 25018
+-----------------------------------------
+AliasSum      :           10829014
+=========================================
+No ModRef     : [026.09%] 200470
+Mod           : [007.81%] 59993
+Ref           : [001.74%] 13367
+ModRef        : [063.25%] 485846
+Must          : [000.00%] 0
+MustMod       : [000.03%] 293
+MustRef       : [000.00%] 6
+MustModRef    : [001.05%] 8111
+-----------------------------------------
+ModRefSum     :           768086
+=========================================
+Alias Sets    :           12053
+mean, var     : 2.85522, 17.3887
+No Alias Sets :           7117
+mean, var     : 154.353, 2.59193e+15
+
+TimePass Report for class llvm::CFLAndersAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 89,257.036.500
+ModRef Time   : 0,189.407.100
+=========================================
+No Alias      : [001.12%] 122065
+May Alias     : [098.85%] 10705125
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1842
+-----------------------------------------
+AliasSum      :           10829032
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 768086
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           768086
+=========================================
+Alias Sets    :           755
+mean, var     : 4.08742, 25.9311
+No Alias Sets :           2502
+mean, var     : 74.7574, 7.3728e+15
+
+TimePass Report for class llvm::CFLSteensAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 31,849.830.600
+ModRef Time   : 0,177.376.800
+=========================================
+No Alias      : [000.84%] 91364
+May Alias     : [099.13%] 10735826
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1842
+-----------------------------------------
+AliasSum      :           10829032
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 768086
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           768086
+=========================================
+Alias Sets    :           755
+mean, var     : 4.08742, 25.9311
+No Alias Sets :           1703
+mean, var     : 41.7751, 1.08319e+16
+
+chrashed for lv_80
+
+Report for class llvm::BasicAAWrapperPass:
+count:321
+Total PM Time : 1451,091.203.132
+Funtion Time  : 0,006.723.900
+Alias Time    : 1343,190.002.800
+ModRef Time   : 85,505.166.100
+=========================================
+No Alias      : [006.03%] 654450
+May Alias     : [093.63%] 10151080
+Partial Alias : [000.09%] 10209
+Must Alias    : [000.23%] 25075
+-----------------------------------------
+AliasSum      :           10840814
+=========================================
+No ModRef     : [026.81%] 207869
+Mod           : [007.73%] 59963
+Ref           : [001.72%] 13338
+ModRef        : [062.64%] 485553
+Must          : [000.00%] 0
+MustMod       : [000.03%] 293
+MustRef       : [000.00%] 6
+MustModRef    : [001.03%] 8041
+-----------------------------------------
+ModRefSum     :           775063
+=========================================
+Alias Sets    :           12089
+mean, var     : 2.85276, 17.3308
+No Alias Sets :           7126
+mean, var     : 154.119, 2.58865e+15
+
+TimePass Report for class llvm::CFLAndersAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 114,344.517.700
+ModRef Time   : 3,279.204.200
+=========================================
+No Alias      : [001.12%] 122250
+May Alias     : [098.85%] 10716746
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1836
+-----------------------------------------
+AliasSum      :           10840832
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 775063
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           775063
+=========================================
+Alias Sets    :           755
+mean, var     : 4.07947, 25.8252
+No Alias Sets :           2502
+mean, var     : 74.7594, 7.3728e+15
+
+TimePass Report for class llvm::CFLSteensAAWrapperPass:
+Total PM Time : --
+Funtion Time  : --
+Alias Time    : 56,329.756.400
+ModRef Time   : 3,314.625.200
+=========================================
+No Alias      : [000.86%] 93294
+May Alias     : [099.12%] 10745702
+Partial Alias : [000.00%] 0
+Must Alias    : [000.01%] 1836
+-----------------------------------------
+AliasSum      :           10840832
+=========================================
+No ModRef     : [000.00%] 0
+Mod           : [000.00%] 0
+Ref           : [000.00%] 0
+ModRef        : [100.00%] 775063
+Must          : [000.00%] 0
+MustMod       : [000.00%] 0
+MustRef       : [000.00%] 0
+MustModRef    : [000.00%] 0
+-----------------------------------------
+ModRefSum     :           775063
+=========================================
+Alias Sets    :           755
+mean, var     : 4.07947, 25.8252
+No Alias Sets :           1764
+mean, var     : 41.3668, 1.04573e+16
+
+crashed lv_90
