@@ -61,6 +61,7 @@ namespace boaaa {
 		
 		virtual bool loadModule(uint64_t module_file_hash) = 0;
 		virtual bool loadModule(uint64_t module_file_prefix, uint64_t module_file_hash) = 0;
+		virtual void unloadModule() = 0;
 		virtual bool runAnalysis(boaaa::aa_id analysis) = 0;
 
 

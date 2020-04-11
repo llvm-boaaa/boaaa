@@ -64,6 +64,10 @@ namespace boaaa {
 		~version_context() {
 			if (string_ref_vp)
 				delete string_ref_vp;
+			loaded_module.reset(nullptr);
+			context_to_module.reset(nullptr);
+			if (del_strm_after_use)
+				delete basic_ostream;
 		}
 	};
 }

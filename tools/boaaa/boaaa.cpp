@@ -115,6 +115,10 @@ enum class COROUTINESTATES_MAIN : int8_t
 	SKIP_ARGUMENTS				= -2,
 	ERROR_WHILE_LOAD_MODULE		= -1,
 	NORMAL						= 0,
+	INIT						= 1,
+	NEXT_VERSION				= 2,
+	NO_ARGS_LEFT				= 3,
+
 
 };
 
@@ -124,7 +128,12 @@ void setup();
 void initAAs();
 void finalize();
 
+void evaluateMainloopError(COROUTINESTATES_MAIN cms) {
+
+}
+
 int main(int argc, char** argv) {
+	using CSM = COROUTINESTATES_MAIN;
 	//init llvm and register needed passes
 	int res = 0;
 	setup();
@@ -144,7 +153,12 @@ int main(int argc, char** argv) {
 	cl::ParseCommandLineOptions(argc, argv);
 
 	if (!FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
-		res = static_cast<int8_t>(mainloop());
+		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
+			if (static_cast<int8_t>(state) < 0) {
+				evaluateMainloopError(state);
+				--res;
+			}
+		}
 		finalize();
 		return res;
 	}
@@ -182,20 +196,11 @@ int main(int argc, char** argv) {
 			continue;
 		}
 		cl::ParseCommandLineOptions(_argc, _argv);
-		using CSM = COROUTINESTATES_MAIN;
-		if (auto state = mainloop(); static_cast<int8_t>(state) < 0) {
-			switch (state) {
-			case CSM::ERROR_WHILE_LOAD_MODULE:
-				std::cout << "Error while Load Module in LIne: " << line_count << "\n";
-				break;
-			case CSM::SKIP_ARGUMENTS:
-				std::cout << "Skipped Analysis defined in LIne: " << line_count << " because of failed Module loading\n";
-				break;
-			case CSM::ERROR_IN_ANALYSIS:
-				std::cout << "Error in at least one Analysis of Line:" << line_count << "\n";
-				break;
+		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
+			if (static_cast<int8_t>(state) < 0) {
+				evaluateMainloopError(state);
+				--res;
 			}
-			res--;
 		}
 		free(_argv); //delete them after mainloop, so all variables could be invalidated.
 	}
@@ -227,7 +232,7 @@ bool is_active_LLVM_90() {
 	return Version.getValue() == llvm90->getVersion();
 }
 
-bool loadModule()
+bool loadModule(boaaa::llvm_version version)
 {
 	uint64_t filehash = llvm_man->registerData(InputFilename);
 	uint64_t prefixhash = 0;
@@ -239,7 +244,7 @@ bool loadModule()
 	}
 
 	bool error;
-	if (llvm40 && (AllVersions.getValue() || is_active_LLVM_40())) {
+	if (llvm40 && version == llvm40->getVersion() && (AllVersions.getValue() || is_active_LLVM_40())) {
 		if (prefix) error = llvm40->loadModule(prefixhash, filehash);
 		else        error = llvm40->loadModule(filehash);
 		if (!error)
@@ -249,7 +254,7 @@ bool loadModule()
 		}
 	}
 
-	if (llvm50 && (AllVersions.getValue() || is_active_LLVM_50())) {
+	if (llvm50 && version == llvm50->getVersion() && (AllVersions.getValue() || is_active_LLVM_50())) {
 		if (prefix) error = llvm50->loadModule(prefixhash, filehash);
 		else        error = llvm50->loadModule(filehash);
 		if (!error)
@@ -259,7 +264,7 @@ bool loadModule()
 		}
 	}
 
-	if (llvm60 && (AllVersions.getValue() || is_active_LLVM_60())) {
+	if (llvm60 && version == llvm60->getVersion() && (AllVersions.getValue() || is_active_LLVM_60())) {
 		if (prefix) error = llvm60->loadModule(prefixhash, filehash);
 		else        error = llvm60->loadModule(filehash);
 		if (!error)
@@ -269,7 +274,7 @@ bool loadModule()
 		}
 	}
 
-	if (llvm71 && (AllVersions.getValue() || is_active_LLVM_71())) {
+	if (llvm71 && version == llvm71->getVersion() && (AllVersions.getValue() || is_active_LLVM_71())) {
 		if (prefix) error = llvm71->loadModule(prefixhash, filehash);
 		else        error = llvm71->loadModule(filehash);
 		if (!error)
@@ -279,7 +284,7 @@ bool loadModule()
 		}
 	}
 
-	if (llvm80 && (AllVersions.getValue() || is_active_LLVM_80())) {
+	if (llvm80 && version == llvm80->getVersion() && (AllVersions.getValue() || is_active_LLVM_80())) {
 		if (prefix) error = llvm80->loadModule(prefixhash, filehash);
 		else        error = llvm80->loadModule(filehash);
 		if (!error)
@@ -289,7 +294,7 @@ bool loadModule()
 		}
 	}
 
-	if (llvm90 && (AllVersions.getValue() || is_active_LLVM_90())) {
+	if (llvm90 && version == llvm90->getVersion() && (AllVersions.getValue() || is_active_LLVM_90())) {
 		if (prefix) error = llvm90->loadModule(prefixhash, filehash);
 		else        error = llvm90->loadModule(filehash);
 		if (!error)
@@ -301,62 +306,94 @@ bool loadModule()
 	return true;
 }
 
-boaaa::aa_id getCurrentVersionId()
+void unloadModule(boaaa::llvm_version version)
 {
+	if (llvm40 && version == llvm40->getVersion() && (AllVersions.getValue() || is_active_LLVM_40()))
+		llvm40->unloadModule();
+
+	if (llvm50 && version == llvm50->getVersion() && (AllVersions.getValue() || is_active_LLVM_50()))
+		llvm50->unloadModule();
+
+	if (llvm60 && version == llvm60->getVersion() && (AllVersions.getValue() || is_active_LLVM_60()))
+		llvm60->unloadModule();
+
+	if (llvm71 && version == llvm71->getVersion() && (AllVersions.getValue() || is_active_LLVM_71()))
+		llvm71->unloadModule();
+
+	if (llvm80 && version == llvm80->getVersion() && (AllVersions.getValue() || is_active_LLVM_80()))
+		llvm80->unloadModule();
+
+	if (llvm90 && version == llvm90->getVersion() && (AllVersions.getValue() || is_active_LLVM_90()))
+		llvm90->unloadModule();
+}
+
+boaaa::aa_id getLLVMVersion(uint32_t version) {
 	using LLV = boaaa::LLVM_VERSIONS;
 
-	switch (Version.getValue()) {
+	switch (version) {
+	case 30:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_30);
+	case 35:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_35);
 	case 40:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_40);
 	case 50:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_50);
 	case 60:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_60);
+	case 70:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_70);
 	case 71:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_71);
 	case 80:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_80);
 	case 90:
 		return static_cast<boaaa::aa_id>(LLV::LLVM_90);
+	case 100:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_100);
+	case 110:
+		return static_cast<boaaa::aa_id>(LLV::LLVM_110);
 	default:
 		return 0;
 	}
 }
 
-bool runAnalysis(std::set<boaaa::aa_id> analysises)
+boaaa::aa_id getCurrentVersionId()
+{
+	return getLLVMVersion(Version.getValue());
+}
+
+bool runAnalysis(boaaa::aa_id aa)
 {
 	using LLV = boaaa::LLVM_VERSIONS;
 
 	bool res = true;
-	for (boaaa::aa_id aa : analysises)
+	switch (aa & boaaa::version_mask)
 	{
-		switch (aa & boaaa::version_mask)
-		{
-		case LLV::LLVM_40:
-			if (!AllVersions.getValue() && !is_active_LLVM_40()) break;
-			res &= llvm40->runAnalysis(aa);
-			break;
-		case LLV::LLVM_50:
-			if (!AllVersions.getValue() && !is_active_LLVM_50()) break;
-			res &= llvm50->runAnalysis(aa);
-			break;
-		case LLV::LLVM_60:
-			if (!AllVersions.getValue() && !is_active_LLVM_60()) break;
-			res &= llvm60->runAnalysis(aa);
-			break;
-		case LLV::LLVM_71:
-			if (!AllVersions.getValue() && !is_active_LLVM_71()) break;
-			res &= llvm71->runAnalysis(aa);
-			break;
-		case LLV::LLVM_80:
-			if (!AllVersions.getValue() && !is_active_LLVM_80()) break;
-			res &= llvm80->runAnalysis(aa);
-			break;
-		case LLV::LLVM_90:
-			if (!AllVersions.getValue() && !is_active_LLVM_90()) break;
-			res &= llvm90->runAnalysis(aa);
-			break;
-		}
+	case LLV::LLVM_40:
+		if (!AllVersions.getValue() && !is_active_LLVM_40()) break;
+		res &= llvm40->runAnalysis(aa);
+		break;
+	case LLV::LLVM_50:
+		if (!AllVersions.getValue() && !is_active_LLVM_50()) break;
+		res &= llvm50->runAnalysis(aa);
+		break;
+	case LLV::LLVM_60:
+		if (!AllVersions.getValue() && !is_active_LLVM_60()) break;
+		res &= llvm60->runAnalysis(aa);
+		break;
+	case LLV::LLVM_71:
+		if (!AllVersions.getValue() && !is_active_LLVM_71()) break;
+		res &= llvm71->runAnalysis(aa);
+		break;
+	case LLV::LLVM_80:
+		if (!AllVersions.getValue() && !is_active_LLVM_80()) break;
+		res &= llvm80->runAnalysis(aa);
+		break;
+	case LLV::LLVM_90:
+		if (!AllVersions.getValue() && !is_active_LLVM_90()) break;
+		res &= llvm90->runAnalysis(aa);
+		break;
 	}
 	return res;
 }
@@ -365,64 +402,106 @@ COROUTINESTATES_MAIN mainloop()
 {
 	using CSM = COROUTINESTATES_MAIN;
 
-	static CSM coroutine_state = CSM::NORMAL;
+	static CSM coroutine_state = CSM::INIT;
+	static std::vector<boaaa::aa_id> analysis_to_run;
+	static int16_t index = -1;
+	static uint32_t aa_index = 0;
 	
 	switch (coroutine_state) {
-		case CSM::ERROR_WHILE_LOAD_MODULE:
-			coroutine_state = CSM::SKIP_ARGUMENTS;
-		case CSM::SKIP_ARGUMENTS:
-			if (!InputFilename.hasArgStr())
-				return coroutine_state; //skip because of previos error
-		case CSM::ERROR_IN_ANALYSIS:	//error in analysis is not a big deal, for running other analysises, so run like normal behavior
-		case CSM::NORMAL:
-			if (!InputFilename.hasArgStr())
-			{
-				if (!loadModule()) 
-				{
-					coroutine_state = CSM::ERROR_WHILE_LOAD_MODULE;
-					return coroutine_state; //error while laod module
-				}
-			}
-
-			std::set<boaaa::aa_id> analysis_to_run;
-
+	case CSM::ERROR_WHILE_LOAD_MODULE:
+		coroutine_state = CSM::SKIP_ARGUMENTS;
+	case CSM::SKIP_ARGUMENTS:
+		if (!InputFilename.hasArgStr())
+			return coroutine_state; //skip because of previos error
+	case CSM::INIT:
+		analysis_to_run.clear(); //clear analysis bevore
+		aa_index = 0;
+		index = -1; //increment in NEXT_VERSION to 0
+		{
+			std::set<boaaa::aa_id> analysis_temp;
+			//scan analysis to run
 			if (AllAnalysis.getValue())
 			{
 				if (AllVersions.getValue()) {
 					for (int i = 0; i < aa_map_size; i++) {
-						analysis_to_run.insert(std::begin(aa_map[i]), std::end(aa_map[i]));
+						analysis_temp.insert(std::begin(aa_map[i]), std::end(aa_map[i]));
 					}
 				}
-				else 
+				else
 				{
 					if (!Version.isDefaultOption()) {
-						for(boaaa::aa_id i = 0; i < aa_map_size; i++)
+						for (boaaa::aa_id i = 0; i < aa_map_size; i++)
 						{
 							boaaa::aa_id id = getCurrentVersionId();
 							for (boaaa::aa_id aa : aa_map[i])
 								if ((aa & boaaa::version_mask) == id)
-									analysis_to_run.insert(aa);
+									analysis_temp.insert(aa);
 						}
 					}
 				}
-			} 
+			}
 			else
 			{
 				if (aa_list.size() > 0) {
-					analysis_to_run.insert(std::begin(aa_list), std::end(aa_list));
+					analysis_temp.insert(std::begin(aa_list), std::end(aa_list));
 				}
 				if (version_list.size() > 0) {
-					for (boaaa::aa_id i : version_list) 
-						analysis_to_run.insert(std::begin(aa_map[i]), std::end(aa_map[i]));
+					for (boaaa::aa_id i : version_list)
+						analysis_temp.insert(std::begin(aa_map[i]), std::end(aa_map[i]));
 				}
 			}
-			if (!runAnalysis(analysis_to_run)) {
+
+			for (boaaa::aa_id id : analysis_temp)
+				analysis_to_run.push_back(id);
+		}
+
+	case CSM::NEXT_VERSION:
+
+		if (index >= 0 && index < versions_count)
+			unloadModule(versions_loaded[index]);
+
+		++index;
+
+		if (!InputFilename.hasArgStr())
+		{
+			if (!loadModule(versions_loaded[index]))
+			{
+				coroutine_state = CSM::ERROR_WHILE_LOAD_MODULE;
+				return coroutine_state; //error while laod module
+			}
+		}
+
+	case CSM::ERROR_IN_ANALYSIS:	//error in analysis is not a big deal, for running other analysises, so run like normal behavior
+	case CSM::NORMAL:
+
+		boaaa::aa_id max_id = index + 1 < versions_count ?
+			getLLVMVersion(static_cast<uint32_t>(versions_loaded[index + 1])) : INT32_MAX;
+
+		//if below eval same as this comment
+		//if (!analysis_to_run.size() || aa_index == analysis_to_run.size())
+		if (!(analysis_to_run.size() - aa_index))
+			break;
+
+		boaaa::aa_id id = analysis_to_run[aa_index];
+
+		if(
+			id < max_id									//prevent to run analyses with no loaded module
+			&& aa_index < analysis_to_run.size())	//prevent from running out of indices from vector	
+		{
+			if (!runAnalysis(id)) {
 				coroutine_state = CSM::ERROR_IN_ANALYSIS;
 				return coroutine_state;
 			}
+			++aa_index;
+			coroutine_state = CSM::NORMAL;
+			return coroutine_state;
+		}
+		coroutine_state = CSM::NEXT_VERSION;
+		return coroutine_state;
+	//case CSM::NO_ARGS_LEFT: do nothing
 	}
 
-	coroutine_state = CSM::NORMAL;
+	coroutine_state = CSM::NO_ARGS_LEFT;
 	return coroutine_state;
 }
 
@@ -467,8 +546,8 @@ int testmain() {
 
 #endif //!DEBUG
 
-void setupLLVMVersion(boaaa::DLInterface &handle, std::vector<boaaa::llvm_version>& v, uint16_t version) {
-	v.push_back(version);
+void setupLLVMVersion(boaaa::DLInterface &handle, std::set<boaaa::llvm_version>& v, uint16_t version) {
+	v.insert(version);
 
 	handle.setBasicOStream(std::cout);
 	if (!sr_vp_man) { //init only one time per execution
@@ -489,7 +568,8 @@ void setup()
 	llvm80 = llvm_man->loadDL("boaaa.lv_80");
 	llvm90 = llvm_man->loadDL("boaaa.lv_90");
 
-	std::vector<boaaa::llvm_version> versions;
+	//set because it is sorted
+	std::set<boaaa::llvm_version> versions;
 
 	if(llvm40)
 		setupLLVMVersion(*llvm40, versions, llvm40->getVersion());

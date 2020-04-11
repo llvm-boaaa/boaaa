@@ -130,6 +130,17 @@ bool DLInterface60::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	return true;
 }
 
+void DLInterface60::unloadModule()
+{
+	context.alias_sets.clear();
+	context.no_alias_sets.clear();
+
+	context.relevant_pointers.clear();
+
+	context.loaded_module.reset(nullptr);
+	context.context_to_module.reset(nullptr);
+}
+
 bool DLInterface60::runAnalysis(boaaa::aa_id analysis)
 {
 	using LLV = boaaa::LLVM_60_AA;

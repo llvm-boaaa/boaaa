@@ -105,6 +105,8 @@ bool LLVMVersionManager::loadModule(uint64_t module_file_hash) { return false; }
 
 bool LLVMVersionManager::loadModule(uint64_t module_file_prefix, uint64_t module_file_hash) { return false; };
 
+void LLVMVersionManager::unloadModule() { }
+
 boaaa::cl_aa_store getAvailableAAs() 
 {
 	cl_aa_store store;

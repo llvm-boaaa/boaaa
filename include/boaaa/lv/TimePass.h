@@ -43,8 +43,6 @@ namespace boaaa
 
 			std::mutex m_write_mutex;
 
-			uint64_t count = 0;
-
 		public:
 			timestamp start() {
 				return std::chrono::high_resolution_clock::now();
@@ -54,8 +52,6 @@ namespace boaaa
 				timestamp end = std::chrono::high_resolution_clock::now();
 
 				std::lock_guard<std::mutex> guard(m_write_mutex);
-
-				count++;
 
 				if (notset_start || m_start > start) {
 					m_start = start;
@@ -98,7 +94,6 @@ namespace boaaa
 			}
 
 			virtual void printResult(std::ostream& stream) {
-				stream << "count:" << (int) count << "\n";
 				uint8_t  sum_nanos   = std::chrono::duration_cast<std::chrono::nanoseconds>(m_end - m_start).count()  % 1000;
 				uint8_t  sum_micros  = std::chrono::duration_cast<std::chrono::microseconds>(m_end - m_start).count() % 1000;
 				uint8_t  sum_millis  = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start).count() % 1000;

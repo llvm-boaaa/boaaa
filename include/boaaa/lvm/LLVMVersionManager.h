@@ -81,6 +81,7 @@ namespace boaaa {
 		bool loadModule(uint64_t module_file_hash) override;
 		bool loadModule(uint64_t module_file_prefix, 
 						uint64_t module_file_hash) override;
+		void unloadModule() override;
 		bool runAnalysis(boaaa::aa_id analysis) override { return false; }
 	};
 
