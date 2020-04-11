@@ -86,6 +86,8 @@ bool DLInterface90::loadModule(uint64_t module_file_hash)
 	pm.add(cp);
 	pm.run(*context.loaded_module);
 	cp->printResult(*context.basic_ostream);
+	//dont delete pass, get deleted in PM
+	//delete cp;
 
 	//scan pointers for evaluation
 	context.relevant_pointers = std::map<uint64_t, std::unique_ptr<EvaluationContainer>>();
@@ -118,9 +120,13 @@ bool DLInterface90::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	//evaluate countpass result
 	llvm::legacy::PassManager pm;
 	CountPass* cp = new CountPass();
+	llvm::LoopInfoWrapperPass* liwp = new llvm::LoopInfoWrapperPass();
+	pm.add(liwp);
 	pm.add(cp);
 	pm.run(*context.loaded_module);
 	cp->printResult(*context.basic_ostream);
+	//dont delete pass, get deleted in PM
+	//delete cp;
 
 	//scan pointers for evaluation
 	context.relevant_pointers = std::map<uint64_t, std::unique_ptr<EvaluationContainer>>();

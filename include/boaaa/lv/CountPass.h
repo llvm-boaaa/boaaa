@@ -8,11 +8,14 @@
 // include llvm/Pass.h
 #include "include_versions/LLVM_include_Pass_h.inc"
 //define LLVMModulePass
-#include "include_versions/LLVM_ModulePass.inc"
+#include "include_versions/LLVM_FunctionPass.inc"
 //define LLVMRegisterPass
 #include "include_versions/LLVM_RegisterPass.inc"
 //define LLVMFunction
 #include "include_versions/LLVM_Function.inc"
+//include LoopInfoWrapperPass
+#include "include_versions/LLVM_include_LoopInfo.inc"
+
 
 #ifdef LLVM_VERSION_ERROR_CODE
 	LLVM_VERSION_ERROR_CODE
@@ -22,54 +25,33 @@
 
 namespace boaaa {
 
-	struct CountPass : public LLVMModulePass
+	struct CountPass : public LLVMFunctionPass
 	{
 		static char ID;
-		CountPass() : LLVMModulePass(ID) {}
+		CountPass();
 
 		uint64_t function_count = 0;
 		uint64_t basic_block_count = 0;
 		uint64_t instruction_count = 0;
 		uint64_t loop_count = 0;
 
-		bool runOnModule(LLVMModule& M) override {
-			function_count = 0;
-			basic_block_count = 0;
-			instruction_count = 0;
-			loop_count = 0;
-
-
-			for (LLVMFunction& F : M.functions()) {
-
-				//llvm::LoopInfo& LI = getAnalysis<llvm::LoopInfoWrapperPass>(F).getLoopInfo();
-				//for (llvm::Loop* L : LI) {
-				//	loop_count++;
-				//}
-
-				for (llvm::BasicBlock &BB : F.getBasicBlockList()) {
-
-					for (llvm::Instruction& I : BB.getInstList()) {
-						instruction_count++;
-					}
-					basic_block_count++;
-				}
-				function_count++;
-			}
-
-			return false;
-		}
+		bool runOnFunction(LLVMFunction& F) override;
 
 		void printResult(std::ostream& stream) {
-			stream << "CountPass Report:\n";
-			stream << "Function #"     << function_count    << "\n"
-				   << "BasicBlock #"   << basic_block_count << "\n"
-				   << "Instructions #" << instruction_count << "\n";			
+			stream	<< "Module Report LLVM_" << LLVM_VERSION << ":\n";
+			stream	<< "Functions    #" << function_count << "\n"
+					<< "BasicBlocks  #" << basic_block_count << "\n"
+					<< "Loops        #" << loop_count << "\n"
+					<< "Instructions #" << instruction_count << "\n\n";
 		}
+
+		void getAnalysisUsage(llvm::AnalysisUsage& AU) const override;
 	};
+}
 
-	char CountPass::ID = 0;
-
-	//static LLVMRegisterPass<CountPass> X("count", "CountPass", true, false);
+namespace llvm {
+	LLVMFunctionPass* createCountPass();
+	void initializeCountPassPass(llvm::PassRegistry& Registry);
 }
 
 

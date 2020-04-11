@@ -83,6 +83,8 @@ bool DLInterface60::loadModule(uint64_t module_file_hash)
 	pm.add(cp);
 	pm.run(*context.loaded_module);
 	cp->printResult(*context.basic_ostream);
+	//dont delete pass, get deleted in PM
+	//delete cp;
 
 	//scan pointers for evaluation
 	context.relevant_pointers = std::map<uint64_t, std::unique_ptr<EvaluationContainer>>();
@@ -118,6 +120,8 @@ bool DLInterface60::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	pm.add(cp);
 	pm.run(*context.loaded_module);
 	cp->printResult(*context.basic_ostream);
+	//dont delete pass, get deleted in PM
+	//delete cp;
 
 	//scan pointers for evaluation
 	context.relevant_pointers = std::map<uint64_t, std::unique_ptr<EvaluationContainer>>();

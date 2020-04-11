@@ -136,8 +136,8 @@ namespace boaaa {
     INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
     INITIALIZE_PASS_DEPENDENCY(analysisname)                                                        \
     INITIALIZE_PASS_END(passname, arg, help, false, true)											\
-    passname::passname()													\
-			: boaaa::detail::select_eval_pass_t<analysisname>(ID)		                    \
+    passname::passname()																			\
+			: boaaa::detail::select_eval_pass_t<analysisname>(ID)									\
     { initialize##passname##Pass(*PassRegistry::getPassRegistry()); }                               \
     boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
 #endif
