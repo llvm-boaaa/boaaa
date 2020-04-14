@@ -10,7 +10,7 @@ namespace support {
 	template<class Type, class TypeComperator = std::less<Type>>
 	class UnionFind {
 	private:
-		using UF = typename UnionFind<Type, TypeComperator>;
+		using UF = UnionFind<Type, TypeComperator>;
 
 		const Type m_value;
 		UF* m_union;

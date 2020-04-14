@@ -19,7 +19,7 @@ namespace support {
 	class UnionFindMap {
 	public:
 		using _Key = typename std::conditional_t<std::is_pointer<Key>::value || std::is_integral<Key>::value, Key, Key&>;
-		using UF = typename UnionFind<Key, KeyComperator>;
+		using UF = UnionFind<Key, KeyComperator>;
 		using UFM = typename std::map<Key, UF*>;
 		using UFL = typename std::list<UF*>;
 		using iterator = typename UFM::iterator;

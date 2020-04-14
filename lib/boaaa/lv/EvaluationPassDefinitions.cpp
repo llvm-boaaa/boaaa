@@ -21,31 +21,31 @@ BOAAA_CREATE_EVAL_PASS_SOURCE(BasicAAEvalWrapperPass, BasicAAWrapperPass,
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
 using namespace objcarc;
-BOAAA_CREATE_EVAL_PASS_SOURCE(ObjCARCAAEvalWrapperPass, ObjCARCAAWrapperPass, 
+BOAAA_CREATE_EVAL_PASS_SOURCE(ObjCARCAAEvalWrapperPass, ObjCARCAAWrapperPass,
 	"objcarc-aa-eval", "ObjCARC Alias Analysis Evaluator")
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
 
-BOAAA_CREATE_EVAL_PASS_SOURCE(SCEVAAEvalWrapperPass, SCEVAAWrapperPass, 
+BOAAA_CREATE_EVAL_PASS_SOURCE(SCEVAAEvalWrapperPass, SCEVAAWrapperPass,
 	"scev-aa-eval", "SVEC Alias Analysis Evaluator")
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SVECAA
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
 
-BOAAA_CREATE_EVAL_PASS_SOURCE(ScopedNoAliasEvalWrapperPass, ScopedNoAliasAAWrapperPass, 
+BOAAA_CREATE_EVAL_PASS_SOURCE(ScopedNoAliasEvalWrapperPass, ScopedNoAliasAAWrapperPass,
 	"sna-aa-eval", "Scoped no Alias Alias Analysis Evaluator")
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
 
-BOAAA_CREATE_EVAL_PASS_SOURCE(SteensAAEvalWrapperPass, CFLSteensAAWrapperPass, 
+BOAAA_CREATE_EVAL_PASS_SOURCE(SteensAAEvalWrapperPass, CFLSteensAAWrapperPass,
 	"steens-aa-eval", "Steens Alias Analysis Evaluator")
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
 
-BOAAA_CREATE_EVAL_PASS_SOURCE(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass, 
+BOAAA_CREATE_EVAL_PASS_SOURCE(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass,
 	"tbaa-aa-eval", "Type based Alias Analysis Alias Analysis Evaluator")
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
@@ -59,10 +59,14 @@ BOAAA_CREATE_EVAL_PASS_SOURCE(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass
  */
 
 #ifdef LLVM_VERSION_50
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
+ //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
+#ifdef SEA_DSA
+using namespace sea_dsa;
+BOAAA_CREATE_EVAL_PASS_SOURCE_NO_DEP(DsaAnalysisWrapperPass, DsaAnalysis, "sea-dsa", "Sea-Dsa Alias Analysis")
 
+#endif
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
 #endif //!LLVM_VERSION_50

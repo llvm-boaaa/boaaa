@@ -142,13 +142,25 @@ namespace boaaa {
     boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
 #endif
 
+#ifndef BOAAA_CREATE_EVAL_PASS_SOURCE_NO_DEP
+#define BOAAA_CREATE_EVAL_PASS_SOURCE_NO_DEP(passname, analysisname, arg, help)					\
+char passname::ID = 0;                                                                          \
+INITIALIZE_PASS_BEGIN(passname, arg, help, false, true)                                         \
+INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
+INITIALIZE_PASS_END(passname, arg, help, false, true)											\
+passname::passname()																			\
+	: boaaa::detail::select_eval_pass_t<analysisname>(ID)										\
+{ initialize##passname##Pass(*PassRegistry::getPassRegistry()); }                               \
+    boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
+#endif
+
 namespace llvm
 {
 	/*
 	 * Instanziation of all EvaluationPasses in Alphabetic order (LLVM-BUILT-IN)
 	 */
 
-	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++AndersAA
+	 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++AndersAA
 
 	BOAAA_CREATE_EVAL_PASS_HEADER(AndersAAEvalWrapperPass, CFLAndersAAWrapperPass)
 
@@ -178,7 +190,7 @@ namespace llvm
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
-		
+
 	BOAAA_CREATE_EVAL_PASS_HEADER(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass)
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
@@ -188,21 +200,30 @@ namespace llvm
 	//======================================================================================================
 
 	/*
-	 * Instanziation of all EvaluationPasses in Alphabetic order (LLVM-EXTENDING)
-	 */
+	* Instanziation of all EvaluationPasses in Alphabetic order (LLVM-EXTENDING)
+	*/
 
 #ifdef LLVM_VERSION_50
+} //!llvm namespace
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
-//#include "sea_dsa/Local.hh"
-//#include "sea_dsa/BottomUp.hh"
-//#include "sea_dsa/TopDown.hh"
+#ifdef SEA_DSA
 
-	//BOAAA_CREATE_EVAL_PASS_HEADER()
+#include "sea_dsa/DsaAnalysis.hh"
 
+namespace llvm {
+	using namespace sea_dsa;
+	//TODO crashes because couldn't find Function getResult, wrapper for dsa-interface needed.
+	BOAAA_CREATE_EVAL_PASS_HEADER(DsaAnalysisWrapperPass, DsaAnalysis)
 
+}
+#endif
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
+
+
+namespace llvm {
+
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
 #endif //!LLVM_VERSION_50

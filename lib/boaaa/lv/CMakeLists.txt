@@ -44,10 +44,12 @@ file(GLOB DL_VERSION_files
 
 	boaaa_add_llvm_library(${REGISTERED} boaaa.lv_${version_} "boaaa/lv" ${branch} MODULE ${DL_files} ${DL_VERSION_files} ${_dl_files})
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
+	message(STATUS "|| additinal Analysis: ${LLVM_${version_}_ANALYSISES}")
 	target_link_libraries(boaaa.lv_${version_}
 							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp ${LLVM_${version_}_ANALYSISES})
 
-	target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_${version_}_ADDITIONAL_INCLUDE})
+	message(STATUS "|| additional Include Dirs: ${LLVM_${version_}_ADDITIONAL_INCLUDE}")
+	target_include_directories(boaaa.lv_${version_} PUBLIC ${LLVM_${version_}_ADDITIONAL_INCLUDE})
 
 	set_property(TARGET boaaa.lv_${version_} PROPERTY CXX_STANDARD 14)
 
@@ -69,7 +71,7 @@ file(GLOB DL_VERSION_files
 		LLVM_VERSION=${version_}
 		LLVM_VERSION_${version_}=${version_} 
 		BUILD_SHARED_LIB
-		${sys_def})
+		${sys_def} ${LLVM_${version_}_MAKRO})
 
 	#add_custom_target(${LLVM_NAME})
 
