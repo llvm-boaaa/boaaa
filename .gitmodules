@@ -16,6 +16,3 @@
 [submodule "analysis/Sea-Dsa"]
 	path = analysis/Sea-Dsa
 	url = http://knorr.global:8080/tfs/private/_git/Sea-Dsa
-[submodule "repos/simdjson"]
-	path = repos/simdjson
-	url = https://github.com/simdjson/simdjson.git

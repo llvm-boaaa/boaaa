@@ -76,7 +76,8 @@ file(GLOB DL_VERSION_files
 	#add_custom_target(${LLVM_NAME})
 
 	add_dependencies(boaaa.lv_${version_} LLVM_${version_} ${LLVM_${version_}_ANALYSISES})
-	message(STATUS "||added dynamic lib with llvm_version ${version_}: lv_${version_}")
+	message(STATUS "|| added dynamic lib with llvm_version ${version_}: lv_${version_}")
+	message(STATUS "||======================================")
 endforeach(version_)
 
 #															#

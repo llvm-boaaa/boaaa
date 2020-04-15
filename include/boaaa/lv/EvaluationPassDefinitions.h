@@ -213,7 +213,7 @@ namespace llvm
 namespace llvm {
 	using namespace sea_dsa;
 	//TODO crashes because couldn't find Function getResult, wrapper for dsa-interface needed.
-	BOAAA_CREATE_EVAL_PASS_HEADER(DsaAnalysisWrapperPass, DsaAnalysis)
+	//BOAAA_CREATE_EVAL_PASS_HEADER(DsaAnalysisWrapperPass, DsaAnalysis)
 
 }
 #endif

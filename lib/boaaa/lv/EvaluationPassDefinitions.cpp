@@ -62,7 +62,7 @@ BOAAA_CREATE_EVAL_PASS_SOURCE(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass
  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA
 #ifdef SEA_DSA
 using namespace sea_dsa;
-BOAAA_CREATE_EVAL_PASS_SOURCE_NO_DEP(DsaAnalysisWrapperPass, DsaAnalysis, "sea-dsa", "Sea-Dsa Alias Analysis")
+//BOAAA_CREATE_EVAL_PASS_SOURCE_NO_DEP(DsaAnalysisWrapperPass, DsaAnalysis, "sea-dsa", "Sea-Dsa Alias Analysis")
 
 #endif
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SEA-DSAAA

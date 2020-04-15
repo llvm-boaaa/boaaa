@@ -141,6 +141,8 @@ void DLInterface50::unloadModule()
 	context.context_to_module.reset(nullptr);
 }
 
+#include "sea_dsa/DsaAnalysis.hh"
+
 bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 {
 	using LLV = boaaa::LLVM_50_AA;
@@ -155,7 +157,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 		pass->printResult(*context.basic_ostream);
 		return pass;
 	};
-
+	
 	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_50) return false;
 	switch (analysis)
 	{

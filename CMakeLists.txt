@@ -45,6 +45,10 @@ set(ver_string "")
 set(ver_list "")
 foreach(ver ${build_llvm_version})
 
+unset("LLVM_${ver}_ANALYSISES" CACHE)
+unset("LLVM_${ver}_ADDITIONAL_INCLUDE" CACHE)
+unset("LLVM_${ver}_MAKRO" CACHE)
+
 list(APPEND ver_list "${ver}")
 if(ver_string STREQUAL "")
 	set(ver_string "${ver}")
@@ -100,6 +104,8 @@ message(STATUS "||")
 #add libs
 	# googletests, remove googletest error of some kind, but currently not important
 	#nm_add_gtest()
+
+add_subdirectory(repos/simdjson EXCLUDE_FROM_ALL)
 
 #add analysis
 message(STATUS "||=======add Analysis to verisons=======||")
