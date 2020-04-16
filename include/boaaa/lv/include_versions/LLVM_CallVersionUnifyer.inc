@@ -8,6 +8,7 @@
 #define LLVM_VERSION_71_INCLUDE "llvm/IR/CallSite.h"
 #define LLVM_VERSION_80_INCLUDE "llvm/IR/InstrTypes.h"
 #define LLVM_VERSION_90_INCLUDE "llvm/IR/InstrTypes.h"
+#define LLVM_VERSION_100_INCLUDE "llvm/IR/InstrTypes.h"
 
 #define LLVM_VERSION_UNIFY using LLVMCallUnifyer =
 
@@ -18,6 +19,7 @@
 #define LLVM_VERSION_71_UNIFY llvm::CallSite
 #define LLVM_VERSION_80_UNIFY llvm::CallBase
 #define LLVM_VERSION_90_UNIFY llvm::CallBase
+#define LLVM_VERSION_100_UNIFY llvm::CallBase
 #define LLVM_VERSION_UNIFY_FINALIZE ;
 
 #include "boaaa/lv/unify_LLVM_VERSION.def"

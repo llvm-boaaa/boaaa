@@ -7,6 +7,7 @@
 #define LLVM_VERSION_71_INCLUDE "boaaa/lv/71/StringRefVersionParser71.h"
 #define LLVM_VERSION_80_INCLUDE "boaaa/lv/80/StringRefVersionParser80.h"
 #define LLVM_VERSION_90_INCLUDE "boaaa/lv/90/StringRefVersionParser90.h"
+#define LLVM_VERSION_100_INCLUDE "boaaa/lv/100/StringRefVersionParser100.h"
 
 #define LLVM_VERSION_UNIFY using BOAAAStringRefVP = 
 
@@ -16,6 +17,7 @@
 #define LLVM_VERSION_71_UNIFY boaaa::StringRefVP71
 #define LLVM_VERSION_80_UNIFY boaaa::StringRefVP80
 #define LLVM_VERSION_90_UNIFY boaaa::StringRefVP90
+#define LLVM_VERSION_100_UNIFY boaaa::StringRefVP100
 
 #define LLVM_VERSION_UNIFY_FINALIZE ;
 

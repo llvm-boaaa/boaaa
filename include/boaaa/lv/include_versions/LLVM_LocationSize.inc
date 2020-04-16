@@ -11,6 +11,7 @@
 #define LLVM_VERSION_71_UNIFY uint64_t
 #define LLVM_VERSION_80_UNIFY llvm::LocationSize
 #define LLVM_VERSION_90_UNIFY llvm::LocationSize
+#define LLVM_VERSION_100_UNIFY llvm::LocationSize
 #define LLVM_VERSION_REST_UNIFY uint64_t
 #define LLVM_VERSION_UNIFY_FINALIZE ;
 

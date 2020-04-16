@@ -146,7 +146,7 @@ namespace boaaa {
 		bool readJson(const rapidjson::Value& value)
 		{
 			bool tmp = false;
-			bool result = false;
+			bool result = true;
 
 			//time 
 			BOAAA_CHECK_AND_ASIGN_TIME(value, result, tmp, pm_time)

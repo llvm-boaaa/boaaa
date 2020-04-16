@@ -51,6 +51,13 @@
 #undef NOT_SUPPORTED_LLVM_VERSION
 #endif //!LLVM_VERSION_90
 
+#ifdef LLVM_VERSION_100
+#ifndef NOT_SUPPORTED_LLVM_VERSION
+#define LLVM_TWO_VERSIONS_ LLVM_VERSION_100
+#endif
+#undef NOT_SUPPORTED_LLVM_VERSION
+#endif //!LLVM_VERSION_90
+
 //error handling, register version above bye writing:
 /*
 #ifdef LLVM_VERSION_XX

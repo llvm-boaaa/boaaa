@@ -1,4 +1,4 @@
-#include "boaaa/lv/90/Interface_90.h"
+#include "boaaa/lv/100/Interface_100.h"
 
 #include "llvm/Support/CommandLine.h"
 #include "llvm/IR/LLVMContext.h"
@@ -26,33 +26,33 @@ using namespace boaaa;
 
 void registerPasses();
 
-DLInterface90::DLInterface90()
+DLInterface100::DLInterface100()
 {
 
 }
 
-DLInterface90::~DLInterface90()
+DLInterface100::~DLInterface100()
 {
-	
+
 }
 
-void DLInterface90::onLoad()
+void DLInterface100::onLoad()
 {
 	registerPasses();
-	context.string_ref_vp = new StringRefVP90();
+	context.string_ref_vp = new StringRefVP100();
 }
 
-void DLInterface90::onUnload()
+void DLInterface100::onUnload()
 {
 	delete context.string_ref_vp;
 }
 
-void DLInterface90::registerStringRefVPM(StringRefVPM* manager)
+void DLInterface100::registerStringRefVPM(StringRefVPM* manager)
 {
 	context.string_ref_vp->registerVPM(manager);
 }
 
-void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
+void DLInterface100::setBasicOStream(std::ostream& ostream, bool del)
 {
 	if (context.del_strm_after_use)
 		delete context.basic_ostream;
@@ -60,9 +60,9 @@ void DLInterface90::setBasicOStream(std::ostream& ostream, bool del)
 	context.basic_ostream = &ostream;
 }
 
-boaaa::cl_aa_store DLInterface90::getAvailableAAs()
+boaaa::cl_aa_store DLInterface100::getAvailableAAs()
 {
-	return boaaa::getInitalizedAAs_90();
+	return boaaa::getInitalizedAAs_100();
 }
 
 
@@ -94,7 +94,7 @@ bool loadModuleHelper(llvm::StringRef ref, boaaa::version_context& context)
 	return true;
 }
 
-bool DLInterface90::loadModule(uint64_t module_file_hash)
+bool DLInterface100::loadModule(uint64_t module_file_hash)
 {
 	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
@@ -102,7 +102,7 @@ bool DLInterface90::loadModule(uint64_t module_file_hash)
 	return loadModuleHelper(bc_ref, context);
 }
 
-bool DLInterface90::loadModule(uint64_t module_file_prefix, uint64_t module_file_hash)
+bool DLInterface100::loadModule(uint64_t module_file_prefix, uint64_t module_file_hash)
 {
 	using store = typename _raw_type_inst(context.string_ref_vp)::store_t;
 	store storePrefix = context.string_ref_vp->generateStorage();
@@ -111,12 +111,12 @@ bool DLInterface90::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	llvm::StringRef prefix = context.string_ref_vp->parseRegistered(module_file_prefix, storePrefix);
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
 
-	std::string filename = prefix.str() + "90" + bc_ref.str();
+	std::string filename = prefix.str() + "100" + bc_ref.str();
 
 	return loadModuleHelper(filename, context);
 }
 
-void DLInterface90::unloadModule()
+void DLInterface100::unloadModule()
 {
 	context.alias_sets.clear();
 	context.no_alias_sets.clear();
@@ -130,7 +130,7 @@ void DLInterface90::unloadModule()
 template<typename F>
 bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 {
-	using LLV = boaaa::LLVM_90_AA;
+	using LLV = boaaa::LLVM_100_AA;
 
 	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_80) return false;
 	switch (analysis)
@@ -167,7 +167,7 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 	return true;
 }
 
-bool DLInterface90::runAnalysis(boaaa::aa_id analysis)
+bool DLInterface100::runAnalysis(boaaa::aa_id analysis)
 {
 	auto run = [&](auto* pass, auto* timepass) -> void {
 		llvm::legacy::PassManager pm;
@@ -184,7 +184,7 @@ bool DLInterface90::runAnalysis(boaaa::aa_id analysis)
 	return runAnalysisHelp(run, analysis);
 }
 
-bool DLInterface90::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
+bool DLInterface100::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 {
 	auto run = [&](auto* pass, auto* timepass) -> void {
 		llvm::legacy::PassManager pm;
@@ -203,14 +203,14 @@ bool DLInterface90::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 	return runAnalysisHelp(run, analysis);
 }
 
-void DLInterface90::test(uint64_t* hash, uint8_t num)
+void DLInterface100::test(uint64_t* hash, uint8_t num)
 {
 	_raw_type_inst(context.string_ref_vp)::store_t storeSR = context.string_ref_vp->generateStorage();
 	llvm::StringRef ref = context.string_ref_vp->parseRegistered(hash[0], storeSR);
 	*(context.basic_ostream) << LLVM_VERSION << " " << ref.str() << std::endl;
 
 	llvm::LLVMContext llvm_context;
-	llvm::legacy::PassManager manager;		
+	llvm::legacy::PassManager manager;
 
 	llvm::legacy::PassManager pm;
 	//basic_aa.add(llvm::createBasicAAWrapperPass());
@@ -218,12 +218,12 @@ void DLInterface90::test(uint64_t* hash, uint8_t num)
 	//basic_aa.add(llvm::createCFLSteensAAWrapperPass());
 	//basic_aa.add(llvm::createScopedNoAliasAAWrapperPass());
 	llvm::TargetLibraryInfoWrapperPass* tli = new llvm::TargetLibraryInfoWrapperPass();
-	llvm::SCEVAAWrapperPass *scev = new llvm::SCEVAAWrapperPass();
+	llvm::SCEVAAWrapperPass* scev = new llvm::SCEVAAWrapperPass();
 	//llvm::BasicAAWrapperPass* basic_aa = new llvm::BasicAAWrapperPass();
 	boaaa::TimePass<llvm::SCEVAAWrapperPass>* tmscev = new boaaa::TimePass<llvm::SCEVAAWrapperPass>();
 	llvm::SCEVAAEvalWrapperPass* sceveval = new llvm::SCEVAAEvalWrapperPass();
-	
-	boaaa::CountPass *cp = new boaaa::CountPass(); 
+
+	boaaa::CountPass* cp = new boaaa::CountPass();
 	pm.add(tli);
 	pm.add(cp);
 	//pm.add(tmscev);

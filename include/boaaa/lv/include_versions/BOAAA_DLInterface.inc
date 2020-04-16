@@ -7,6 +7,7 @@
 #define LLVM_VERSION_71_INCLUDE "boaaa/lv/71/Interface_71.h"
 #define LLVM_VERSION_80_INCLUDE "boaaa/lv/80/Interface_80.h"
 #define LLVM_VERSION_90_INCLUDE "boaaa/lv/90/Interface_90.h"
+#define LLVM_VERSION_100_INCLUDE "boaaa/lv/100/Interface_100.h"
 
 #define LLVM_VERSION_UNIFY using BOAAADLInterface = 
 
@@ -16,6 +17,7 @@
 #define LLVM_VERSION_71_UNIFY boaaa::DLInterface71
 #define LLVM_VERSION_80_UNIFY boaaa::DLInterface80
 #define LLVM_VERSION_90_UNIFY boaaa::DLInterface90
+#define LLVM_VERSION_100_UNIFY boaaa::DLInterface100
 
 #define LLVM_VERSION_UNIFY_FINALIZE ;
 
