@@ -46,7 +46,7 @@ file(GLOB DL_VERSION_files
 	#target_include_directories(boaaa.lv_${version_} PRIVATE ${LLVM_INCLUDE_DIRS})
 	message(STATUS "|| additinal Analysis: ${LLVM_${version_}_ANALYSISES}")
 	target_link_libraries(boaaa.lv_${version_}
-							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp ${LLVM_${version_}_ANALYSISES})
+							PRIVATE "LLVM_${version_}" boaaa.support boaaa.vp rapidjson ${LLVM_${version_}_ANALYSISES})
 
 	message(STATUS "|| additional Include Dirs: ${LLVM_${version_}_ADDITIONAL_INCLUDE}")
 	target_include_directories(boaaa.lv_${version_} PUBLIC ${LLVM_${version_}_ADDITIONAL_INCLUDE})
@@ -75,7 +75,7 @@ file(GLOB DL_VERSION_files
 
 	#add_custom_target(${LLVM_NAME})
 
-	add_dependencies(boaaa.lv_${version_} LLVM_${version_} ${LLVM_${version_}_ANALYSISES})
+	add_dependencies(boaaa.lv_${version_} LLVM_${version_} rapidjson ${LLVM_${version_}_ANALYSISES})
 	message(STATUS "|| added dynamic lib with llvm_version ${version_}: lv_${version_}")
 	message(STATUS "||======================================")
 endforeach(version_)

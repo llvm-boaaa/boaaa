@@ -14,6 +14,7 @@
 //define LLVMImmutablePass
 #include "include_versions/LLVM_ImmutablePass.inc"
 
+#include "boaaa/EvaluationResult.h"
 #include "boaaa/support/select_type.h"
 #include "boaaa/support/data_store.h"
 
@@ -107,6 +108,23 @@ namespace boaaa
 														  << "." << (m_micros < 100 ? "0" : "") << +(m_micros < 10 ? "0" : "") << (int) m_micros
 														  << "." << (m_nanos  < 100 ? "0" : "") << +(m_nanos  < 10 ? "0" : "") << (int) m_nanos << "\n";
 			}
+
+			void printToEvalRes(EvaluationResult& er) {
+				uint16_t  sum_nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(m_end - m_start).count() % 1000;
+				uint16_t  sum_micros = std::chrono::duration_cast<std::chrono::microseconds>(m_end - m_start).count() % 1000;
+				uint16_t  sum_millis = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start).count() % 1000;
+				uint64_t sum_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_end - m_start).count();
+
+				er.set_pm_time_seconds(sum_seconds);
+				er.set_pm_time_millis(sum_millis);
+				er.set_pm_time_micros(sum_micros);
+				er.set_pm_time_nanos(sum_nanos);
+
+				er.set_function_time_seconds(m_seconds);
+				er.set_function_time_millis(m_millis);
+				er.set_function_time_micros(m_micros);
+				er.set_function_time_nanos(m_nanos);
+			}
 		};
 
 		template<class PASS>
@@ -134,15 +152,11 @@ namespace boaaa
 		class TimeFunctionPass : public PASS, TimeMessure {
 		private:
 			typedef boaaa::data_store<const char*, int> hashobj;
-			
-			std::vector<uint64_t> functionhashes;
 
 		public:
 			TimeFunctionPass() : PASS(), TimeMessure() { }
 
 			bool runOnFunction(LLVMFunction& F) override {
-				hashobj hash(F.getName().str().c_str(), F.getNumOperands());
-				functionhashes.push_back(hash.hash());
 				bool result;
 				timestamp start_ = start();
 				result = PASS::runOnFunction(F);
@@ -154,11 +168,6 @@ namespace boaaa
 				stream << "Report for " << typeid(PASS).name() << ":\n";
 				TimeMessure::printResult(stream);
 			}
-
-			std::vector<uint64_t>& getFunctionHashes() {
-				return functionhashes;
-			}
-
 		};
 
 		template<class PASS>
@@ -177,7 +186,6 @@ namespace boaaa
 				stream << "Total PM Time : --\n";
 				stream << "Funtion Time  : --\n";
 			}
-
 		};
 		
 		template<class PASS>

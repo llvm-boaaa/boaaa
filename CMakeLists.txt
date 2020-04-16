@@ -105,7 +105,23 @@ message(STATUS "||")
 	# googletests, remove googletest error of some kind, but currently not important
 	#nm_add_gtest()
 
-add_subdirectory(repos/simdjson EXCLUDE_FROM_ALL)
+#===rapidjson
+
+set(RAPIDJSON_INCLUDE_DIR "${BOAAA_SOURCE_DIR}/repos/rapidjson/include")
+
+file(GLOB RAPIDJSON_HEADERS
+	"${RAPIDJSON_INCLUDE_DIR}/rapidjson/*.h"
+	"${RAPIDJSON_INCLUDE_DIR}/rapidjson/error/*.h"
+	"${RAPIDJSON_INCLUDE_DIR}/rapidjson/internal/*.h"
+	"${RAPIDJSON_INCLUDE_DIR}/rapidjson/msinttypes/*.h"
+)
+
+include_directories(${RAPIDJSON_INCLUDE_DIR})
+
+nm_add_header_only_library(rapidjson STATIC ${RAPIDJSON_HEADERS})
+
+#===rapidjson
+
 
 #add analysis
 message(STATUS "||=======add Analysis to verisons=======||")

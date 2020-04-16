@@ -50,6 +50,10 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/Analysis/AliasAnalysis.h"
 
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+
+#include "boaaa/EvaluationResult.h"
 #include "boaaa/lv/EvaluationContainer.h"
 #include "boaaa/lv/version_context.h"
 #include "boaaa/support/AutoDeleter.h"
@@ -152,6 +156,7 @@ namespace boaaa {
 		void evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResults& AAResult, EvaluationContainer& container);
 
 		void printResult(::std::ostream &stream);
+		void printToEvalRes(EvaluationResult& er);
 
 		//UFM& getUnionFindMap() { return m_ufm; }
 

@@ -9,12 +9,12 @@ bool isInterestingPointer(LLVMValue* V) {
 
 std::string formatPercentage(uint64_t count, uint64_t total) {
     std::string out = "[XXX.XX%]";
-    out[1] = '0' + (count / total);
-    out[2] = '0' + ((count * 10LL / total) % 10);
-    out[3] = '0' + ((count * 100LL / total) % 10);
+    out[1] = '0' + static_cast<char>((count / total));
+    out[2] = '0' + static_cast<char>(((count * 10LL / total) % 10));
+    out[3] = '0' + static_cast<char>(((count * 100LL / total) % 10));
 
-    out[5] = '0' + ((count * 1000LL / total) % 10);
-    out[6] = '0' + ((count * 10000LL / total) % 10);
+    out[5] = '0' + static_cast<char>(((count * 1000LL / total) % 10));
+    out[6] = '0' + static_cast<char>(((count * 10000LL / total) % 10));
     return out;
 }
 
@@ -463,4 +463,105 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
     stream << "No Alias Sets : " << "         " << " " << sum_no_alias_head << "\n";
     stream << "mean, var     : " << mean_no_alias << ", " << variance_no_alias << "\n";
     stream << "\n";
+}
+
+void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
+{
+    uint64_t sum_alias = 0, sum_alias_head = 0, sum_no_alias = 0, sum_no_alias_head = 0;
+    uint64_t sum_alias_squared = 0, sum_no_alias_squared = 0;
+
+    for (_raw_type_inst(alias_set)::iterator it = alias_set->begin(), end = alias_set->end(); it != end; ++it)
+    {
+        sum_alias_head += it->second->headssize();
+        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
+        {
+            size_t size = (*it2)->size();
+            sum_alias += size;
+            sum_alias_squared += size * size;
+        }
+
+#ifdef DEBUG
+        size_t check_num = 0;
+
+        for (_raw_type_inst(it->second->begin()) it2 = it->second->begin(), end2 = it->second->end(); it2 != end2; ++it2)
+        {
+            if (it2->second->parent() == it2->second) {
+                check_num++;
+            }
+        }
+
+//        assert((check_num == it->second->headssize()));
+#endif
+    }
+
+    for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
+    {
+        sum_no_alias_head += it->second->headssize();
+        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
+        {
+            size_t size = (*it2)->size();
+            sum_no_alias += size;
+            sum_no_alias_squared += size * size;
+        }
+
+#ifdef DEBUG
+        size_t check_num = 0;
+
+        for (_raw_type_inst(it->second->begin()) it2 = it->second->begin(), end2 = it->second->end(); it2 != end2; ++it2)
+        {
+            if (it2->second->parent() == it2->second) {
+                check_num++;
+            }
+        }
+
+//       assert((check_num == it->second->headssize()));
+#endif
+    }
+
+    uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
+
+    double mean_alias = (double)sum_alias / (double)sum_alias_head;
+    double variance_alias = ((double)(sum_alias_squared - sum_alias)) / (double)sum_alias_head;
+    double mean_no_alias = (double)sum_no_alias / (double)sum_no_alias_head;
+    double variance_no_alias = ((double)(sum_alias_squared - sum_no_alias)) / (double)sum_no_alias_head;
+
+    uint64_t ModRefSum = NoModRefCount + RefCount + ModCount + ModRefCount + MustCount + MustRefCount + MustModCount + MustModRefCount;
+
+    //time
+    er.set_alias_time_seconds(m_seconds_alias);
+    er.set_alias_time_millis(m_millis_alias);
+    er.set_alias_time_micros(m_micros_alias);
+    er.set_alias_time_nanos(m_nanos_alias);
+
+    er.set_modref_time_seconds(m_seconds_modref);
+    er.set_modref_time_millis(m_millis_modref);
+    er.set_modref_time_micros(m_millis_modref);
+    er.set_modref_time_nanos(m_nanos_modref);
+
+    //alias
+    er.set_alias_sum(AliasSum);
+    er.set_no_alias_count(NoAliasCount);
+    er.set_may_alias_count(MayAliasCount);
+    er.set_partial_alias_count(PartialAliasCount);
+    er.set_must_alias_count(MustAliasCount);
+
+    //modref
+    er.set_modref_sum(ModRefSum);
+    er.set_no_modref_count(NoModRefCount);
+    er.set_mod_count(ModCount);
+    er.set_ref_count(RefCount);
+    er.set_modref_count(ModRefCount);
+    er.set_must_count(MustCount);
+    er.set_must_mod_count(MustModCount);
+    er.set_must_ref_count(MustRefCount);
+    er.set_must_modref_count(MustModRefCount);
+   
+    //alias set
+    er.set_alias_sets(sum_alias_head);
+    er.set_mean_alias_sets(mean_alias);
+    er.set_var_alias_sets(variance_alias);
+
+    er.set_no_alias_sets(sum_no_alias_head);
+    er.set_mean_no_alias_sets(mean_no_alias);
+    er.set_var_no_alias_sets(variance_no_alias);
 }
