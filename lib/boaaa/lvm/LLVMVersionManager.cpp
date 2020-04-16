@@ -1,6 +1,6 @@
 #include "boaaa/lvm/LLVMVersionManager.h"
-#include "boaaa/support/__STRINGIFY.h"
 
+#include "boaaa/support/UNDEF__STRINGIFY.h"
 #ifdef _WIN32
 #include "WindowsDLHandle.h"
 using _DLHandle = boaaa::WindowsDLHandle;
@@ -9,7 +9,10 @@ using _DLHandle = boaaa::WindowsDLHandle;
 using _DLHandle = boaaa::UNIXDLHandle;
 #endif
 
+#include "boaaa/support/__STRINGIFY.h"
+
 using namespace boaaa;
+
 /*
 auto LLVMVersionManager::getInstance() -> LLVMVersionManager& {
 	static auto instance = std::unique_ptr<LLVMVersionManager>{ nullptr };
@@ -68,15 +71,9 @@ void LLVMVersionManager::mayUnload(std::shared_ptr<DLInterface> inst, StringRef 
 	}
 }
 
-void LLVMVersionManager::onLoad()
-{
+void LLVMVersionManager::onLoad() { }
 
-}
-
-void LLVMVersionManager::onUnload()
-{
-
-}
+void LLVMVersionManager::onUnload() { }
 
 void LLVMVersionManager::registerStringRefVPM(StringRefVPM* manager)
 {

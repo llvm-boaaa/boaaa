@@ -62,18 +62,15 @@ boaaa::cl_aa_store DLInterface50::getAvailableAAs()
 	return boaaa::getInitalizedAAs_50();
 }
 
-bool DLInterface50::loadModule(uint64_t module_file_hash)
+bool loadModuleHelper(llvm::StringRef ref, boaaa::version_context& context)
 {
-	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
-	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
-
 	context.context_to_module.reset(new LLVMLLVMContext());
 	llvm::SMDiagnostic Err;
 
-	context.loaded_module = llvm::parseIRFile(bc_ref, Err, *context.context_to_module);
+	context.loaded_module = llvm::parseIRFile(ref, Err, *context.context_to_module);
 	if (!context.loaded_module) {
-		*(context.basic_ostream) << "Error: while loading LLVMModule " << bc_ref.str() 
-			<< " \nMSG  : " << Err.getMessage().str() << "\n";
+		*(context.basic_ostream)  << "Error: while loading LLVMModule " << ref.str()
+								  << " \nMSG  : " << Err.getMessage().str() << "\n";
 		return false;
 	}
 
@@ -93,6 +90,14 @@ bool DLInterface50::loadModule(uint64_t module_file_hash)
 	return true;
 }
 
+bool DLInterface50::loadModule(uint64_t module_file_hash)
+{
+	_raw_type_inst(context.string_ref_vp)::store_t storeBC = context.string_ref_vp->generateStorage();
+	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
+
+	return loadModuleHelper(bc_ref, context);
+}
+
 bool DLInterface50::loadModule(uint64_t module_file_prefix, uint64_t module_file_hash)
 {
 	using store = typename _raw_type_inst(context.string_ref_vp)::store_t;
@@ -102,32 +107,9 @@ bool DLInterface50::loadModule(uint64_t module_file_prefix, uint64_t module_file
 	llvm::StringRef prefix = context.string_ref_vp->parseRegistered(module_file_prefix, storePrefix);
 	llvm::StringRef bc_ref = context.string_ref_vp->parseRegistered(module_file_hash, storeBC);
 
-	std::string filename = prefix.str() + "50" + bc_ref.str();
+	std::string filename = prefix.str() + "80" + bc_ref.str();
 
-	context.context_to_module.reset(new LLVMLLVMContext());
-	llvm::SMDiagnostic Err;
-
-	context.loaded_module = llvm::parseIRFile(filename, Err, *context.context_to_module);
-	if (!context.loaded_module) {
-		*(context.basic_ostream) << "Error: while loading LLVMModule " << filename
-			<< " \nMSG  : " << Err.getMessage().str() << "\n";
-		return false;
-	}
-
-	//evaluate countpass result
-	llvm::legacy::PassManager pm;
-	CountPass* cp = new CountPass();
-	pm.add(cp);
-	pm.run(*context.loaded_module);
-	cp->printResult(*context.basic_ostream);
-	//dont delete pass, get deleted in PM
-	//delete cp;
-
-	//scan pointers for evaluation
-	context.relevant_pointers = std::map<uint64_t, std::unique_ptr<EvaluationContainer>>();
-	EvaluationPassImpl::scanPointers(*context.loaded_module, context.relevant_pointers);
-
-	return true;
+	return loadModuleHelper(filename, context);
 }
 
 void DLInterface50::unloadModule()
@@ -141,24 +123,12 @@ void DLInterface50::unloadModule()
 	context.context_to_module.reset(nullptr);
 }
 
-#include "sea_dsa/DsaAnalysis.hh"
-
-bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
+template<typename F>
+bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 {
 	using LLV = boaaa::LLVM_50_AA;
 
-	auto run = [=](auto* pass, auto* timepass) -> auto {
-		llvm::legacy::PassManager pm;
-		pass->setContext(&context);
-		pm.add(timepass);
-		pm.add(pass);
-		pm.run(*context.loaded_module);
-		timepass->printResult(*context.basic_ostream);
-		pass->printResult(*context.basic_ostream);
-		return pass;
-	};
-	
-	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_50) return false;
+	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_80) return false;
 	switch (analysis)
 	{
 	case LLV::CFL_ANDERS:
@@ -191,6 +161,42 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 		break;
 	}
 	return true;
+}
+
+bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
+{
+	auto run = [&](auto* pass, auto* timepass) -> void {
+		llvm::legacy::PassManager pm;
+		pass->setContext(&context);
+		pm.add(timepass);
+		pm.add(pass);
+		pm.run(*context.loaded_module);
+		if (*context.basic_ostream) {
+			timepass->printResult(*context.basic_ostream);
+			pass->printResult(*context.basic_ostream);
+		}
+	};
+
+	return runAnalysisHelp(run, analysis);
+}
+
+bool DLInterface50::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
+{
+	auto run = [&](auto* pass, auto* timepass) -> void {
+		llvm::legacy::PassManager pm;
+		pass->setContext(&context);
+		pm.add(timepass);
+		pm.add(pass);
+		pm.run(*context.loaded_module);
+		if (*context.basic_ostream) {
+			timepass->printResult(*context.basic_ostream);
+			pass->printResult(*context.basic_ostream);
+		}
+		timepass->printToEvalRes(er);
+		pass->printToEvalRes(er);
+	};
+
+	return runAnalysisHelp(run, analysis);
 }
 
 void DLInterface50::test(uint64_t* hash, uint8_t num)

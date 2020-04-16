@@ -1,11 +1,13 @@
 #ifndef BOAAA_EVALUATION_RESULT_H
 #define BOAAA_EVALUATION_RESULT_H
 
-#include "rapidjson/document.h"
-#include "support/struct_help.h"
-#include "support/__STRINGIFY.h"
+#include "boaaa/support/struct_help.h"
+#include "boaaa/support/__STRINGIFY.h"
 
-using namespace rapidjson;
+#include "rapidjson/document.h"
+
+//dont use namespace rapidjson, never, it destroyes llvm namespace!!!
+//using namespace rapidjson;
 
 #ifndef BOAAA_ADD_TIME_MEMBERS
 #define BOAAA_ADD_TIME_MEMBERS(BASE)																\
@@ -103,8 +105,7 @@ namespace boaaa {
 			m_no_alias_sets(0), m_mean_no_alias_sets(0.0), m_var_no_alias_sets(0.0)
 		{ }
 
-
-		Value& writeJson(Value& value)
+		rapidjson::Value& writeJson(rapidjson::Value& value)
 		{
 			//time
 			BOAAA_CHECK_AND_WRITE_TIME(value, pm_time)
@@ -113,36 +114,36 @@ namespace boaaa {
 			BOAAA_CHECK_AND_WRITE_TIME(value, modref_time)
 
 			//time
-			BOAAA_CHECK_AND_WRITE(value, m_alias_sum,				"alias_sum",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_no_alias_count,			"no_alias_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_may_alias_count,			"may_alias_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_partial_alias_count,		"partial_alias_count",		SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_alias_count,		"must_alias_count",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_alias_sum,							"alias_sum",				SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_no_alias_count,						"no_alias_count",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_may_alias_count,						"may_alias_count",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_partial_alias_count,					"partial_alias_count",		SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_must_alias_count,					"must_alias_count",			SetUint64)
 
 			//modref
-			BOAAA_CHECK_AND_WRITE(value, m_modref_sum,				"modref_sum",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_no_modref_count,			"no_modref_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_mod_count,				"mod_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_ref_count,				"ref_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_modref_count,			"modref_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_count,				"must_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_mod_count,			"must_mod_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_ref_count,			"must_ref_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_modref_count,		"must_modref_count",		SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_modref_sum,							"modref_sum",				SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_no_modref_count,						"no_modref_count",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_mod_count,							"mod_count",				SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_ref_count,							"ref_count",				SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_modref_count,						"modref_count",				SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_must_count,							"must_count",				SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_must_mod_count,						"must_mod_count",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_must_ref_count,						"must_ref_count",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_must_modref_count,					"must_modref_count",		SetUint64)
 
 			//alias sets	
-			BOAAA_CHECK_AND_WRITE(value, m_alias_sets,				"alias_sets",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_no_alias_sets,			"no_alias_sets",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_alias_sets,							"alias_sets",				SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_no_alias_sets,						"no_alias_sets",			SetUint64)
 
-			BOAAA_CHECK_AND_WRITE(value, m_mean_alias_sets,			"mean_alias_sets",			SetDouble)
-			BOAAA_CHECK_AND_WRITE(value, m_var_alias_sets,			"mean_alias_sets",			SetDouble)
-			BOAAA_CHECK_AND_WRITE(value, m_mean_no_alias_sets,		"mean_no_alias_sets",		SetDouble)
-			BOAAA_CHECK_AND_WRITE(value, m_var_no_alias_sets,		"mean_var_alias_sets",		SetDouble)
+			BOAAA_CHECK_AND_WRITE(value, m_mean_alias_sets,						"mean_alias_sets",			SetDouble)
+			BOAAA_CHECK_AND_WRITE(value, m_var_alias_sets,						"mean_alias_sets",			SetDouble)
+			BOAAA_CHECK_AND_WRITE(value, m_mean_no_alias_sets,					"mean_no_alias_sets",		SetDouble)
+			BOAAA_CHECK_AND_WRITE(value, m_var_no_alias_sets,					"mean_var_alias_sets",		SetDouble)
 
 			return value;
 		}
 
-		bool readJson(const Value& value)
+		bool readJson(const rapidjson::Value& value)
 		{
 			bool tmp = false;
 			bool result = false;
@@ -191,5 +192,7 @@ namespace boaaa {
 #undef BOAAA_CHECK_AND_ASIGN
 #undef BOAAA_CHECK_AND_ASIGNCAST
 #undef BOAAA_CHECK_AND_ASIGN_TIME
+
+#include "boaaa/support/UNDEF__STRINGIFY.h"
 
 #endif 

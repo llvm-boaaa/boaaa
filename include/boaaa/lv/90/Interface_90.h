@@ -3,6 +3,7 @@
 
 #include "boaaa/dynamic_interface.h"
 #include "boaaa/support/raw_type.h"
+#include "boaaa/support/__STRINGIFY.h"
 #include "boaaa/vp/StringRefVersionParser.h"
 
 #include <ostream>
@@ -32,11 +33,18 @@ namespace boaaa {
 						uint64_t module_file_hash) override;
 		void unloadModule() override;
 		bool runAnalysis(boaaa::aa_id analysis) override;
+		bool runAnalysis(boaaa::aa_id analysis, EvaluationResult& er) override;
 
 		llvm_version getVersion() override
 		{
 			return LLVM_VERSION;
 		}
+
+		char* getVersionString() override
+		{
+			return __STRINGIFY(LLVM_VERSION);
+		}
+
 		void test(uint64_t* hash = nullptr, uint8_t num = 0) override;
 	private:
 		version_context context;

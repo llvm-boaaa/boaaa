@@ -8,7 +8,9 @@
 
 #include "boaaa/export.h"
 #include "boaaa/dynamic_interface.h"
+#include "boaaa/EvaluationResult.h"
 #include "boaaa/lvm/DLHandle.h"
+
 #include "StringRefVersionParserCurrent.h"
 
 using namespace llvm;
@@ -83,6 +85,7 @@ namespace boaaa {
 						uint64_t module_file_hash) override;
 		void unloadModule() override;
 		bool runAnalysis(boaaa::aa_id analysis) override { return false; }
+		bool runAnalysis(boaaa::aa_id analysis, EvaluationResult& er) override { return false; }
 	};
 
 }

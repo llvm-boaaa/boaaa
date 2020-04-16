@@ -109,7 +109,7 @@ namespace boaaa
 														  << "." << (m_nanos  < 100 ? "0" : "") << +(m_nanos  < 10 ? "0" : "") << (int) m_nanos << "\n";
 			}
 
-			void printToEvalRes(EvaluationResult& er) {
+			virtual void printToEvalRes(EvaluationResult& er) {
 				uint16_t  sum_nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(m_end - m_start).count() % 1000;
 				uint16_t  sum_micros = std::chrono::duration_cast<std::chrono::microseconds>(m_end - m_start).count() % 1000;
 				uint16_t  sum_millis = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start).count() % 1000;
@@ -146,6 +146,10 @@ namespace boaaa
 				stream << "Report for " << typeid(PASS).name() << ":\n";
 				TimeMessure::printResult(stream);
 			}
+
+			void printToEvalRes(EvaluationResult& er) override {
+				TimeMessure::printToEvalRes(er);
+			}
 		};
 
 		template<class PASS>
@@ -168,6 +172,10 @@ namespace boaaa
 				stream << "Report for " << typeid(PASS).name() << ":\n";
 				TimeMessure::printResult(stream);
 			}
+
+			void printToEvalRes(EvaluationResult& er) override {
+				TimeMessure::printToEvalRes(er);
+			}
 		};
 
 		template<class PASS>
@@ -185,6 +193,10 @@ namespace boaaa
 				stream << "TimePass Report for " << typeid(PASS).name() << ":\n";
 				stream << "Total PM Time : --\n";
 				stream << "Funtion Time  : --\n";
+			}
+
+			void printToEvalRes(EvaluationResult& er) override {
+				TimeMessure::printToEvalRes(er);
 			}
 		};
 		

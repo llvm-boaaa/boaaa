@@ -57,6 +57,10 @@ namespace boaaa {
 			void printResult(std::ostream& stream) {
 				impl->printResult(stream);
 			}
+
+			void printToEvalRes(EvaluationResult& er) {
+				impl->printToEvalRes(er);
+			}
 		};
 
 		template<class PASS>
@@ -91,6 +95,10 @@ namespace boaaa {
 
 			void printResult(std::ostream& stream) {
 				impl->printResult(stream);
+			}
+
+			void printToEvalRes(EvaluationResult& er) {
+				impl->printToEvalRes(er);
 			}
 		};
 

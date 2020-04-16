@@ -27,5 +27,5 @@ target_link_libraries(boaaa.lvm boaaa.support boaaa.vp)
 message(STATUS "||added lib: llvm_version_manager")
 
 add_dependencies(boaaa.lvm LLVM_${llvm_boaaa})
-target_link_libraries(boaaa.lvm LLVM_${llvm_boaaa})
+target_link_libraries(boaaa.lvm rapidjson LLVM_${llvm_boaaa})
 message(STATUS "||add LLVM_${llvm_boaaa}")

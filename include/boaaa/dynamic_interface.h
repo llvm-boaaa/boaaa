@@ -1,6 +1,8 @@
 #ifndef LLVM_DYN_INTERFACE_H
 #define LLVM_DYN_INTERFACE_H
 
+#include "boaaa/support/UNDEF__STRINGIFY.h"
+
 #include <inttypes.h>
 #include <memory>
 #ifdef _WIN32
@@ -10,7 +12,10 @@
 #include <iostream>
 #endif
 
+#include "boaaa/support/__STRINGIFY.h"
+
 #include "boaaa/export.h"
+#include "boaaa/EvaluationResult.h"
 #include "boaaa/vp/StringRefVersionParser.h"
 
 #include "boaaa/commandline_types.h"
@@ -63,11 +68,16 @@ namespace boaaa {
 		virtual bool loadModule(uint64_t module_file_prefix, uint64_t module_file_hash) = 0;
 		virtual void unloadModule() = 0;
 		virtual bool runAnalysis(boaaa::aa_id analysis) = 0;
-
+		virtual bool runAnalysis(boaaa::aa_id analysis, EvaluationResult& er) = 0;
 
 		virtual llvm_version getVersion()
 		{
 			return -10;
+		}
+
+		virtual char* getVersionString() 
+		{
+			return "-10";
 		}
 		//only defined in tool, so test ist allways public, 
 		//but only callable from outside, when DEBUG_DLL_Test is defined
