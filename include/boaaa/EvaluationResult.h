@@ -17,17 +17,30 @@ BOAAA_SETTER_GETTER(uint16_t, BASE##_micros)														\
 BOAAA_SETTER_GETTER(uint16_t, BASE##_nanos)
 #endif
 
+//if (results.HasMember(id.c_str()))
+//results[id.c_str()].SetObject();
+//else
+//{
+//	rapidjson::Value& val = rapidjson::Value().SetObject();
+//	results.AddMember(rapidjson::StringRef(id.c_str()), val.Move(), doc.GetAllocator());
+//}
+
 #ifndef BOAAA_CHECK_AND_WRITE
-#define BOAAA_CHECK_AND_WRITE(VAR, MEMVAR, ID, SETFUNC)												\
-VAR[ID].SETFUNC(MEMVAR);
+#define BOAAA_CHECK_AND_WRITE(VAR, MEMVAR, ID, SETFUNC, ALLOC)									\
+if (VAR.HasMember(ID))																			\
+	{ if ( ! VAR[ID].IsObject()) VAR[ID].SetObject(); }											\
+else {																							\
+	rapidjson::Value& val = rapidjson::Value().SetObject();										\
+	VAR.AddMember(rapidjson::Value(ID, ALLOC), val.Move(), ALLOC);								\
+} VAR[ID].SETFUNC(MEMVAR);
 #endif
 
 #ifndef BOAAA_CHECK_AND_WRITE_TIME
-#define BOAAA_CHECK_AND_WRITE_TIME(VAR, BASE)														\
-BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_seconds, __STRINGIFY(sec_##BASE), SetUint64)					\
-BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_millis,  __STRINGIFY(mil_##BASE), SetUint)					\
-BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_micros,  __STRINGIFY(mic_##BASE), SetUint)					\
-BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_nanos,   __STRINGIFY(nan_##BASE), SetUint)
+#define BOAAA_CHECK_AND_WRITE_TIME(VAR, BASE, ALLOC)												\
+BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_seconds, __STRINGIFY(sec_##BASE), SetUint64, ALLOC)			\
+BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_millis,  __STRINGIFY(mil_##BASE), SetUint  , ALLOC)			\
+BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_micros,  __STRINGIFY(mic_##BASE), SetUint  , ALLOC)			\
+BOAAA_CHECK_AND_WRITE(VAR, m_##BASE##_nanos,   __STRINGIFY(nan_##BASE), SetUint  , ALLOC)
 #endif
 
 #ifndef BOAAA_CHECK_AND_ASIGN
@@ -56,6 +69,8 @@ namespace boaaa {
 
 	struct EvaluationResult
 	{
+		BOAAA_SETTER_GETTER(const char*, aa_name)
+
 		//time definitions
 		BOAAA_ADD_TIME_MEMBERS(pm_time)
 		BOAAA_ADD_TIME_MEMBERS(function_time)
@@ -105,48 +120,75 @@ namespace boaaa {
 			m_no_alias_sets(0), m_mean_no_alias_sets(0.0), m_var_no_alias_sets(0.0)
 		{ }
 
-		rapidjson::Value& writeJson(rapidjson::Value& value)
+		template<typename AllocatorType>
+		rapidjson::Value& writeJson(rapidjson::Value& _value, AllocatorType& alloc)
 		{
-			//time
-			BOAAA_CHECK_AND_WRITE_TIME(value, pm_time)
-			BOAAA_CHECK_AND_WRITE_TIME(value, function_time)
-			BOAAA_CHECK_AND_WRITE_TIME(value, alias_time)
-			BOAAA_CHECK_AND_WRITE_TIME(value, modref_time)
+			if (!_value.IsObject()) _value.SetObject();
+
+			const char* str = m_aa_name;
+
+			if (_value.HasMember(str))
+			{
+				if (!_value[str].IsObject())
+					_value[str].SetObject();
+			}
+			else
+			{
+				rapidjson::Value val = rapidjson::Value(rapidjson::kObjectType);
+				_value.AddMember(rapidjson::Value(str, alloc), val, alloc);
+				assert((_value.HasMember(str)));
+			}
+
+			rapidjson::Value& value = _value[str];
 
 			//time
-			BOAAA_CHECK_AND_WRITE(value, m_alias_sum,							"alias_sum",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_no_alias_count,						"no_alias_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_may_alias_count,						"may_alias_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_partial_alias_count,					"partial_alias_count",		SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_alias_count,					"must_alias_count",			SetUint64)
+			BOAAA_CHECK_AND_WRITE_TIME(value, pm_time,			alloc)
+			BOAAA_CHECK_AND_WRITE_TIME(value, function_time,	alloc)
+			BOAAA_CHECK_AND_WRITE_TIME(value, alias_time,		alloc)
+			BOAAA_CHECK_AND_WRITE_TIME(value, modref_time,		alloc)
+
+			//time
+			BOAAA_CHECK_AND_WRITE(value, m_alias_sum,							"alias_sum",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_no_alias_count,						"no_alias_count",			SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_may_alias_count,						"may_alias_count",			SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_partial_alias_count,					"partial_alias_count",		SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_partial_alias_count,					"partial_alias_count",		SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_partial_alias_count,					"partial_alias_count",		SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_must_alias_count,					"must_alias_count",			SetUint64, alloc)
 
 			//modref
-			BOAAA_CHECK_AND_WRITE(value, m_modref_sum,							"modref_sum",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_no_modref_count,						"no_modref_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_mod_count,							"mod_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_ref_count,							"ref_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_modref_count,						"modref_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_count,							"must_count",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_mod_count,						"must_mod_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_ref_count,						"must_ref_count",			SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_must_modref_count,					"must_modref_count",		SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_modref_sum,							"modref_sum",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_no_modref_count,						"no_modref_count",			SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_mod_count,							"mod_count",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_ref_count,							"ref_count",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_modref_count,						"modref_count",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_must_count,							"must_count",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_must_mod_count,						"must_mod_count",			SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_must_ref_count,						"must_ref_count",			SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_must_modref_count,					"must_modref_count",		SetUint64, alloc)
 
 			//alias sets	
-			BOAAA_CHECK_AND_WRITE(value, m_alias_sets,							"alias_sets",				SetUint64)
-			BOAAA_CHECK_AND_WRITE(value, m_no_alias_sets,						"no_alias_sets",			SetUint64)
+			BOAAA_CHECK_AND_WRITE(value, m_alias_sets,							"alias_sets",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_no_alias_sets,						"no_alias_sets",			SetUint64, alloc)
 
-			BOAAA_CHECK_AND_WRITE(value, m_mean_alias_sets,						"mean_alias_sets",			SetDouble)
-			BOAAA_CHECK_AND_WRITE(value, m_var_alias_sets,						"mean_alias_sets",			SetDouble)
-			BOAAA_CHECK_AND_WRITE(value, m_mean_no_alias_sets,					"mean_no_alias_sets",		SetDouble)
-			BOAAA_CHECK_AND_WRITE(value, m_var_no_alias_sets,					"mean_var_alias_sets",		SetDouble)
+			BOAAA_CHECK_AND_WRITE(value, m_mean_alias_sets,						"mean_alias_sets",			SetDouble, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_var_alias_sets,						"var_alias_sets",			SetDouble, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_mean_no_alias_sets,					"mean_no_alias_sets",		SetDouble, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_var_no_alias_sets,					"var_no_alias_sets",		SetDouble, alloc)
 
 			return value;
 		}
 
-		bool readJson(const rapidjson::Value& value)
+		bool readJson(const rapidjson::Value& _value, const char* str)
 		{
 			bool tmp = false;
 			bool result = true;
+
+			if (!_value.IsObject()) return false;
+			if (!_value.HasMember(str)) return false;
+			if (!_value[str].IsObject()) return false;
+
+			const rapidjson::Value& value = _value[str];
 
 			//time 
 			BOAAA_CHECK_AND_ASIGN_TIME(value, result, tmp, pm_time)

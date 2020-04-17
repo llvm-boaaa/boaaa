@@ -148,6 +148,8 @@ namespace boaaa
 			}
 
 			void printToEvalRes(EvaluationResult& er) override {
+				// +6 because typeid starts witch "class classname"
+				er.set_aa_name(typeid(PASS).name() + 6);
 				TimeMessure::printToEvalRes(er);
 			}
 		};
@@ -174,6 +176,8 @@ namespace boaaa
 			}
 
 			void printToEvalRes(EvaluationResult& er) override {
+				// +6 because typeid starts witch "class classname"
+				er.set_aa_name(typeid(PASS).name() + 6);
 				TimeMessure::printToEvalRes(er);
 			}
 		};
@@ -196,6 +200,8 @@ namespace boaaa
 			}
 
 			void printToEvalRes(EvaluationResult& er) override {
+				// +6 because typeid starts witch "class classname"
+				er.set_aa_name(typeid(PASS).name() + 6);
 				TimeMessure::printToEvalRes(er);
 			}
 		};

@@ -24,6 +24,12 @@
 #include "boaaa/support/LLVMErrorOr.h"
 #include "boaaa/support/raw_type.h"
 
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/ostreamwrapper.h"
+#include "rapidjson/writer.h"
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -61,11 +67,15 @@ Version("v", cl::desc("The version of the analysises"),
 	cl::init(0), cl::value_desc("XX") ,cl::cat(BoaaaCat));
 
 static cl::opt<bool>
-AllVersions("all-Ver", cl::desc("If Flag is set, run all Analysis if available under all loaded versions"),
+AllVersions("all-Versions", cl::desc("If Flag is set, run all Analysis if available under all loaded versions"),
 	cl::init(false), cl::cat(BoaaaCat));
 
 static cl::opt<bool>
 AllAnalysis("all-AAs", cl::desc("If Flag is set, run all Analysis, for each version"),
+	cl::init(false), cl::cat(BoaaaCat));
+
+static cl::opt<bool>
+NoJsonExport("no-json", cl::desc("boaaa exports by default all results to a json: path/to/boaaa/results.json"),
 	cl::init(false), cl::cat(BoaaaCat));
 
 static cl::opt<std::string>
@@ -105,6 +115,9 @@ llvm::StringMap<boaaa::cl_aa_store> aa_cl_group;
 std::vector<boaaa::aa_id>* aa_map;
 uint32_t aa_map_size;
 
+rapidjson::Document doc;
+rapidjson::Value results;
+
 #ifdef DEBUG
 int testmain();
 #endif // DEBUG
@@ -118,8 +131,6 @@ enum class COROUTINESTATES_MAIN : int8_t
 	INIT						= 1,
 	NEXT_VERSION				= 2,
 	NO_ARGS_LEFT				= 3,
-
-
 };
 
 COROUTINESTATES_MAIN mainloop();
@@ -128,8 +139,20 @@ void setup();
 void initAAs();
 void finalize();
 
-void evaluateMainloopError(COROUTINESTATES_MAIN cms) {
-
+void evaluateMainloopError(COROUTINESTATES_MAIN cms, uint64_t line_count) {
+	
+	using CSM = COROUTINESTATES_MAIN;
+	switch (cms) {
+	case CSM::ERROR_WHILE_LOAD_MODULE:
+		std::cout << "Error while Load Module in LIne: " << line_count << "\n";
+		break;
+	case CSM::SKIP_ARGUMENTS:
+		std::cout << "Skipped Analysis defined in LIne: " << line_count << " because of failed Module loading\n";
+		break;
+	case CSM::ERROR_IN_ANALYSIS:
+		std::cout << "Error in at least one Analysis of Line:" << line_count << "\n";
+		break;
+	}
 }
 
 int main(int argc, char** argv) {
@@ -155,7 +178,7 @@ int main(int argc, char** argv) {
 	if (!FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			if (static_cast<int8_t>(state) < 0) {
-				evaluateMainloopError(state);
+				evaluateMainloopError(state, 0);
 				--res;
 			}
 		}
@@ -198,7 +221,7 @@ int main(int argc, char** argv) {
 		cl::ParseCommandLineOptions(_argc, _argv);
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			if (static_cast<int8_t>(state) < 0) {
-				evaluateMainloopError(state);
+				evaluateMainloopError(state, line_count);
 				--res;
 			}
 		}
@@ -208,28 +231,20 @@ int main(int argc, char** argv) {
 	return res;
 }
 
-bool is_active_LLVM_40() {
-	return Version.getValue() == llvm40->getVersion();
+bool is_active(std::shared_ptr<boaaa::DLInterface>& dl) {
+	return Version.getValue() == dl->getVersion();
 }
 
-bool is_active_LLVM_50() {
-	return Version.getValue() == llvm50->getVersion();
-}
-
-bool is_active_LLVM_60() {
-	return Version.getValue() == llvm60->getVersion();
-}
-
-bool is_active_LLVM_71() {
-	return Version.getValue() == llvm71->getVersion();
-}
-
-bool is_active_LLVM_80() {
-	return Version.getValue() == llvm80->getVersion();
-}
-
-bool is_active_LLVM_90() {
-	return Version.getValue() == llvm90->getVersion();
+void loadModuleHelper(std::shared_ptr<boaaa::DLInterface>& dl,bool& error, bool prefix, boaaa::llvm_version version, uint64_t prefixhash, uint64_t filehash)
+{
+	if (dl && version == dl->getVersion() && (AllVersions.getValue() || is_active(dl))) {
+		if (prefix) error = dl->loadModule(prefixhash, filehash);
+		else        error = dl->loadModule(filehash);
+		if (!error)
+		{
+			std::cout << "       Error in Module llvm " << dl->getVersion() <<"\n";
+		}
+	}
 }
 
 bool loadModule(boaaa::llvm_version version)
@@ -244,87 +259,30 @@ bool loadModule(boaaa::llvm_version version)
 	}
 
 	bool error;
-	if (llvm40 && version == llvm40->getVersion() && (AllVersions.getValue() || is_active_LLVM_40())) {
-		if (prefix) error = llvm40->loadModule(prefixhash, filehash);
-		else        error = llvm40->loadModule(filehash);
-		if (!error)
-		{
-			std::cout << "       Error in Module llvm 40" << "\n";
-			return false;
-		}
-	}
+	loadModuleHelper(llvm40, error, prefix, version, prefixhash, filehash);
+	loadModuleHelper(llvm50, error, prefix, version, prefixhash, filehash);
+	loadModuleHelper(llvm60, error, prefix, version, prefixhash, filehash);
+	loadModuleHelper(llvm71, error, prefix, version, prefixhash, filehash);
+	loadModuleHelper(llvm80, error, prefix, version, prefixhash, filehash);
+	loadModuleHelper(llvm90, error, prefix, version, prefixhash, filehash);
+	
+	return error;
+}
 
-	if (llvm50 && version == llvm50->getVersion() && (AllVersions.getValue() || is_active_LLVM_50())) {
-		if (prefix) error = llvm50->loadModule(prefixhash, filehash);
-		else        error = llvm50->loadModule(filehash);
-		if (!error)
-		{
-			std::cout << "       Error in Module llvm 50" << "\n";
-			return false;
-		}
-	}
-
-	if (llvm60 && version == llvm60->getVersion() && (AllVersions.getValue() || is_active_LLVM_60())) {
-		if (prefix) error = llvm60->loadModule(prefixhash, filehash);
-		else        error = llvm60->loadModule(filehash);
-		if (!error)
-		{
-			std::cout << "       Error in Module llvm 40" << "\n";
-			return false;
-		}
-	}
-
-	if (llvm71 && version == llvm71->getVersion() && (AllVersions.getValue() || is_active_LLVM_71())) {
-		if (prefix) error = llvm71->loadModule(prefixhash, filehash);
-		else        error = llvm71->loadModule(filehash);
-		if (!error)
-		{
-			std::cout << "       Error in Module llvm 50" << "\n";
-			return false;
-		}
-	}
-
-	if (llvm80 && version == llvm80->getVersion() && (AllVersions.getValue() || is_active_LLVM_80())) {
-		if (prefix) error = llvm80->loadModule(prefixhash, filehash);
-		else        error = llvm80->loadModule(filehash);
-		if (!error)
-		{
-			std::cout << "       Error in Module llvm 90" << "\n";
-			return false;
-		}
-	}
-
-	if (llvm90 && version == llvm90->getVersion() && (AllVersions.getValue() || is_active_LLVM_90())) {
-		if (prefix) error = llvm90->loadModule(prefixhash, filehash);
-		else        error = llvm90->loadModule(filehash);
-		if (!error)
-		{
-			std::cout << "       Error in Module llvm 90" << "\n";
-			return false;
-		}
-	}
-	return true;
+void unloadModuleHelper(std::shared_ptr<boaaa::DLInterface>& dl, boaaa::llvm_version version)
+{
+	if (dl && version == dl->getVersion() && (AllVersions.getValue() || is_active(dl)))
+		dl->unloadModule();
 }
 
 void unloadModule(boaaa::llvm_version version)
 {
-	if (llvm40 && version == llvm40->getVersion() && (AllVersions.getValue() || is_active_LLVM_40()))
-		llvm40->unloadModule();
-
-	if (llvm50 && version == llvm50->getVersion() && (AllVersions.getValue() || is_active_LLVM_50()))
-		llvm50->unloadModule();
-
-	if (llvm60 && version == llvm60->getVersion() && (AllVersions.getValue() || is_active_LLVM_60()))
-		llvm60->unloadModule();
-
-	if (llvm71 && version == llvm71->getVersion() && (AllVersions.getValue() || is_active_LLVM_71()))
-		llvm71->unloadModule();
-
-	if (llvm80 && version == llvm80->getVersion() && (AllVersions.getValue() || is_active_LLVM_80()))
-		llvm80->unloadModule();
-
-	if (llvm90 && version == llvm90->getVersion() && (AllVersions.getValue() || is_active_LLVM_90()))
-		llvm90->unloadModule();
+	unloadModuleHelper(llvm40, version);
+	unloadModuleHelper(llvm50, version);
+	unloadModuleHelper(llvm60, version);
+	unloadModuleHelper(llvm71, version);
+	unloadModuleHelper(llvm80, version);
+	unloadModuleHelper(llvm90, version);
 }
 
 boaaa::aa_id getLLVMVersion(uint32_t version) {
@@ -363,36 +321,71 @@ boaaa::aa_id getCurrentVersionId()
 	return getLLVMVersion(Version.getValue());
 }
 
+void checkObjectOrCreate(rapidjson::Value& value, const char* str)
+{
+	if (value.HasMember(str))
+	{
+		if (!value[str].IsObject())
+			value[str].SetObject();
+	}
+	else
+	{
+		rapidjson::Value val = rapidjson::Value(rapidjson::kObjectType);
+		value.AddMember(rapidjson::Value(str, doc.GetAllocator()), val, doc.GetAllocator());
+		assert(value.HasMember(str));
+	}
+}
+
+void runAnalysisHelper(std::shared_ptr<boaaa::DLInterface>& dl, boaaa::aa_id aa, const char* id, bool& res)
+{
+	boaaa::EvaluationResult er;
+	rapidjson::Value& val = results[id];
+
+	checkObjectOrCreate(val, dl->getVersionString());
+	res &= !NoJsonExport.getValue()
+		? dl->runAnalysis(aa, er)
+		: dl->runAnalysis(aa);
+	if (!NoJsonExport.getValue()) er.writeJson(val[dl->getVersionString()], doc.GetAllocator());
+}
+
 bool runAnalysis(boaaa::aa_id aa)
 {
 	using LLV = boaaa::LLVM_VERSIONS;
+
+	if (!results.IsObject()) results.SetObject();
+	std::string id = fs::path(InputFilename.getValue().c_str()).stem().u8string();
+	checkObjectOrCreate(results, id.c_str());
 
 	bool res = true;
 	switch (aa & boaaa::version_mask)
 	{
 	case LLV::LLVM_40:
-		if (!AllVersions.getValue() && !is_active_LLVM_40()) break;
-		res &= llvm40->runAnalysis(aa);
+		if (!AllVersions.getValue() && !is_active(llvm40)) break;
+		runAnalysisHelper(llvm40, aa, id.c_str(), res);
 		break;
 	case LLV::LLVM_50:
-		if (!AllVersions.getValue() && !is_active_LLVM_50()) break;
-		res &= llvm50->runAnalysis(aa);
+		if (!AllVersions.getValue() && !is_active(llvm50)) break;
+		runAnalysisHelper(llvm50, aa, id.c_str(), res);
 		break;
 	case LLV::LLVM_60:
-		if (!AllVersions.getValue() && !is_active_LLVM_60()) break;
-		res &= llvm60->runAnalysis(aa);
+		if (!AllVersions.getValue() && !is_active(llvm60)) break;
+		runAnalysisHelper(llvm60, aa, id.c_str(), res);
 		break;
 	case LLV::LLVM_71:
-		if (!AllVersions.getValue() && !is_active_LLVM_71()) break;
-		res &= llvm71->runAnalysis(aa);
+		if (!AllVersions.getValue() && !is_active(llvm71)) break;
+		runAnalysisHelper(llvm71, aa, id.c_str(), res);
 		break;
 	case LLV::LLVM_80:
-		if (!AllVersions.getValue() && !is_active_LLVM_80()) break;
-		res &= llvm80->runAnalysis(aa);
+		if (!AllVersions.getValue() && !is_active(llvm80)) break;
+		runAnalysisHelper(llvm80, aa, id.c_str(), res);
 		break;
 	case LLV::LLVM_90:
-		if (!AllVersions.getValue() && !is_active_LLVM_90()) break;
-		res &= llvm90->runAnalysis(aa);
+		if (!AllVersions.getValue() && !is_active(llvm90)) break;
+		runAnalysisHelper(llvm90, aa, id.c_str(), res);
+		break;
+	default:
+		res = false;
+		std::cout << "Analysis not found aa_id: " << std::hex << aa << std::dec << "\n";
 		break;
 	}
 	return res;
@@ -411,8 +404,10 @@ COROUTINESTATES_MAIN mainloop()
 	case CSM::ERROR_WHILE_LOAD_MODULE:
 		coroutine_state = CSM::SKIP_ARGUMENTS;
 	case CSM::SKIP_ARGUMENTS:
-		if (!InputFilename.hasArgStr())
+		if (!InputFilename.hasArgStr()) {
+			coroutine_state = CSM::NO_ARGS_LEFT;
 			return coroutine_state; //skip because of previos error
+		}
 	case CSM::INIT:
 		analysis_to_run.clear(); //clear analysis bevore
 		aa_index = 0;
@@ -560,6 +555,15 @@ void setupLLVMVersion(boaaa::DLInterface &handle, std::set<boaaa::llvm_version>&
 void setup()
 {
 	llvm_man = new boaaa::LLVMVersionManager();
+
+	if (fs::exists("results.json")) {
+		std::ifstream ifs("results.json");
+		rapidjson::IStreamWrapper isw(ifs);
+		doc.ParseStream(isw);
+		results.CopyFrom(doc, doc.GetAllocator());
+		if (!results.IsObject())
+			results.SetObject();
+	}
 
 	llvm40 = llvm_man->loadDL("boaaa.lv_40");
 	llvm50 = llvm_man->loadDL("boaaa.lv_50");
@@ -735,4 +739,11 @@ void finalize()
 	llvm80.reset();
 	llvm90.reset();
 	delete llvm_man;
+
+	{
+		std::ofstream ofs("results.json");
+		rapidjson::OStreamWrapper osw(ofs);
+		rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+		results.Accept(writer);
+	}
 }

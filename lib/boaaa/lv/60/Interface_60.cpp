@@ -128,7 +128,7 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 {
 	using LLV = boaaa::LLVM_60_AA;
 
-	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_80) return false;
+	if ((analysis & version_mask) != LLVM_VERSIONS::LLVM_60) return false;
 	switch (analysis)
 	{
 	case LLV::CFL_ANDERS:
