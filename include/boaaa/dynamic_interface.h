@@ -69,6 +69,7 @@ namespace boaaa {
 		virtual void unloadModule() = 0;
 		virtual bool runAnalysis(boaaa::aa_id analysis) = 0;
 		virtual bool runAnalysis(boaaa::aa_id analysis, EvaluationResult& er) = 0;
+		virtual ModuleResult* getModuleResult() = 0;
 
 		virtual llvm_version getVersion()
 		{

@@ -16,6 +16,8 @@
 //include LoopInfoWrapperPass
 #include "include_versions/LLVM_include_LoopInfo.inc"
 
+#include "boaaa/EvaluationResult.h"
+
 
 #ifdef LLVM_VERSION_ERROR_CODE
 	LLVM_VERSION_ERROR_CODE
@@ -37,12 +39,21 @@ namespace boaaa {
 
 		bool runOnFunction(LLVMFunction& F) override;
 
-		void printResult(std::ostream& stream) {
+		void printResult(std::ostream& stream) 
+		{
 			stream	<< "Module Report LLVM_" << LLVM_VERSION << ":\n";
 			stream	<< "Functions    #" << function_count << "\n"
 					<< "BasicBlocks  #" << basic_block_count << "\n"
 					<< "Loops        #" << loop_count << "\n"
 					<< "Instructions #" << instruction_count << "\n\n";
+		}
+
+		void printToModuleRes(ModuleResult& mr)
+		{
+			mr.set_function_count(function_count);
+			mr.set_basic_block_count(basic_block_count);
+			mr.set_loop_count(loop_count);
+			mr.set_instruction_count(instruction_count);
 		}
 
 		void getAnalysisUsage(llvm::AnalysisUsage& AU) const override;

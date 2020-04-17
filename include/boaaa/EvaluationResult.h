@@ -226,6 +226,42 @@ namespace boaaa {
 			return result;
 		}
 	};
+
+	struct ModuleResult
+	{
+		BOAAA_SETTER_GETTER(uint64_t, function_count)
+		BOAAA_SETTER_GETTER(uint64_t, basic_block_count)
+		BOAAA_SETTER_GETTER(uint64_t, loop_count)
+		BOAAA_SETTER_GETTER(uint64_t, instruction_count)
+
+		template<typename AllocatorType>
+		rapidjson::Value& writeJson(rapidjson::Value& value, AllocatorType& alloc)
+		{
+			if (!value.IsObject()) value.SetObject();
+		
+			BOAAA_CHECK_AND_WRITE(value, m_function_count,			"function_count",		SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_basic_block_count,		"basic_block_count",	SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_loop_count,				"loop_count",			SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_instruction_count,		"instruction_count",	SetUint64, alloc)
+
+			return value;
+		}
+
+		bool readJson(const rapidjson::Value& value)
+		{
+			bool tmp = false;
+			bool result = true;
+
+			if (!value.IsObject()) return false;
+		
+			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_function_count,			"function_count",			IsUint64, GetUint64)
+			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_basic_block_count,		"basic_block_count",		IsUint64, GetUint64)
+			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_loop_count,				"loop_count",				IsUint64, GetUint64)
+			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_instruction_count,		"instruction_count",		IsUint64, GetUint64)
+
+			return result;
+		}
+	};
 }
 
 #undef BOAAA_ADD_TIME_MEMBERS

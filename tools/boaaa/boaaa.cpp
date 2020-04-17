@@ -138,6 +138,7 @@ COROUTINESTATES_MAIN mainloop();
 void setup();
 void initAAs();
 void finalize();
+void writeJson();
 
 void evaluateMainloopError(COROUTINESTATES_MAIN cms, uint64_t line_count) {
 	
@@ -177,6 +178,7 @@ int main(int argc, char** argv) {
 
 	if (!FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
+			void writeJson();
 			if (static_cast<int8_t>(state) < 0) {
 				evaluateMainloopError(state, 0);
 				--res;
@@ -220,6 +222,7 @@ int main(int argc, char** argv) {
 		}
 		cl::ParseCommandLineOptions(_argc, _argv);
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
+			void writeJson();
 			if (static_cast<int8_t>(state) < 0) {
 				evaluateMainloopError(state, line_count);
 				--res;
@@ -235,14 +238,37 @@ bool is_active(std::shared_ptr<boaaa::DLInterface>& dl) {
 	return Version.getValue() == dl->getVersion();
 }
 
-void loadModuleHelper(std::shared_ptr<boaaa::DLInterface>& dl,bool& error, bool prefix, boaaa::llvm_version version, uint64_t prefixhash, uint64_t filehash)
+void checkObjectOrCreate(rapidjson::Value& value, const char* str)
 {
+	if (value.HasMember(str))
+	{
+		if (!value[str].IsObject())
+			value[str].SetObject();
+	}
+	else
+	{
+		rapidjson::Value val = rapidjson::Value(rapidjson::kObjectType);
+		value.AddMember(rapidjson::Value(str, doc.GetAllocator()), val, doc.GetAllocator());
+		assert(value.HasMember(str));
+	}
+}
+
+void loadModuleHelper(std::shared_ptr<boaaa::DLInterface>& dl,bool& error, bool prefix, boaaa::llvm_version version, uint64_t prefixhash, uint64_t filehash, rapidjson::Value& value)
+{
+	checkObjectOrCreate(value, dl->getVersionString());
+	rapidjson::Value& version_obj = value[dl->getVersionString()];
+
 	if (dl && version == dl->getVersion() && (AllVersions.getValue() || is_active(dl))) {
 		if (prefix) error = dl->loadModule(prefixhash, filehash);
 		else        error = dl->loadModule(filehash);
 		if (!error)
 		{
-			std::cout << "       Error in Module llvm " << dl->getVersion() <<"\n";
+			std::cout << "       Error in Module llvm " << dl->getVersionString() <<"\n";
+		} 
+		else
+		{
+			boaaa::ModuleResult* mr = dl->getModuleResult();
+			if (mr) mr->writeJson(version_obj, doc.GetAllocator());
 		}
 	}
 }
@@ -258,13 +284,17 @@ bool loadModule(boaaa::llvm_version version)
 		prefixhash = llvm_man->registerData(PrefixFilePath);
 	}
 
+	if (!results.IsObject()) results.SetObject();
+	std::string id = fs::path(InputFilename.getValue().c_str()).stem().u8string();
+	checkObjectOrCreate(results, id.c_str());
+
 	bool error;
-	loadModuleHelper(llvm40, error, prefix, version, prefixhash, filehash);
-	loadModuleHelper(llvm50, error, prefix, version, prefixhash, filehash);
-	loadModuleHelper(llvm60, error, prefix, version, prefixhash, filehash);
-	loadModuleHelper(llvm71, error, prefix, version, prefixhash, filehash);
-	loadModuleHelper(llvm80, error, prefix, version, prefixhash, filehash);
-	loadModuleHelper(llvm90, error, prefix, version, prefixhash, filehash);
+	loadModuleHelper(llvm40, error, prefix, version, prefixhash, filehash, results[id.c_str()]);
+	loadModuleHelper(llvm50, error, prefix, version, prefixhash, filehash, results[id.c_str()]);
+	loadModuleHelper(llvm60, error, prefix, version, prefixhash, filehash, results[id.c_str()]);
+	loadModuleHelper(llvm71, error, prefix, version, prefixhash, filehash, results[id.c_str()]);
+	loadModuleHelper(llvm80, error, prefix, version, prefixhash, filehash, results[id.c_str()]);
+	loadModuleHelper(llvm90, error, prefix, version, prefixhash, filehash, results[id.c_str()]);
 	
 	return error;
 }
@@ -321,19 +351,12 @@ boaaa::aa_id getCurrentVersionId()
 	return getLLVMVersion(Version.getValue());
 }
 
-void checkObjectOrCreate(rapidjson::Value& value, const char* str)
+void writeJson()
 {
-	if (value.HasMember(str))
-	{
-		if (!value[str].IsObject())
-			value[str].SetObject();
-	}
-	else
-	{
-		rapidjson::Value val = rapidjson::Value(rapidjson::kObjectType);
-		value.AddMember(rapidjson::Value(str, doc.GetAllocator()), val, doc.GetAllocator());
-		assert(value.HasMember(str));
-	}
+	std::ofstream ofs("results.json");
+	rapidjson::OStreamWrapper osw(ofs);
+	rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+	results.Accept(writer);
 }
 
 void runAnalysisHelper(std::shared_ptr<boaaa::DLInterface>& dl, boaaa::aa_id aa, const char* id, bool& res)
@@ -740,10 +763,5 @@ void finalize()
 	llvm90.reset();
 	delete llvm_man;
 
-	{
-		std::ofstream ofs("results.json");
-		rapidjson::OStreamWrapper osw(ofs);
-		rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
-		results.Accept(writer);
-	}
+	writeJson();
 }

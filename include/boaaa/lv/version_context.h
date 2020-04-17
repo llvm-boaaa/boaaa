@@ -15,6 +15,7 @@ namespace boaaa {
 #else
 }
 
+#include "boaaa/EvaluationResult.h"
 #include "boaaa/lv/include_versions/BOAAA_StringRefVP.inc"
 #include "boaaa/lv/include_versions/LLVM_Module.inc"
 #include "boaaa/lv/include_versions/LLVM_LLVMContext.inc"
@@ -51,12 +52,14 @@ namespace boaaa {
 		evaluation_aa_sets no_alias_sets;
 		std::ostream* basic_ostream;
 		bool del_strm_after_use;
+		std::unique_ptr<ModuleResult> module_result;
 		
 		version_context() : relevant_pointers(), alias_sets(), no_alias_sets()
 		{
 			string_ref_vp = nullptr;
 			loaded_module.reset(nullptr);
 			context_to_module.reset(nullptr);
+			module_result.reset(nullptr);
             basic_ostream = nullptr;
 			del_strm_after_use = false;
 		}
@@ -66,6 +69,7 @@ namespace boaaa {
 				delete string_ref_vp;
 			loaded_module.reset(nullptr);
 			context_to_module.reset(nullptr);
+			module_result.reset(nullptr);
 			if (del_strm_after_use)
 				delete basic_ostream;
 		}

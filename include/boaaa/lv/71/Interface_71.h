@@ -31,6 +31,11 @@ namespace boaaa {
 		void unloadModule() override;
 		bool runAnalysis(boaaa::aa_id analysis) override;
 		bool runAnalysis(boaaa::aa_id analysis, EvaluationResult& er) override;
+		
+		ModuleResult* getModuleResult() override
+		{
+			return context.module_result.get();
+		}
 
 		llvm_version getVersion() override
 		{

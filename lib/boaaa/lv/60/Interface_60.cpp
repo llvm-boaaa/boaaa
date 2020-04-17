@@ -65,6 +65,7 @@ boaaa::cl_aa_store DLInterface60::getAvailableAAs()
 bool loadModuleHelper(llvm::StringRef ref, boaaa::version_context& context)
 {
 	context.context_to_module.reset(new LLVMLLVMContext());
+	context.module_result.reset(new ModuleResult());
 	llvm::SMDiagnostic Err;
 
 	context.loaded_module = llvm::parseIRFile(ref, Err, *context.context_to_module);
@@ -80,6 +81,7 @@ bool loadModuleHelper(llvm::StringRef ref, boaaa::version_context& context)
 	pm.add(cp);
 	pm.run(*context.loaded_module);
 	cp->printResult(*context.basic_ostream);
+	cp->printToModuleRes(*context.module_result);
 	//dont delete pass, get deleted in PM
 	//delete cp;
 
@@ -121,6 +123,7 @@ void DLInterface60::unloadModule()
 
 	context.loaded_module.reset(nullptr);
 	context.context_to_module.reset(nullptr);
+	context.module_result.reset(nullptr);
 }
 
 template<typename F>
