@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
 
 	if (!FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
-			void writeJson();
+			writeJson();
 			if (static_cast<int8_t>(state) < 0) {
 				evaluateMainloopError(state, 0);
 				--res;
@@ -222,7 +222,7 @@ int main(int argc, char** argv) {
 		}
 		cl::ParseCommandLineOptions(_argc, _argv);
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
-			void writeJson();
+			writeJson();
 			if (static_cast<int8_t>(state) < 0) {
 				evaluateMainloopError(state, line_count);
 				--res;

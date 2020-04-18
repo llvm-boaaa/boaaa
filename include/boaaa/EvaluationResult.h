@@ -170,12 +170,14 @@ namespace boaaa {
 			//alias sets	
 			BOAAA_CHECK_AND_WRITE(value, m_alias_sets,							"alias_sets",				SetUint64, alloc)
 			BOAAA_CHECK_AND_WRITE(value, m_no_alias_sets,						"no_alias_sets",			SetUint64, alloc)
-
-			BOAAA_CHECK_AND_WRITE(value, m_mean_alias_sets,						"mean_alias_sets",			SetDouble, alloc)
-			BOAAA_CHECK_AND_WRITE(value, m_var_alias_sets,						"var_alias_sets",			SetDouble, alloc)
-			BOAAA_CHECK_AND_WRITE(value, m_mean_no_alias_sets,					"mean_no_alias_sets",		SetDouble, alloc)
-			BOAAA_CHECK_AND_WRITE(value, m_var_no_alias_sets,					"var_no_alias_sets",		SetDouble, alloc)
-
+			if (m_alias_sets) {
+				BOAAA_CHECK_AND_WRITE(value, m_mean_alias_sets,					"mean_alias_sets",			SetDouble, alloc)
+				BOAAA_CHECK_AND_WRITE(value, m_var_alias_sets,					"var_alias_sets",			SetDouble, alloc)
+			}
+			if (m_no_alias_sets) {
+				BOAAA_CHECK_AND_WRITE(value, m_mean_no_alias_sets,				"mean_no_alias_sets",		SetDouble, alloc)
+				BOAAA_CHECK_AND_WRITE(value, m_var_no_alias_sets,				"var_no_alias_sets",		SetDouble, alloc)
+			}
 			return value;
 		}
 
