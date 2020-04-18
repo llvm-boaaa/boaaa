@@ -15,6 +15,9 @@ namespace boaaa
 		SCEV       = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::SCEV_AA,
 		SCOPEDNA   = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::SCOPED_NA_AA,
 		TBAA       = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::TBAA_AA,
+#ifdef SEA_DSA
+		SEADSA,
+#endif
 	};
 
 	namespace _50 {
@@ -26,6 +29,7 @@ namespace boaaa
 		static char SCEV[]       = __STRINGIFY(SCEV);
 		static char SCOPEDNA[]   = __STRINGIFY(SCOPEDNA);
 		static char TBAA[]       = __STRINGIFY(TBAA);
+		static char SEADSA[]	 = __STRINGIFY(SEADSA);
 	}
 
 	inline cl_aa_store getInitalizedAAs_50()
@@ -40,6 +44,9 @@ namespace boaaa
 		raa.push_back(registeredAA(&_50::SCEV[0],       static_cast<aa_id>(L5::SCEV),       getDescription(L5::SCEV)));
 		raa.push_back(registeredAA(&_50::SCOPEDNA[0],   static_cast<aa_id>(L5::SCOPEDNA),   getDescription(L5::SCOPEDNA)));
 		raa.push_back(registeredAA(&_50::TBAA[0],       static_cast<aa_id>(L5::TBAA),       getDescription(L5::TBAA)));
+#ifdef SEA_DSA
+		raa.push_back(registeredAA(&_50::SEADSA[0],		static_cast<aa_id>(L5::SEADSA),		"external SeaDsa Analysis"));
+#endif
 		return raa;
 	}
 }

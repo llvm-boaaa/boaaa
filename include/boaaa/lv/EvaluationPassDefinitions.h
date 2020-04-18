@@ -217,11 +217,12 @@ namespace llvm
 #ifdef SEA_DSA
 
 #include "sea_dsa/DsaAnalysis.hh"
+#include "50/SeaDsaWrapper.h"
 
 namespace llvm {
 	using namespace sea_dsa;
-	//TODO crashes because couldn't find Function getResult, wrapper for dsa-interface needed.
-	//BOAAA_CREATE_EVAL_PASS_HEADER(DsaAnalysisWrapperPass, DsaAnalysis)
+	
+	BOAAA_CREATE_EVAL_PASS_HEADER(SeaDsaEvalWrapperPass, SeaDsaWrapperPass)
 
 }
 #endif

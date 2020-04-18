@@ -162,6 +162,11 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 		run(new llvm::TypeBasedAAEvalWrapperPass(),
 			new boaaa::TimePass<llvm::TypeBasedAAWrapperPass>());
 		break;
+#ifdef SEA_DSA
+	case LLV::SEADSA:
+		run(new llvm::SeaDsaEvalWrapperPass(),
+			new boaaa::TimePass<llvm::SeaDsaWrapperPass>());
+#endif
 	}
 	return true;
 }
