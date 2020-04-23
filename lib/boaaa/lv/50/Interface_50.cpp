@@ -184,7 +184,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 			pass->printResult(*context.basic_ostream);
 		}
 	};
-
+	
 	return runAnalysisHelp(run, analysis);
 }
 
@@ -203,6 +203,18 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 		timepass->printToEvalRes(er);
 		pass->printToEvalRes(er);
 	};
+
+	using namespace sea_dsa;
+
+	
+	//llvm::legacy::PassManager pm;
+	//pm.add(createDsaPrintStatsPass());
+	//pm.add(createDsaPrinterPass());
+	//pm.add(createDsaViewerPass());
+	//pm.add(createDsaPrintCallGraphStatsPass());
+	//pm.add(createDsaCallGraphPrinterPass());
+	//pm.run(*context.loaded_module);
+	
 
 	return runAnalysisHelp(run, analysis);
 }

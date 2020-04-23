@@ -18,9 +18,11 @@ namespace llvm
 	class SeaDsaResult : public AAResultBase<SeaDsaResult> {
 		friend AAResultBase<SeaDsaResult>;
 
+        sea_dsa::DsaAnalysis& analysis;
+        sea_dsa::GlobalAnalysis& global;
 
 	public:
-        SeaDsaResult();
+        SeaDsaResult(sea_dsa::DsaAnalysis& Analysis);
         ~SeaDsaResult();
 
         AliasResult alias(const MemoryLocation& LocA, const MemoryLocation& LocB);

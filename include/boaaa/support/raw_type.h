@@ -43,7 +43,7 @@ namespace boaaa {
 	};
 }
 
-#define _raw_type(arg) raw_type_t<arg>
-#define _raw_type_inst(arg) raw_type_t<decltype(arg)>
+#define _raw_type(arg) ::boaaa::raw_type_t<arg>
+#define _raw_type_inst(arg) ::boaaa::raw_type_t<decltype(arg)>
 
 #endif //!BOAAA_RAW_TYPE_H
