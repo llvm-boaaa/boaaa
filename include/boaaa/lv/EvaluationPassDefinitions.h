@@ -150,16 +150,29 @@ namespace boaaa {
     boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
 #endif
 
-#ifndef BOAAA_CREATE_EVAL_PASS_SOURCE_NO_DEP
-#define BOAAA_CREATE_EVAL_PASS_SOURCE_NO_DEP(passname, analysisname, arg, help)						\
-char passname::ID = 0;																				\
-	INITIALIZE_PASS_BEGIN(passname, arg, help, false, true)                                         \
-	INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
-	INITIALIZE_PASS_END(passname, arg, help, false, true)											\
-	passname::passname()																			\
+#ifndef BOAAA_CREATE_EVAL_PASS_SOURCE_ADD_INST
+#define BOAAA_CREATE_EVAL_PASS_SOURCE_ADD_INST(passname, analysisname, arg, help, inst)				\
+    char passname::ID = 0;                                                                          \
+    INITIALIZE_PASS_BEGIN(passname, arg, help, false, true)                                         \
+    INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
+    INITIALIZE_PASS_DEPENDENCY(analysisname)                                                        \
+    INITIALIZE_PASS_END(passname, arg, help, false, true)											\
+    passname::passname()																			\
 			: boaaa::detail::select_eval_pass_t<analysisname>(ID)									\
-	{ initialize##passname##Pass(*PassRegistry::getPassRegistry()); }                               \
-	boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
+    { initialize##passname##Pass(*PassRegistry::getPassRegistry()); inst; }                         \
+    boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
+
+#endif
+
+#ifndef BOAAA_CREATE_RENAME_PASS
+#define BOAAA_CREATE_RENAME_PASS(newname, passname, inst)											\
+class newname : public passname																		\
+{																									\
+public:																								\
+	newname() : passname() { inst; }																\
+};																									\
+inline void initialize##newname##Pass(PassRegistry& Registry) { initialize##passname##Pass(Registry); }	
+
 #endif
 
 namespace llvm
@@ -170,36 +183,36 @@ namespace llvm
 
 	 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++AndersAA
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(AndersAAEvalWrapperPass, CFLAndersAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(AndersAAEvalWrapperPass,			CFLAndersAAWrapperPass)
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++AndersAA
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
-	BOAAA_CREATE_EVAL_PASS_HEADER(BasicAAEvalWrapperPass, BasicAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(BasicAAEvalWrapperPass,			BasicAAWrapperPass)
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++BASIC-AA
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
 	using namespace objcarc;
-	BOAAA_CREATE_EVAL_PASS_HEADER(ObjCARCAAEvalWrapperPass, ObjCARCAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(ObjCARCAAEvalWrapperPass,			ObjCARCAAWrapperPass)
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++OBJ-CARC
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SCEVAA
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(SCEVAAEvalWrapperPass, SCEVAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(SCEVAAEvalWrapperPass,			SCEVAAWrapperPass)
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SCEVAA
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(ScopedNoAliasEvalWrapperPass, ScopedNoAliasAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(ScopedNoAliasEvalWrapperPass,		ScopedNoAliasAAWrapperPass)
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ScopedNoAliasAA
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(SteensAAEvalWrapperPass, CFLSteensAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(SteensAAEvalWrapperPass,			CFLSteensAAWrapperPass)
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(TypeBasedAAEvalWrapperPass, TypeBasedAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(TypeBasedAAEvalWrapperPass,		TypeBasedAAWrapperPass)
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
 
@@ -221,8 +234,35 @@ namespace llvm
 
 namespace llvm {
 	using namespace sea_dsa;
-	
-	BOAAA_CREATE_EVAL_PASS_HEADER(SeaDsaEvalWrapperPass, SeaDsaWrapperPass)
+
+	namespace {
+		inline void changeDsaOption(GlobalAnalysisKind kind) {
+			reinterpret_cast<cl::opt<::sea_dsa::GlobalAnalysisKind>*>(cl::getRegisteredOptions().find("sea-dsa")->second)->setValue(kind);
+		}
+	}
+
+
+	//rename passes, so they get show correctly in JSON export
+	BOAAA_CREATE_RENAME_PASS(ContextSensitiveSeaDsaWrapperPass,					SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::CONTEXT_SENSITIVE))
+
+	BOAAA_CREATE_RENAME_PASS(ContextSensitiveBottomUpTopDownSeaDsaWrapperPass,	SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::BUTD_CONTEXT_SENSITIVE))
+
+	BOAAA_CREATE_RENAME_PASS(BottomUpSeaDsaWrapperPass,							SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::BU))
+
+	BOAAA_CREATE_RENAME_PASS(ContextInsensitiveSeaDsaWrapperPass,				SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::CONTEXT_INSENSITIVE))
+
+	BOAAA_CREATE_RENAME_PASS(FlatMemorySeaDsaWrapperPass,						SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::FLAT_MEMORY))
+
+	//create all evaluationpasses for sea_dsa
+	BOAAA_CREATE_EVAL_PASS_HEADER(ContextSensitiveSeaDsaEvalWrapperPass,				ContextSensitiveSeaDsaWrapperPass)
+		
+	BOAAA_CREATE_EVAL_PASS_HEADER(ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass,	ContextSensitiveBottomUpTopDownSeaDsaWrapperPass)
+		
+	BOAAA_CREATE_EVAL_PASS_HEADER(BottomUpSeaDsaEvalWrapperPass,						BottomUpSeaDsaWrapperPass)
+
+	BOAAA_CREATE_EVAL_PASS_HEADER(ContextInsensitiveSeaDsaEvalWrapperPass,				ContextInsensitiveSeaDsaWrapperPass)
+
+	BOAAA_CREATE_EVAL_PASS_HEADER(FlatMemorySeaDsaEvalWrapperPass,						FlatMemorySeaDsaWrapperPass)
 
 }
 #endif

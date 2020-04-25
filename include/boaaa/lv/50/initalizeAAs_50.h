@@ -16,20 +16,28 @@ namespace boaaa
 		SCOPEDNA   = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::SCOPED_NA_AA,
 		TBAA       = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::TBAA_AA,
 #ifdef SEA_DSA
-		SEADSA,
+		SEA_DSA_CS,
+		SEA_DSA_BU,
+		SEA_DSA_CS_BUTD,
+		SEA_DSA_CIS,
+		SEA_DSA_FM,
 #endif
 	};
 
 	namespace _50 {
 
-		static char BASIC[]      = __STRINGIFY(BASIC);
-		static char CFL_ANDERS[] = __STRINGIFY(CFL-ANDERS);
-		static char CFL_STEENS[] = __STRINGIFY(CFL-STEENS);
-		static char OBJ_CARC[]   = __STRINGIFY(OBJ-CARC);
-		static char SCEV[]       = __STRINGIFY(SCEV);
-		static char SCOPEDNA[]   = __STRINGIFY(SCOPEDNA);
-		static char TBAA[]       = __STRINGIFY(TBAA);
-		static char SEADSA[]	 = __STRINGIFY(SEADSA);
+		static char BASIC[]				= __STRINGIFY(BASIC);
+		static char CFL_ANDERS[]		= __STRINGIFY(CFL-ANDERS);
+		static char CFL_STEENS[]		= __STRINGIFY(CFL-STEENS);
+		static char OBJ_CARC[]			= __STRINGIFY(OBJ-CARC);
+		static char SCEV[]				= __STRINGIFY(SCEV);
+		static char SCOPEDNA[]			= __STRINGIFY(SCOPEDNA);
+		static char TBAA[]				= __STRINGIFY(TBAA);
+		static char SEA_DSA_CS[]		= __STRINGIFY(SEA-DSA-CS);
+		static char SEA_DSA_BU[]		= __STRINGIFY(SEA-DSA-BU);
+		static char SEA_DSA_CS_BUTD[]	= __STRINGIFY(SEA-DSA-CS-BUTD);
+		static char SEA_DSA_CIS[]		= __STRINGIFY(SEA-DSA-CIS);
+		static char SEA_DSA_FM[]		= __STRINGIFY(SEA-DSA-FM);
 	}
 
 	inline cl_aa_store getInitalizedAAs_50()
@@ -45,7 +53,11 @@ namespace boaaa
 		raa.push_back(registeredAA(&_50::SCOPEDNA[0],   static_cast<aa_id>(L5::SCOPEDNA),   getDescription(L5::SCOPEDNA)));
 		raa.push_back(registeredAA(&_50::TBAA[0],       static_cast<aa_id>(L5::TBAA),       getDescription(L5::TBAA)));
 #ifdef SEA_DSA
-		raa.push_back(registeredAA(&_50::SEADSA[0],		static_cast<aa_id>(L5::SEADSA),		"external SeaDsa Analysis"));
+		raa.push_back(registeredAA(&_50::SEA_DSA_CS[0],			static_cast<aa_id>(L5::SEA_DSA_CS),			"external SeaDsa Context Sensitive Analysis"));
+		raa.push_back(registeredAA(&_50::SEA_DSA_CS_BUTD[0],	static_cast<aa_id>(L5::SEA_DSA_CS_BUTD),	"external SeaDsa Context Sensitive BottumUpTopDown Analysis"));
+		raa.push_back(registeredAA(&_50::SEA_DSA_BU[0],			static_cast<aa_id>(L5::SEA_DSA_BU),			"external SeaDsa BottomUp Analysis"));
+		raa.push_back(registeredAA(&_50::SEA_DSA_CIS[0],		static_cast<aa_id>(L5::SEA_DSA_CIS),		"external SeaDsa Context Insensitive Analysis"));
+		raa.push_back(registeredAA(&_50::SEA_DSA_FM[0],			static_cast<aa_id>(L5::SEA_DSA_FM),			"external SeaDsa Flat Memory Analysis"));
 #endif
 		return raa;
 	}

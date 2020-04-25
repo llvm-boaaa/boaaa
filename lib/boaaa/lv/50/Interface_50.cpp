@@ -163,9 +163,26 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 			new boaaa::TimePass<llvm::TypeBasedAAWrapperPass>());
 		break;
 #ifdef SEA_DSA
-	case LLV::SEADSA:
-		run(new llvm::SeaDsaEvalWrapperPass(),
-			new boaaa::TimePass<llvm::SeaDsaWrapperPass>());
+	case LLV::SEA_DSA_CS:
+		run(new llvm::ContextSensitiveSeaDsaEvalWrapperPass(),
+			new boaaa::TimePass<llvm::ContextSensitiveSeaDsaWrapperPass>());
+		break;
+	case LLV::SEA_DSA_CS_BUTD:
+		run(new llvm::ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass(),
+			new boaaa::TimePass<llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass>());
+		break;
+	case LLV::SEA_DSA_BU:
+		run(new llvm::BottomUpSeaDsaEvalWrapperPass(),
+			new boaaa::TimePass<llvm::BottomUpSeaDsaWrapperPass>());
+		break;
+	case LLV::SEA_DSA_CIS:
+		run(new llvm::ContextInsensitiveSeaDsaEvalWrapperPass(),
+			new boaaa::TimePass<llvm::ContextInsensitiveSeaDsaWrapperPass>());
+		break;
+	case LLV::SEA_DSA_FM:
+		run(new llvm::FlatMemorySeaDsaEvalWrapperPass(),
+			new boaaa::TimePass<llvm::FlatMemorySeaDsaWrapperPass>());
+		break;
 #endif
 	}
 	return true;

@@ -211,8 +211,12 @@ int main(int argc, char** argv) {
 	//while lines in file seperate arguments, parse them and run main loop to calculate what the arguments describe.
 	uint64_t line_count = 0;
 	while (std::getline(cl_inst, line)) {
-		cl::ResetAllOptionOccurrences();
 		line_count++;
+
+		//skip line starting with //
+		if (line.rfind("//", 0) == 0) continue;
+
+		cl::ResetAllOptionOccurrences();
 		int _argc;
 		char** _argv = boaaa::parse(boaaa_string, line.data(), &_argc);
 		if (_argc < 0) {
@@ -220,6 +224,7 @@ int main(int argc, char** argv) {
 			res--;
 			continue;
 		}
+
 		cl::ParseCommandLineOptions(_argc, _argv);
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			writeJson();
@@ -524,41 +529,7 @@ COROUTINESTATES_MAIN mainloop()
 }
 
 #ifdef DEBUG
-void passManagerTest()
-{
-	llvm::LLVMContext context;
-	llvm::SMDiagnostic Err;
-	std::unique_ptr<llvm::Module> module = llvm::parseIRFile(InputFilename, Err, context);
-
-}
-
 int testmain() {
-
-	passManagerTest();
-
-	StringRef test_string = "says hello";
-
-	uint64_t str_test_hash = llvm_man->registerData(test_string);
-	uint64_t test_bc = llvm_man->registerData(InputFilename);
-
-	uint64_t* test_args = new uint64_t[2]{ str_test_hash, test_bc };
-
-	if (!llvm40->loadModule(test_bc)) {
-		std::cout << "       Error in Module llvm 40" << "\n";
-	}
-
-	if (!llvm50->loadModule(test_bc)) {
-		std::cout << "       Error in Module llvm 50" << "\n";
-	}
-
-	if (!llvm90->loadModule(test_bc)) {
-		std::cout << "       Error in Module llvm 90" << "\n";
-	}
-
-	llvm40->test(test_args, 2);
-	llvm50->test(test_args, 2);
-	llvm90->test(test_args, 2);
-
 	return 0;
 };
 

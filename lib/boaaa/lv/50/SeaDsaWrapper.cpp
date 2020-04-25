@@ -103,22 +103,34 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
     const llvm::Value* ValueA = LocA.Ptr;
     const llvm::Value* ValueB = LocB.Ptr;
 
-    assert(notDifferentParent(ValueA, ValueB) &&
-        "SeaDsa doesn't support interprocedural queries.");
-
     const Function* F = getParent(ValueA);
 
     {//only needed F2 for check
-        const Function* F2 = getParent(ValueB);
-        //if couldn't find Parent then don't know how to get Alias Informations, so returning may alias
-        if (!F || !F2 || F != F2) return MayAlias;
+        if (!F) {
+            F = getParent(ValueB);
+            
+            if (!F) return MayAlias; //no alias Information Found
+        }
+        else
+        {
+            const Function* F2 = getParent(ValueB);
+            assert(F == F2 && "SeaDsa doesn't support interprocedural queries.");
+            if (F != F2) return MayAlias; //return in nodebug-mode MayAlias. 
+        }
     }
     
+    //F must be a valide Function
+    assert(F);
+
     if (!global.hasGraph(*F)) return MayAlias;
     Graph& G = global.getGraph(*F);
 
     //if (!global.hasSummaryGraph(*F)) return MayAlias;
     //Graph& G = global.getSummaryGraph(*F);
+
+    //when one Value is a global and not in the Graph of the Function it is not used in the Function, we could return NoAlias her, 
+    //but we don't have any Information about why the Alias-check is called on this two Pointers so we say MayAlias and a other Analysis can return a better Result.
+    if (!G.hasCell(*ValueA) || !G.hasCell(*ValueB)) return MayAlias;
 
     const Cell CA = G.getCell(*ValueA);
     const Cell CB = G.getCell(*ValueB);
