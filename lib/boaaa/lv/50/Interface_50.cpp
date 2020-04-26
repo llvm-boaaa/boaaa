@@ -165,23 +165,23 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 #ifdef SEA_DSA
 	case LLV::SEA_DSA_CS:
 		run(new llvm::ContextSensitiveSeaDsaEvalWrapperPass(),
-			new boaaa::TimePass<llvm::ContextSensitiveSeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::ContextSensitiveSeaDsaWrapperPass, SeaDsaWrapperPass>());
 		break;
 	case LLV::SEA_DSA_CS_BUTD:
 		run(new llvm::ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass(),
-			new boaaa::TimePass<llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass, SeaDsaWrapperPass>());
 		break;
 	case LLV::SEA_DSA_BU:
 		run(new llvm::BottomUpSeaDsaEvalWrapperPass(),
-			new boaaa::TimePass<llvm::BottomUpSeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::BottomUpSeaDsaWrapperPass, SeaDsaWrapperPass>());
 		break;
 	case LLV::SEA_DSA_CIS:
 		run(new llvm::ContextInsensitiveSeaDsaEvalWrapperPass(),
-			new boaaa::TimePass<llvm::ContextInsensitiveSeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::ContextInsensitiveSeaDsaWrapperPass, SeaDsaWrapperPass>());
 		break;
 	case LLV::SEA_DSA_FM:
 		run(new llvm::FlatMemorySeaDsaEvalWrapperPass(),
-			new boaaa::TimePass<llvm::FlatMemorySeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::FlatMemorySeaDsaWrapperPass, SeaDsaWrapperPass>());
 		break;
 #endif
 	}
@@ -193,7 +193,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 	auto run = [&](auto* pass, auto* timepass) -> void {
 		llvm::legacy::PassManager pm;
 		pass->setContext(&context);
-		pm.add(timepass);
+		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
 		if (*context.basic_ostream) {
@@ -210,7 +210,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 	auto run = [&](auto* pass, auto* timepass) -> void {
 		llvm::legacy::PassManager pm;
 		pass->setContext(&context);
-		pm.add(timepass);
+		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
 		if (*context.basic_ostream) {

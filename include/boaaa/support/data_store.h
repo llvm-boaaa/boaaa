@@ -176,6 +176,11 @@ namespace boaaa
 			return xxhash(bytep, size, seed);
 		}
 
+		size_t size()
+		{
+			return n;
+		}
+
 	private:
 		const size_t n = __n;
 		store data;

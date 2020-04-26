@@ -1,6 +1,9 @@
 #ifndef BOAAA_LV_TIMEPASS_H
 #define BOAAA_LV_TIMEPASS_H
 
+//shouldn't be needed to include, but without the code wouldn't compile
+#include "llvm/IR/LegacyPassManager.h"
+
 //define LLVMFunction
 #include "include_versions/LLVM_Function.inc"
 //define LLVMModule
@@ -13,6 +16,8 @@
 #include "include_versions/LLVM_FunctionPass.inc"
 //define LLVMImmutablePass
 #include "include_versions/LLVM_ImmutablePass.inc"
+//define LLVMLegacyPassManager
+#include "include_versions/LLVM_LegacyPassManager.inc"
 
 #include "boaaa/EvaluationResult.h"
 #include "boaaa/support/select_type.h"
@@ -36,8 +41,8 @@ namespace boaaa
 			uint16_t m_millis		= 0;
 			uint64_t m_seconds		= 0;
 
-			timestamp m_start;
-			timestamp m_end;
+			timestamp m_start		= timestamp();
+			timestamp m_end			= timestamp();
 
 			bool notset_start = true;
 			bool notset_end   = true;
@@ -125,10 +130,47 @@ namespace boaaa
 				er.set_function_time_micros(m_micros);
 				er.set_function_time_nanos(m_nanos);
 			}
+
+			void concat(TimeMessure* tm) 
+			{
+
+				//tm->unifyTime();
+
+				if (!tm->notset_start && (notset_start || m_start > tm->m_start)) {
+					m_start = tm->m_start;
+					notset_start = false;
+				}
+
+				if (!tm->notset_end && (notset_end || m_end < tm->m_end)) {
+					m_end = tm->m_end;
+					notset_end = false;
+				}
+
+				m_nanos += tm->m_nanos;
+				if (m_nanos >= 1000) {
+					m_nanos -= 1000U;
+					m_micros++;
+				}
+				m_micros += tm->m_micros;
+				if (m_micros >= 1000) {
+					m_micros -= 1000U;
+					m_millis++;
+				}
+
+				m_millis += tm->m_millis;
+				if (m_millis >= 1000) {
+					m_millis -= 1000U;
+					m_seconds++;
+				}
+
+				m_seconds += tm->m_seconds;
+			}
+
+			virtual void unifyTime() {};
 		};
 
 		template<class PASS>
-		class TimeModulePass : public PASS, TimeMessure {
+		class TimeModulePass : public PASS, public TimeMessure {
 		public:
 			TimeModulePass() : PASS(), TimeMessure() {
 
@@ -155,7 +197,7 @@ namespace boaaa
 		};
 
 		template<class PASS>
-		class TimeFunctionPass : public PASS, TimeMessure {
+		class TimeFunctionPass : public PASS, public TimeMessure {
 		private:
 			typedef boaaa::data_store<const char*, int> hashobj;
 
@@ -183,7 +225,7 @@ namespace boaaa
 		};
 
 		template<class PASS>
-		class TimeImmutablePass : public PASS, TimeMessure {
+		class TimeImmutablePass : public PASS, public TimeMessure {
 
 		public:
 			TimeImmutablePass() : PASS(), TimeMessure() { }
@@ -218,6 +260,11 @@ namespace boaaa
 		using select_time_pass_t = typename select_time_pass<PASS>::type;
 	}
 
+	struct TimePassTemplate 
+	{
+		
+	};
+
 	template<class PASS>
 	struct TimePass : public detail::select_time_pass_t<PASS> {
 		using super	= PASS;
@@ -227,8 +274,111 @@ namespace boaaa
 		TimePass() : timepass() { }
 
 		~TimePass() { }
+
+		void addPass(LLVMLegacyPassManager& pm) {
+			pm.add(this);
+		}
+
+		void unifyTime() override {}
 	};
 
+	namespace {
+
+		template<size_t N, class ...Passes>
+		struct recursiveCaller;
+
+		template<size_t N, class ...Passes>
+		struct recursiveCaller 
+		{
+		private:
+			using store = _data_store<Passes...>;
+		public:
+			using type = typename get_helper<N, store>::type;
+			typedef boaaa::data_store<TimePass<Passes>*...> data_store;
+
+			static void addPasses(LLVMLegacyPassManager& pm, data_store& passes)
+			{
+				recursiveCaller<N - 1, Passes...>::addPasses(pm, passes);
+				TimePass<type>* pass = passes.get<N>();
+				pass->addPass(pm);
+			}
+
+			static std::string unifyNames()
+			{
+				std::string out = std::string(typeid(type).name()).substr(6) + "->";
+				out += recursiveCaller<N - 1, Passes...>::unifyNames();
+				return out;
+			}
+
+			static void unifyTime(detail::TimeMessure& tm, data_store& passes)
+			{
+				tm.concat(reinterpret_cast<detail::TimeMessure*>(passes.get<N>()));
+				recursiveCaller<N - 1, Passes...>::unifyTime(tm, passes);
+			}
+		};
+
+		template<class ...Passes>
+		struct recursiveCaller<0, Passes...> 
+		{
+		private:
+			using store = _data_store<Passes...>;
+		public:
+			using type = typename get_helper<0, store>::type;
+			typedef boaaa::data_store<TimePass<Passes>*...> data_store;
+
+			static void addPasses(LLVMLegacyPassManager& pm, data_store& passes)
+			{
+				TimePass<type>* pass = passes.get<0>();
+				pass->addPass(pm);
+			}
+
+			static std::string unifyNames()
+			{
+				return std::string(typeid(type).name()).substr(6);
+			}
+
+			static void unifyTime(detail::TimeMessure& tm, data_store& passes)
+			{
+				tm.concat(reinterpret_cast<detail::TimeMessure*>(passes.get<0>()));
+			}
+		};
+	}
+
+	template<class ...Passes>
+	struct ConcatTimePass : public detail::TimeMessure
+	{
+	private:
+		static constexpr size_t num = sizeof...(Passes);
+		boaaa::data_store<TimePass<Passes>*...> passes;
+
+	public:		
+		ConcatTimePass() : detail::TimeMessure(), passes(new TimePass<Passes>()... ) { }
+
+		void addPass(LLVMLegacyPassManager& pm) {
+			recursiveCaller<num - 1, Passes...>::addPasses(pm, passes);
+		}
+
+		std::string identifyer() {
+			return recursiveCaller<num - 1, Passes...>::unifyNames();
+		}
+
+		void unifyTime() override {
+			detail::TimeMessure::reset();
+			recursiveCaller<num - 1, Passes...>::unifyTime(*reinterpret_cast<TimeMessure*>(this), passes);
+		}
+
+		void printResult(std::ostream& stream) override {
+			stream << "TimePass Report for " << identifyer() << ":\n";
+			unifyTime();
+			detail::TimeMessure::printResult(stream);
+		}
+
+		void printToEvalRes(EvaluationResult& er) override {
+			er.set_aa_name(identifyer().c_str());
+			unifyTime();
+			detail::TimeMessure::printToEvalRes(er);
+		}
+	};
 
 }
 
