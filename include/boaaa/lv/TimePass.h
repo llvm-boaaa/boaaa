@@ -134,7 +134,7 @@ namespace boaaa
 			void concat(TimeMessure* tm) 
 			{
 
-				//tm->unifyTime();
+				tm->unifyTime();
 
 				if (!tm->notset_start && (notset_start || m_start > tm->m_start)) {
 					m_start = tm->m_start;
@@ -312,7 +312,9 @@ namespace boaaa
 
 			static void unifyTime(detail::TimeMessure& tm, data_store& passes)
 			{
-				tm.concat(reinterpret_cast<detail::TimeMessure*>(passes.get<N>()));
+				tm.concat(static_cast<detail::TimeMessure*>(
+							static_cast<detail::select_time_pass_t<type>*>(
+								static_cast<TimePass<type>*>(passes.get<N>()))));
 				recursiveCaller<N - 1, Passes...>::unifyTime(tm, passes);
 			}
 		};
@@ -339,7 +341,9 @@ namespace boaaa
 
 			static void unifyTime(detail::TimeMessure& tm, data_store& passes)
 			{
-				tm.concat(reinterpret_cast<detail::TimeMessure*>(passes.get<0>()));
+				tm.concat(static_cast<detail::TimeMessure*>(
+							static_cast<detail::select_time_pass_t<type>*>(
+								static_cast<TimePass<type>*>(passes.get<0>()))));
 			}
 		};
 	}
@@ -352,7 +356,7 @@ namespace boaaa
 		boaaa::data_store<TimePass<Passes>*...> passes;
 
 	public:		
-		ConcatTimePass() : detail::TimeMessure(), passes(new TimePass<Passes>()... ) { }
+		ConcatTimePass() : detail::TimeMessure(), passes({ new TimePass<Passes>()... }) { }
 
 		void addPass(LLVMLegacyPassManager& pm) {
 			recursiveCaller<num - 1, Passes...>::addPasses(pm, passes);
@@ -364,7 +368,7 @@ namespace boaaa
 
 		void unifyTime() override {
 			detail::TimeMessure::reset();
-			recursiveCaller<num - 1, Passes...>::unifyTime(*reinterpret_cast<TimeMessure*>(this), passes);
+			recursiveCaller<num - 1, Passes...>::unifyTime(*this, passes);
 		}
 
 		void printResult(std::ostream& stream) override {

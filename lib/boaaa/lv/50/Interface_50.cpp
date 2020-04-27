@@ -165,23 +165,23 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 #ifdef SEA_DSA
 	case LLV::SEA_DSA_CS:
 		run(new llvm::ContextSensitiveSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::ContextSensitiveSeaDsaWrapperPass, SeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::ContextSensitiveSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
 		break;
 	case LLV::SEA_DSA_CS_BUTD:
 		run(new llvm::ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass, SeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
 		break;
 	case LLV::SEA_DSA_BU:
 		run(new llvm::BottomUpSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::BottomUpSeaDsaWrapperPass, SeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::BottomUpSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
 		break;
 	case LLV::SEA_DSA_CIS:
 		run(new llvm::ContextInsensitiveSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::ContextInsensitiveSeaDsaWrapperPass, SeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::ContextInsensitiveSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
 		break;
 	case LLV::SEA_DSA_FM:
 		run(new llvm::FlatMemorySeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::FlatMemorySeaDsaWrapperPass, SeaDsaWrapperPass>());
+			new boaaa::ConcatTimePass<llvm::FlatMemorySeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
 		break;
 #endif
 	}
