@@ -33,6 +33,9 @@
  * ===========================================================================
  *
  * > main returns 15.
+ *
+ * BOAAA_CONSUME() and BOAAA_CONSUME(macro) will expend to NOTHING
+ *
  */
 
 #define NOTHING 
@@ -49,7 +52,7 @@
 //  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
 #define B0AAA_SEQ_49x1_1x0()   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0
 //_50,_51,_52,_53,_54,_55,_56,_57,_58,_59,_60,_61,_62,_63,_64,_65,_66,_67,_68,_69,_70,_71,_72,_73,_74,_75,_76,_77,_78,_79,_80,_81,_82,_83,_84,_85,_86,_87,_88,_89,_90,_91,_92,_93,_94,_95,_96,_97,_98,_99,
-#define BOAAA_ARG_N(         _1, _2, _3, _4, _5, _6, _7, _8, _9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,_30,_31,_32,_33,_34,_35,_36,_37,_38,_39,_40,_41,_42,_43,_44,_45,_46,_47,_48,_49, N,...) N
+#define BOAAA_ARG_N(          _1, _2, _3, _4, _5, _6, _7, _8, _9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,_30,_31,_32,_33,_34,_35,_36,_37,_38,_39,_40,_41,_42,_43,_44,_45,_46,_47,_48,_49, N,...) N
 
 
 #define BOAAA_NARG_(...) BOAAA_ARG_N(__VA_ARGS__)
@@ -136,6 +139,10 @@
 #define BOAAA_COUNT_ARG_MINUS_FUNC(FUNC, ...)     NOTHING BOAAA_COUNT_ARG(__VA_ARGS__)
 #define BOAAA_CONSUME_EVAL(...)	                  NOTHING BOAAA_EVAL(BOAAA_CONSUME_IMP(__VA_ARGS__))
 #define BOAAA_CONSUME_EVAL_2(...)	              NOTHING BOAAA_CONSUME_EVAL(BOAAA_COUNT_ARG_MINUS_FUNC(__VA_ARGS__), BOAAA_RETURN(__VA_ARGS__))
-#define BOAAA_CONSUME(...)				          NOTHING BOAAA_CONSUME_EVAL_2(__VA_ARGS__)
+#define BOAAA_CONSUME_NO_ZERO_ARGS(...)		      NOTHING BOAAA_CONSUME_EVAL_2(__VA_ARGS__)
+#define BOAAA_CONSUME_EXTENDED_2(COND, ...)	      NOTHING BOAAA_EVAL(BOAAA_IFF_ ## COND (__VA_ARGS__))
+#define BOAAA_CONSUME_EXTENDED_1(...)			  NOTHING BOAAA_EVAL(BOAAA_CONSUME_EXTENDED_2(__VA_ARGS__))
+#define BOAAA_IS_EMPTY_MINUS_FUNC(FUNC, ...)      NOTHING BOAAA_IS_EMPTY(__VA_ARGS__)
+#define BOAAA_CONSUME(...)					      NOTHING BOAAA_EVAL(BOAAA_CONSUME_EXTENDED_1(BOAAA_IS_EMPTY_MINUS_FUNC(__VA_ARGS__), BOAAA_CONSUME_NO_ZERO_ARGS(__VA_ARGS__), NOTHING))
 
 #endif //!BOAAA_CONSUME_MACRO
