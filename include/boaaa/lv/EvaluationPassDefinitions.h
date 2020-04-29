@@ -9,6 +9,7 @@
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/TimePass.h"
 #include "boaaa/lv/version_context.h"
+#include "boaaa/support/consume_macro.h"
 #include "boaaa/support/data_store.h"
 #include "boaaa/support/select_type.h"
 
@@ -148,43 +149,27 @@ namespace boaaa {
 }
 
 #ifndef BOAAA_CREATE_EVAL_PASS_HEADER
-#define BOAAA_CREATE_EVAL_PASS_HEADER(passname, analysisname)										\
-	class passname : public boaaa::detail::select_eval_pass_t<analysisname>							\
+#define BOAAA_CREATE_EVAL_PASS_HEADER(passname, ...) NOTHING										\
+	class passname : public boaaa::detail::EvalPass<__VA_ARGS__>									\
 	{																								\
 	public:																							\
 		static char ID;																				\
 		passname();																					\
 	};																								\
-	boaaa::detail::select_base_pass_t<analysisname>*												\
-		create##passname();																			\
+	LLVMFunctionPass* create##passname();															\
 	void initialize##passname##Pass(PassRegistry& Registry);
 #endif
 
 #ifndef BOAAA_CREATE_EVAL_PASS_SOURCE 
-#define BOAAA_CREATE_EVAL_PASS_SOURCE(passname, analysisname, arg, help)							\
+#define BOAAA_CREATE_EVAL_PASS_SOURCE(passname, arg, help, ...) NOTHING 							\
     char passname::ID = 0;                                                                          \
     INITIALIZE_PASS_BEGIN(passname, arg, help, false, true)                                         \
     INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
-    INITIALIZE_PASS_DEPENDENCY(analysisname)                                                        \
+    BOAAA_CONSUME(INITIALIZE_PASS_DEPENDENCY, __VA_ARGS__)                                          \
     INITIALIZE_PASS_END(passname, arg, help, false, true)											\
-    passname::passname()																			\
-			: boaaa::detail::select_eval_pass_t<analysisname>(ID)									\
+    passname::passname() : boaaa::detail::EvalPass<__VA_ARGS__>(ID)									\
     { initialize##passname##Pass(*PassRegistry::getPassRegistry()); }                               \
-    boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
-#endif
-
-#ifndef BOAAA_CREATE_EVAL_PASS_SOURCE_ADD_INST
-#define BOAAA_CREATE_EVAL_PASS_SOURCE_ADD_INST(passname, analysisname, arg, help, inst)				\
-    char passname::ID = 0;                                                                          \
-    INITIALIZE_PASS_BEGIN(passname, arg, help, false, true)                                         \
-    INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
-    INITIALIZE_PASS_DEPENDENCY(analysisname)                                                        \
-    INITIALIZE_PASS_END(passname, arg, help, false, true)											\
-    passname::passname()																			\
-			: boaaa::detail::select_eval_pass_t<analysisname>(ID)									\
-    { initialize##passname##Pass(*PassRegistry::getPassRegistry()); inst; }                         \
-    boaaa::detail::select_base_pass_t<analysisname>* create##passname() { return new passname(); }
-
+    LLVMFunctionPass* create##passname() { return new passname(); }
 #endif
 
 #ifndef BOAAA_CREATE_RENAME_PASS
