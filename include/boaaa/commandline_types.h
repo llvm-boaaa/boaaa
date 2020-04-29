@@ -50,6 +50,12 @@ namespace boaaa
 		TBAA_AA
 	};
 
+	enum LLVM_ORIGINAL_ANALYSIS_COMBINED : aa_id
+	{
+		CLANG_COMBINED_ANALYSIS = LLVM_ORIGINAL_ANALYSIS::TBAA_AA + 1,
+		
+	};
+
 	inline char* getDescription(aa_id aa_id)
 	{
 		using LOA = LLVM_ORIGINAL_ANALYSIS;
@@ -71,6 +77,19 @@ namespace boaaa
 		case LOA::TBAA_AA:
 			return "LLVM ORIGINAL Type Based Alias Analysis";
 		}
+		return "unknown analysis id, if this is shown in -h, there is something wrong configured!";
+	}
+
+	inline char* getCombinedDescription(aa_id aa_id)
+	{
+		using LOAC = LLVM_ORIGINAL_ANALYSIS_COMBINED;
+
+		switch (aa_id & aa_mask)
+		{
+		case LOAC::CLANG_COMBINED_ANALYSIS:
+			return "LLVM ORIGINAL COMBINED BasicAA->NoAilas->TBAA->CFLSteens";
+		}
+
 		return "unknown analysis id, if this is shown in -h, there is something wrong configured!";
 	}
 }

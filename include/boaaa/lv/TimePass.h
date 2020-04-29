@@ -191,7 +191,9 @@ namespace boaaa
 
 			void printToEvalRes(EvaluationResult& er) override {
 				// +6 because typeid starts witch "class classname"
-				er.set_aa_name(typeid(PASS).name() + 6);
+				std::string s = typeid(PASS).name() + 6;
+				er.set_aa_name(boaaa::copyString(s.c_str(), s.size()));
+				er.set_aa_name_delete(boaaa::delete_mem);
 				TimeMessure::printToEvalRes(er);
 			}
 		};
@@ -219,7 +221,9 @@ namespace boaaa
 
 			void printToEvalRes(EvaluationResult& er) override {
 				// +6 because typeid starts witch "class classname"
-				er.set_aa_name(typeid(PASS).name() + 6);
+				std::string s = typeid(PASS).name() + 6;
+				er.set_aa_name(boaaa::copyString(s.c_str(), s.size()));
+				er.set_aa_name_delete(boaaa::delete_mem);
 				TimeMessure::printToEvalRes(er);
 			}
 		};
@@ -243,7 +247,9 @@ namespace boaaa
 
 			void printToEvalRes(EvaluationResult& er) override {
 				// +6 because typeid starts witch "class classname"
-				er.set_aa_name(typeid(PASS).name() + 6);
+				std::string s = typeid(PASS).name() + 6;
+				er.set_aa_name(boaaa::copyString(s.c_str(), s.size()));
+				er.set_aa_name_delete(boaaa::delete_mem);
 				TimeMessure::printToEvalRes(er);
 			}
 		};
@@ -378,7 +384,9 @@ namespace boaaa
 		}
 
 		void printToEvalRes(EvaluationResult& er) override {
-			er.set_aa_name(identifyer().c_str());
+			std::string s = identifyer().c_str();
+			er.set_aa_name(boaaa::copyString(s.c_str(), s.size()));
+			er.set_aa_name_delete(boaaa::delete_mem);
 			unifyTime();
 			detail::TimeMessure::printToEvalRes(er);
 		}

@@ -15,6 +15,7 @@ namespace boaaa
 		SCEV       = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::SCEV_AA,
 		SCOPEDNA   = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::SCOPED_NA_AA,
 		TBAA       = LLVM_50 + LLVM_ORIGINAL_ANALYSIS::TBAA_AA,
+		CLANG	   = LLVM_50 + LLVM_ORIGINAL_ANALYSIS_COMBINED::CLANG_COMBINED_ANALYSIS,
 #ifdef SEA_DSA
 		SEA_DSA_CS,
 		SEA_DSA_BU,
@@ -33,6 +34,9 @@ namespace boaaa
 		static char SCEV[]				= __STRINGIFY(SCEV);
 		static char SCOPEDNA[]			= __STRINGIFY(SCOPEDNA);
 		static char TBAA[]				= __STRINGIFY(TBAA);
+
+		static char CLANG[]			    = __STRINGIFY(CLANG-COMBINE);
+
 		static char SEA_DSA_CS[]		= __STRINGIFY(SEA-DSA-CS);
 		static char SEA_DSA_BU[]		= __STRINGIFY(SEA-DSA-BU);
 		static char SEA_DSA_CS_BUTD[]	= __STRINGIFY(SEA-DSA-CS-BUTD);
@@ -52,6 +56,8 @@ namespace boaaa
 		raa.push_back(registeredAA(&_50::SCEV[0],       static_cast<aa_id>(L5::SCEV),       getDescription(L5::SCEV)));
 		raa.push_back(registeredAA(&_50::SCOPEDNA[0],   static_cast<aa_id>(L5::SCOPEDNA),   getDescription(L5::SCOPEDNA)));
 		raa.push_back(registeredAA(&_50::TBAA[0],       static_cast<aa_id>(L5::TBAA),       getDescription(L5::TBAA)));
+
+		raa.push_back(registeredAA(&_50::CLANG[0],		static_cast<aa_id>(L5::CLANG),      getCombinedDescription(L5::CLANG)));
 #ifdef SEA_DSA
 		raa.push_back(registeredAA(&_50::SEA_DSA_CS[0],			static_cast<aa_id>(L5::SEA_DSA_CS),			"external SeaDsa Context Sensitive Analysis"));
 		raa.push_back(registeredAA(&_50::SEA_DSA_CS_BUTD[0],	static_cast<aa_id>(L5::SEA_DSA_CS_BUTD),	"external SeaDsa Context Sensitive BottumUpTopDown Analysis"));

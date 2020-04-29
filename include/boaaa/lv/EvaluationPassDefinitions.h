@@ -48,12 +48,12 @@ namespace boaaa {
 		struct EvalRecursivePasses
 		{
 		private:
-			using store = _data_store<TimePass<PASSES>*...>;
+			using store = _data_store<TimePass<PASSES>...>;
 		public:
 			using type = typename get_helper<N, store>::type;
-			typedef data_store<AnalysisGetter<PASSES>...> getter;
+			typedef data_store<AnalysisGetter<TimePass<PASSES>>...> getter;
 
-			static void getAnalysisUsage(llvm::AnalysisUsage& AU, data_store& passes)
+			static void getAnalysisUsage(llvm::AnalysisUsage& AU)
 			{
 				EvalRecursivePasses<N - 1, PASSES...>::getAnalysisUsage(AU);
 				AU.addRequired<type>();
@@ -61,7 +61,7 @@ namespace boaaa {
 
 			static void addAAResult(LLVMFunctionPass* FP, LLVMAAResults& result, getter& passes)
 			{
-				EvalRecursivePasses<N - 1, PASSES...>::addAAResult(result, passes);
+				EvalRecursivePasses<N - 1, PASSES...>::addAAResult(FP, result, passes);
 				AnalysisGetter<type> getter = passes.get<N>();
 				getter.addAAResult(FP, result);
 			}
@@ -71,10 +71,10 @@ namespace boaaa {
 		struct EvalRecursivePasses<0, PASSES...>
 		{
 		private:
-			using store = _data_store<PASSES...>;
+			using store = _data_store<TimePass<PASSES>...>;
 		public:
 			using type = typename get_helper<0, store>::type;
-			typedef data_store<AnalysisGetter<PASSES>...> getter;
+			typedef data_store<AnalysisGetter<TimePass<PASSES>>...> getter;
 
 			static void getAnalysisUsage(llvm::AnalysisUsage& AU)
 			{
@@ -94,13 +94,13 @@ namespace boaaa {
 		private:
 			static constexpr size_t num = sizeof...(PASSES);
 
-			typedef data_store<AnalysisGetter<PASSES>...> _getter;
+			typedef data_store<AnalysisGetter<TimePass<PASSES>>...> _getter;
 			EvaluationPassImpl* impl;
 			version_context* context;
 			_getter getter;
 
 		public:
-			EvalPass(char ID) : LLVMFunctionPass(ID), impl(new EvaluationPassImpl()), context(nullptr), getter({ AnalysisGetter<PASSES>()... }) { }
+			EvalPass(char ID) : LLVMFunctionPass(ID), impl(new EvaluationPassImpl()), context(nullptr), getter({ AnalysisGetter<TimePass<PASSES>>()... }) { }
 			~EvalPass() { delete impl; }
 
 			bool runOnFunction(LLVMFunction& F) override
@@ -148,16 +148,33 @@ namespace boaaa {
 	}
 }
 
-#ifndef BOAAA_CREATE_EVAL_PASS_HEADER
-#define BOAAA_CREATE_EVAL_PASS_HEADER(passname, ...) NOTHING										\
+#ifndef BOAAA_CREATE_EVAL_PASS_HEADER_START
+#define BOAAA_CREATE_EVAL_PASS_HEADER_START(passname, ...) NOTHING									\
 	class passname : public boaaa::detail::EvalPass<__VA_ARGS__>									\
 	{																								\
 	public:																							\
+		using timepass = boaaa::ConcatTimePass<__VA_ARGS__											
+#endif
+
+#ifndef BOAAA_CREATE_EVAL_PASS_HEADER_ADDITIONAL_TIME_ANALYSIS
+#define BOAAA_CREATE_EVAL_PASS_HEADER_ADDITIONAL_TIME_ANALYSIS(...) NOTHING BOAAA_COMMA __VA_ARGS__
+#endif
+
+#ifndef BOAAA_CREATE_EVAL_PASS_HEADER_END
+#define BOAAA_CREATE_EVAL_PASS_HEADER_END(passname, ...) 											\
+															>;										\
 		static char ID;																				\
 		passname();																					\
-	};																								\
-	LLVMFunctionPass* create##passname();															\
+		timepass* createTimePass();																	\
+};																									\
+LLVMFunctionPass * create##passname();																\
 	void initialize##passname##Pass(PassRegistry& Registry);
+#endif
+
+#ifndef BOAAA_CREATE_EVAL_PASS_HEADER
+#define BOAAA_CREATE_EVAL_PASS_HEADER(passname, ...) NOTHING										\
+BOAAA_CREATE_EVAL_PASS_HEADER_START(passname, __VA_ARGS__)											\
+BOAAA_CREATE_EVAL_PASS_HEADER_END(passname, __VA_ARGS__)
 #endif
 
 #ifndef BOAAA_CREATE_EVAL_PASS_SOURCE 
@@ -165,10 +182,11 @@ namespace boaaa {
     char passname::ID = 0;                                                                          \
     INITIALIZE_PASS_BEGIN(passname, arg, help, false, true)                                         \
     INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)                                        \
-    BOAAA_CONSUME(INITIALIZE_PASS_DEPENDENCY, __VA_ARGS__)                                          \
+    BOAAA_CONSUME(INITIALIZE_PASS_DEPENDENCY, __VA_ARGS__)	    									\
     INITIALIZE_PASS_END(passname, arg, help, false, true)											\
     passname::passname() : boaaa::detail::EvalPass<__VA_ARGS__>(ID)									\
     { initialize##passname##Pass(*PassRegistry::getPassRegistry()); }                               \
+	passname::timepass* passname::createTimePass() {return new passname::timepass(); }				\
     LLVMFunctionPass* create##passname() { return new passname(); }
 #endif
 
@@ -262,15 +280,25 @@ namespace llvm {
 	BOAAA_CREATE_RENAME_PASS(FlatMemorySeaDsaWrapperPass,						SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::FLAT_MEMORY))
 
 	//create all evaluationpasses for sea_dsa
-	BOAAA_CREATE_EVAL_PASS_HEADER(ContextSensitiveSeaDsaEvalWrapperPass,				ContextSensitiveSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_START(ContextSensitiveSeaDsaEvalWrapperPass,				    ContextSensitiveSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_ADDITIONAL_TIME_ANALYSIS(DsaAnalysis)
+	BOAAA_CREATE_EVAL_PASS_HEADER_END(ContextSensitiveSeaDsaEvalWrapperPass,				    ContextSensitiveSeaDsaWrapperPass)
 		
-	BOAAA_CREATE_EVAL_PASS_HEADER(ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass,	ContextSensitiveBottomUpTopDownSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_START(ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass,	ContextSensitiveBottomUpTopDownSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_ADDITIONAL_TIME_ANALYSIS(DsaAnalysis)
+	BOAAA_CREATE_EVAL_PASS_HEADER_END(ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass,     ContextSensitiveBottomUpTopDownSeaDsaWrapperPass)
 		
-	BOAAA_CREATE_EVAL_PASS_HEADER(BottomUpSeaDsaEvalWrapperPass,						BottomUpSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_START(BottomUpSeaDsaEvalWrapperPass,						    BottomUpSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_ADDITIONAL_TIME_ANALYSIS(DsaAnalysis)
+	BOAAA_CREATE_EVAL_PASS_HEADER_END(BottomUpSeaDsaEvalWrapperPass,                            BottomUpSeaDsaWrapperPass)
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(ContextInsensitiveSeaDsaEvalWrapperPass,				ContextInsensitiveSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_START(ContextInsensitiveSeaDsaEvalWrapperPass,				ContextInsensitiveSeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_ADDITIONAL_TIME_ANALYSIS(DsaAnalysis)
+	BOAAA_CREATE_EVAL_PASS_HEADER_END(ContextInsensitiveSeaDsaEvalWrapperPass,                  ContextInsensitiveSeaDsaWrapperPass)
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(FlatMemorySeaDsaEvalWrapperPass,						FlatMemorySeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_START(FlatMemorySeaDsaEvalWrapperPass,						FlatMemorySeaDsaWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER_ADDITIONAL_TIME_ANALYSIS(DsaAnalysis)
+	BOAAA_CREATE_EVAL_PASS_HEADER_END(FlatMemorySeaDsaEvalWrapperPass,						    FlatMemorySeaDsaWrapperPass)
 
 }
 #endif
@@ -281,9 +309,20 @@ namespace llvm {
 
 namespace llvm {
 
-
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SFSAA
 #endif //!LLVM_VERSION_50
+
+
+	/*
+	 * Instanziation of all EvaluationPasses in Alphabetic order (COMBINED)
+	 */
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++CLANG_DEFAULT
+
+	BOAAA_CREATE_EVAL_PASS_HEADER(ClangEvalWrapperPass, BasicAAWrapperPass, ScopedNoAliasAAWrapperPass, TypeBasedAAWrapperPass)
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++CLANG_DEFAULT
 }
 
 #endif

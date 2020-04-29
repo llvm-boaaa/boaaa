@@ -41,6 +41,8 @@
 
 #define BOAAA_LEFT_PAREN  (
 #define BOAAA_RIGHT_PAREN )
+#define BOAAA_COMMA ,
+
 #define BOAAA_EVAL(a) a
 #define BOAAA_RETURN(...) NOTHING __VA_ARGS__
 #define BOAAA_EVAL_2(a, ...) NOTHING a NOTHING (__VA_ARGS__)
@@ -144,6 +146,6 @@
 #define BOAAA_CONSUME_EXTENDED_1(...)			  NOTHING BOAAA_EVAL(BOAAA_CONSUME_EXTENDED_2(__VA_ARGS__))
 #define BOAAA_IS_EMPTY_MINUS_FUNC(...)            NOTHING BOAAA_IS_ZERO_OR_ONE_ARG(__VA_ARGS__)
 //                                                                                                                                                                          ,0 ,0 added so gcc and clang get enought arguments, and can deal with the replacement, because macros dont lazy evaluate
-#define BOAAA_CONSUME(...)					      NOTHING BOAAA_EVAL(BOAAA_CONSUME_EXTENDED_1(BOAAA_IS_EMPTY_MINUS_FUNC(__VA_ARGS__), BOAAA_CONSUME_NO_ZERO_ARGS(__VA_ARGS__,0 ,0), NOTHING))
+#define BOAAA_CONSUME(...)					      NOTHING BOAAA_EVAL(BOAAA_CONSUME_EXTENDED_1(BOAAA_IS_EMPTY_MINUS_FUNC(__VA_ARGS__), BOAAA_CONSUME_NO_ZERO_ARGS(__VA_ARGS__), NOTHING))
 
 #endif //!BOAAA_CONSUME_MACRO

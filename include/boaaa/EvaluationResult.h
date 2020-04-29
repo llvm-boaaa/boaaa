@@ -6,8 +6,26 @@
 
 #include "rapidjson/document.h"
 
+#include <functional>
+
 //dont use namespace rapidjson, never, it destroyes llvm namespace!!!
 //using namespace rapidjson;
+
+typedef void(*delete_string)(char*);
+
+namespace boaaa {
+	inline char* copyString(const char* source, size_t len)
+	{
+		char* buffer = new char[len + 1];
+		std::strcpy(buffer, source);
+		return buffer;
+	}
+
+	inline void delete_mem(char* mchar)
+	{
+		delete[] mchar;
+	}
+}
 
 #ifndef BOAAA_ADD_TIME_MEMBERS
 #define BOAAA_ADD_TIME_MEMBERS(BASE)																\
@@ -69,7 +87,8 @@ namespace boaaa {
 
 	struct EvaluationResult
 	{
-		BOAAA_SETTER_GETTER(const char*, aa_name)
+		BOAAA_SETTER_GETTER(char*, aa_name)
+		BOAAA_SETTER(delete_string, aa_name_delete)
 
 		//time definitions
 		BOAAA_ADD_TIME_MEMBERS(pm_time)
@@ -104,7 +123,8 @@ namespace boaaa {
 		BOAAA_SETTER_GETTER(double, mean_no_alias_sets)
 		BOAAA_SETTER_GETTER(double, var_no_alias_sets)
 
-		EvaluationResult() : 
+		EvaluationResult() :
+			m_aa_name(nullptr), m_aa_name_delete(nullptr),
 			//time
 			m_pm_time_seconds(0),       m_pm_time_millis(0),       m_pm_time_micros(0),       m_pm_time_nanos(0),
 			m_function_time_seconds(0), m_function_time_millis(0), m_function_time_micros(0), m_function_time_nanos(0),
@@ -119,6 +139,7 @@ namespace boaaa {
 			m_alias_sets(0),    m_mean_alias_sets(0.0),    m_var_alias_sets(0.0),
 			m_no_alias_sets(0), m_mean_no_alias_sets(0.0), m_var_no_alias_sets(0.0)
 		{ }
+		~EvaluationResult() { if (m_aa_name_delete) m_aa_name_delete(m_aa_name); }
 
 		template<typename AllocatorType>
 		rapidjson::Value& writeJson(rapidjson::Value& _value, AllocatorType& alloc)

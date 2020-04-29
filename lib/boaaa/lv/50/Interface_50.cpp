@@ -20,6 +20,7 @@
 #include "boaaa/lv/CountPass.h"
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/EvaluationPassDefinitions.h"
+#include "boaaa/support/raw_type.h"
 
 using namespace boaaa;
 void registerPasses();
@@ -135,71 +136,63 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 	switch (analysis)
 	{
 	case LLV::CFL_ANDERS:
-		run(new llvm::AndersAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::CFLAndersAAWrapperPass>());
+		run(new llvm::AndersAAEvalWrapperPass());
 		break;
 	case LLV::BASIC:
-		run(new llvm::BasicAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::BasicAAWrapperPass>());
+		run(new llvm::BasicAAEvalWrapperPass());
 		break;
 	case LLV::OBJ_CARC:
-		run(new llvm::ObjCARCAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::ObjCARCAAWrapperPass>());
+		run(new llvm::ObjCARCAAEvalWrapperPass());
 		break;
 	case LLV::SCEV:
-		run(new llvm::SCEVAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::SCEVAAWrapperPass>());
+		run(new llvm::SCEVAAEvalWrapperPass());
 		break;
 	case LLV::SCOPEDNA:
-		run(new llvm::ScopedNoAliasEvalWrapperPass(),
-			new boaaa::TimePass<llvm::ScopedNoAliasAAWrapperPass>());
+		run(new llvm::ScopedNoAliasEvalWrapperPass());
 		break;
 	case LLV::CFL_STEENS:
-		run(new llvm::SteensAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::CFLSteensAAWrapperPass>());
+		run(new llvm::SteensAAEvalWrapperPass());
 		break;
 	case LLV::TBAA:
-		run(new llvm::TypeBasedAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::TypeBasedAAWrapperPass>());
+		run(new llvm::TypeBasedAAEvalWrapperPass());
 		break;
 #ifdef SEA_DSA
 	case LLV::SEA_DSA_CS:
-		run(new llvm::ContextSensitiveSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::ContextSensitiveSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
+		run(new llvm::ContextSensitiveSeaDsaEvalWrapperPass());
 		break;
 	case LLV::SEA_DSA_CS_BUTD:
-		run(new llvm::ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
+		run(new llvm::ContextSensitiveBottomUpTopDownSeaDsaEvalWrapperPass());
 		break;
 	case LLV::SEA_DSA_BU:
-		run(new llvm::BottomUpSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::BottomUpSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
+		run(new llvm::BottomUpSeaDsaEvalWrapperPass());
 		break;
 	case LLV::SEA_DSA_CIS:
-		run(new llvm::ContextInsensitiveSeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::ContextInsensitiveSeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
+		run(new llvm::ContextInsensitiveSeaDsaEvalWrapperPass());
 		break;
 	case LLV::SEA_DSA_FM:
-		run(new llvm::FlatMemorySeaDsaEvalWrapperPass(),
-			new boaaa::ConcatTimePass<llvm::FlatMemorySeaDsaWrapperPass, sea_dsa::DsaAnalysis>());
+		run(new llvm::FlatMemorySeaDsaEvalWrapperPass());
 		break;
 #endif
+	case LLV::CLANG:
+		run(new llvm::ClangEvalWrapperPass());
+		break;
 	}
 	return true;
 }
 
 bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 {
-	auto run = [&](auto* pass, auto* timepass) -> void {
+	auto run = [&](auto* pass) -> void {
 		llvm::legacy::PassManager pm;
 		pass->setContext(&context);
-		timepass->addPass(pm);
+		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
 		pm.add(pass);
 		pm.run(*context.loaded_module);
 		if (*context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
+		delete timepass;
 	};
 	
 	return runAnalysisHelp(run, analysis);
@@ -207,10 +200,10 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 
 bool DLInterface50::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 {
-	auto run = [&](auto* pass, auto* timepass) -> void {
+	auto run = [&](auto* pass) -> void {
 		llvm::legacy::PassManager pm;
 		pass->setContext(&context);
-		timepass->addPass(pm);
+		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
 		pm.add(pass);
 		pm.run(*context.loaded_module);
 		if (*context.basic_ostream) {
@@ -219,6 +212,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 		}
 		timepass->printToEvalRes(er);
 		pass->printToEvalRes(er);
+		delete timepass;
 	};
 
 	using namespace sea_dsa;
