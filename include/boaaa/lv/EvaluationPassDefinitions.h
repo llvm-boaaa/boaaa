@@ -9,6 +9,7 @@
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/TimePass.h"
 #include "boaaa/lv/version_context.h"
+#include "boaaa/support/data_store.h"
 #include "boaaa/support/select_type.h"
 
 //include analysis
@@ -25,61 +26,87 @@ namespace boaaa {
 	namespace detail
 	{
 		template<class PASS>
-		class EvalModulePass : public LLVMModulePass
+		class AnalysisGetter
 		{
-		private:
-			EvaluationPassImpl* impl;
-			version_context* context;
-
+			PASS* Pass;
 		public:
-			EvalModulePass(char ID) : LLVMModulePass(ID) { impl = new EvaluationPassImpl(); }
-			~EvalModulePass() { delete impl; }
+			AnalysisGetter() : Pass(nullptr) { }
 
-			bool runOnModule(LLVMModule& M) override
+			void addAAResult(LLVMFunctionPass* pass, LLVMAAResults& result) 
 			{
-				auto& TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>();
-				auto& WrapperPass = getAnalysis<boaaa::TimePass<PASS>>();
-				llvm::AAResults result(TLI.getTLI());
-				result.addAAResult(WrapperPass.getResult());
-				impl->evaluateAAResultOnModule(M, result, context->relevant_pointers);
-				return false;
-			}
-
-			void getAnalysisUsage(llvm::AnalysisUsage& AU) const override
-			{
-				AU.addRequired<llvm::TargetLibraryInfoWrapperPass>();
-				AU.addRequired<boaaa::TimePass<PASS>>();
-				AU.setPreservesAll();
-			}
-
-			void setContext(version_context* _context) { context = _context; }
-
-			void printResult(std::ostream& stream) {
-				impl->printResult(stream);
-			}
-
-			void printToEvalRes(EvaluationResult& er) {
-				impl->printToEvalRes(er);
+				if (Pass == nullptr)
+					Pass = &pass->getAnalysis<PASS>();
+				result.addAAResult(Pass->getResult());
 			}
 		};
 
-		template<class PASS>
-		class EvalFunctionPass : public LLVMFunctionPass
+		template<size_t N, class ...PASSES>
+		struct EvalRecursivePasses;
+
+		template<size_t N, class ...PASSES>
+		struct EvalRecursivePasses
 		{
 		private:
+			using store = _data_store<TimePass<PASSES>*...>;
+		public:
+			using type = typename get_helper<N, store>::type;
+			typedef data_store<AnalysisGetter<PASSES>...> getter;
+
+			static void getAnalysisUsage(llvm::AnalysisUsage& AU, data_store& passes)
+			{
+				EvalRecursivePasses<N - 1, PASSES...>::getAnalysisUsage(AU);
+				AU.addRequired<type>();
+			}
+
+			static void addAAResult(LLVMFunctionPass* FP, LLVMAAResults& result, getter& passes)
+			{
+				EvalRecursivePasses<N - 1, PASSES...>::addAAResult(result, passes);
+				AnalysisGetter<type> getter = passes.get<N>();
+				getter.addAAResult(FP, result);
+			}
+		};
+
+		template<class ...PASSES>
+		struct EvalRecursivePasses<0, PASSES...>
+		{
+		private:
+			using store = _data_store<PASSES...>;
+		public:
+			using type = typename get_helper<0, store>::type;
+			typedef data_store<AnalysisGetter<PASSES>...> getter;
+
+			static void getAnalysisUsage(llvm::AnalysisUsage& AU)
+			{
+				AU.addRequired<type>();
+			}
+
+			static void addAAResult(LLVMFunctionPass* FP, LLVMAAResults& result, getter& passes)
+			{
+				AnalysisGetter<type> getter = passes.get<0>();
+				getter.addAAResult(FP, result);
+			}
+		};
+
+		template<class ...PASSES>
+		class EvalPass : public LLVMFunctionPass
+		{
+		private:
+			static constexpr size_t num = sizeof...(PASSES);
+
+			typedef data_store<AnalysisGetter<PASSES>...> _getter;
 			EvaluationPassImpl* impl;
 			version_context* context;
+			_getter getter;
 
 		public:
-			EvalFunctionPass(char ID) : LLVMFunctionPass(ID) { impl = new EvaluationPassImpl(); }
-			~EvalFunctionPass() { delete impl; }
+			EvalPass(char ID) : LLVMFunctionPass(ID), impl(new EvaluationPassImpl()), context(nullptr), getter({ AnalysisGetter<PASSES>()... }) { }
+			~EvalPass() { delete impl; }
 
 			bool runOnFunction(LLVMFunction& F) override
 			{
 				auto& TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>();
-				auto& WrapperPass = getAnalysis<boaaa::TimePass<PASS>>();
-				llvm::AAResults result(TLI.getTLI());
-				result.addAAResult(WrapperPass.getResult());
+				LLVMAAResults result(TLI.getTLI());
+				EvalRecursivePasses<num - 1,PASSES...>::addAAResult(static_cast<LLVMFunctionPass*>(this), result, getter);
 				impl->evaluateAAResultOnFunction(F, result, *context->relevant_pointers[F.getGUID()]);
 				return false;
 			}
@@ -87,7 +114,7 @@ namespace boaaa {
 			void getAnalysisUsage(llvm::AnalysisUsage& AU) const override
 			{
 				AU.addRequired<llvm::TargetLibraryInfoWrapperPass>();
-				AU.addRequired<boaaa::TimePass<PASS>>();
+				EvalRecursivePasses<num - 1, PASSES...>::getAnalysisUsage(AU);
 				AU.setPreservesAll();
 			}
 
@@ -104,9 +131,7 @@ namespace boaaa {
 
 		template<typename PASS>
 		struct select_eval_pass {
-			using type = typename select_type_reverse_for<std::is_base_of, PASS,
-														  LLVMModulePass, EvalModulePass<PASS>,
-														  LLVMFunctionPass, EvalFunctionPass<PASS>>::type;
+			using type = typename EvalPass<PASS>;
 		};
 
 		template<class PASS>
@@ -114,9 +139,7 @@ namespace boaaa {
 
 		template<typename PASS>
 		struct select_base_pass {
-			using type = typename select_type_reverse<std::is_base_of, PASS,
-													  LLVMModulePass,
-													  LLVMFunctionPass>::type;
+			using type = typename LLVMFunctionPass;
 		};
 
 		template<class PASS>
