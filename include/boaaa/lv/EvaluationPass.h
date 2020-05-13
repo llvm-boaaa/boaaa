@@ -146,7 +146,7 @@ namespace boaaa {
 			}
 		}
 
-		void setSets(evaluation_sets* alias, evaluation_sets* no_alias) {
+		void setSets(evaluation_sets* alias, evaluation_explicite_sets* no_alias) {
 			deleteSets();
 			alias_set = alias;
 			no_alias_set = no_alias;
@@ -171,7 +171,7 @@ namespace boaaa {
 			if (!no_alias_set)
 			{
 				delete_no_aa_set = true;
-				no_alias_set = new evaluation_sets();
+				no_alias_set = new evaluation_explicite_sets();
 			}
 		}
 
@@ -183,11 +183,17 @@ namespace boaaa {
 				)).first->second.get();
 		}
 
-		unionfind_map* initNoAASets(uint64_t GUID)
+		evaluation_sets* initNoAASets(uint64_t GUID, size_t num)
 		{
-			return no_alias_set->insert(std::make_pair(
-				GUID, std::unique_ptr<unionfind_map>(new unionfind_map())
+			evaluation_sets* set =  no_alias_set->insert(std::make_pair(
+				GUID, std::unique_ptr<evaluation_sets>(new evaluation_sets())
 				)).first->second.get();
+			//insert number of unionfindmaps as pointers into the container
+			for (int i = 0; i < num; i++) 
+			{
+				set->insert(std::make_pair(i, std::unique_ptr<unionfind_map>(new unionfind_map())));
+			}
+			return set;
 		}
 
 		int64_t FunctionCount;
@@ -196,7 +202,7 @@ namespace boaaa {
 		int64_t MustCount, MustRefCount, MustModCount, MustModRefCount;
 
 		evaluation_sets* alias_set;
-		evaluation_sets* no_alias_set;
+		evaluation_explicite_sets* no_alias_set;
 		bool delete_aa_set;
 		bool delete_no_aa_set;
 	};

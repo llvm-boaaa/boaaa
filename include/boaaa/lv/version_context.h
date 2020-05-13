@@ -33,9 +33,13 @@ LLVM_VERSION_ERROR_CODE
 namespace boaaa {
 	
 	typedef std::map<uint64_t, std::unique_ptr<boaaa::EvaluationContainer>>				evaluation_storage;
+
 	typedef support::UnionFindMap<size_t>												unionfind_map;
 	typedef std::map<size_t,   std::unique_ptr<unionfind_map>>							evaluation_sets;
+	typedef std::map<size_t,   std::unique_ptr<evaluation_sets>>						evaluation_explicite_sets;
+	
 	typedef std::map<aa_id,    std::unique_ptr<evaluation_sets>>						evaluation_aa_sets;
+	typedef std::map<aa_id,    std::unique_ptr<evaluation_explicite_sets>>				evaluation_no_aa_sets;
 
 	struct version_context
 	{
@@ -48,8 +52,8 @@ namespace boaaa {
 
 
 //-----------------------------------------------------LLVM_VERSION independent
-		evaluation_aa_sets alias_sets;
-		evaluation_aa_sets no_alias_sets;
+		evaluation_aa_sets    alias_sets;
+		evaluation_no_aa_sets no_alias_sets;
 		std::ostream* basic_ostream;
 		bool del_strm_after_use;
 		std::unique_ptr<ModuleResult> module_result;

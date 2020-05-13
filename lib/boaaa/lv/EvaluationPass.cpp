@@ -105,7 +105,7 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
 {
     checkInitSets();
     unionfind_map* aa_set = initAASet(F.getGUID());
-    unionfind_map* no_aa_set = initNoAASets(F.getGUID());
+    evaluation_sets* no_aa_set = initNoAASets(F.getGUID(), container.sum_all);
     using namespace llvm;
     llvm::DataLayout DL = F.getParent()->getDataLayout();
 
@@ -142,22 +142,25 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
 #endif
             timestamp start = begin();
             LLVMAliasResult AR = AAResult.alias(I1, I1Size, I2, I2Size);
-            addAliasTime(start);
+            size_t valX = pointer_offset + x;
+            size_t valY = pointer_offset + y;
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
-                no_aa_set->concat(pointer_offset + x, pointer_offset + y);
+                //add valX/valY add first, to assure it is the head how represent the set
+                (*no_aa_set)[valX]->concat(valX, valY);
+                (*no_aa_set)[valY]->concat(valY, valX);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
-                aa_set->concat(pointer_offset + x, pointer_offset + y);
+                aa_set->concat(valX, valY);
                 break;
             case MustAlias:
                 ++MustAliasCount;
-                aa_set->concat(pointer_offset + x, pointer_offset + y);
+                aa_set->concat(valX, valY);
                 break;
             }
         }
@@ -173,21 +176,25 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMLoadInst>(load)),
                 LLVMMemoryLocation::get(cast<LLVMStoreInst>(store)));
             addAliasTime(start);
+            size_t valX = pointer_offset + x;
+            size_t valY = pointer_offset + y;
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
-                no_aa_set->concat(store_offset + x, load_offset + y);
+                //add valX/valY add first, to assure it is the head how represent the set
+                (*no_aa_set)[valX]->concat(valX, valY);
+                (*no_aa_set)[valY]->concat(valY, valX);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
-                aa_set->concat(store_offset + x, load_offset + y);
+                aa_set->concat(valX, valY);
                 break;
             case MustAlias:
                 ++MustAliasCount;
-                aa_set->concat(store_offset + x, load_offset + y);
+                aa_set->concat(valX, valY);
                 break;
             }
         }
@@ -203,21 +210,25 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMStoreInst>(I1)),
                 LLVMMemoryLocation::get(cast<LLVMStoreInst>(I2)));
             addAliasTime(start);
+            size_t valX = pointer_offset + x;
+            size_t valY = pointer_offset + y;
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
-                no_aa_set->concat(store_offset + x, store_offset + y);
+                //add valX/valY add first, to assure it is the head how represent the set
+                (*no_aa_set)[valX]->concat(valX, valY);
+                (*no_aa_set)[valY]->concat(valY, valX);
                 break;
             case MayAlias:
                 ++MayAliasCount;
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
-                aa_set->concat(store_offset + x, store_offset + y);
+                aa_set->concat(valX, valY);
                 break;
             case MustAlias:
                 ++MustAliasCount;
-                aa_set->concat(store_offset + x, store_offset + y);
+                aa_set->concat(valX, valY);
                 break;
             }
         }
@@ -387,27 +398,75 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
 
     for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
     {
-        sum_no_alias_head += it->second->headssize();
-        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
+        size_t num = it->second->size();
+        bool* check = new bool[num]{ true };
+        evaluation_sets* set = it->second.get();
+        for (int i = 0; i < num; i++)
         {
-            size_t size = (*it2)->size();
+            //allready checked
+            if (!check[i] || (*set)[i]->size() == 0) continue;
+            if ((*set)[i])
+            assert((*set)[i]->headssize() == 1);
+            std::set<size_t> ids;
+            unionfind_map* map = (*set)[i].get();
+            bool check_added = false;
+            size_t size = map->size();
+
+            for (unionfind_map::const_iterator it = map->begin(), end = map->end(); it != end; ++it)
+            {
+                size_t id = it->second->value();
+                assert((*set)[id]->headssize() == 1);
+                unionfind_map* comp = (*set)[id].get();
+                if (comp->size() == map->size()) {
+                    //compare
+                    //fill one time if needed
+                    if (ids.size() < map->size()) {
+                        ids.clear();
+                        for (unionfind_map::const_iterator iit = map->begin(), iend = map->end(); iit != iend; iit++)
+                        {
+                            ids.insert(iit->second->value());
+                        }
+                    }
+
+                    bool check_all = true;
+
+                    for (unionfind_map::const_iterator iit = comp->begin(), iend = comp->end(); iit != iend; iit++)
+                    {
+                        //skip own id
+                        if ((*set)[id]->begin()->first == iit->second->value()) continue;
+
+                        if (ids.find(iit->second->value()) == ids.end()) {
+                            check_all = false;
+                            break;
+                        }
+                    }
+
+                    if (check_all) {
+                        continue;
+                    }
+
+                    if (check[id]) 
+                    {
+                        check[id] = false;
+                    }
+                    else 
+                    {
+                        //skip
+                        check_added = true;
+                    }
+                }
+            }
+
+            //already added
+            if (check_added) continue;
+
+            sum_no_alias_head++;
             sum_no_alias += size;
             sum_no_alias_squared += size * size;
         }
-
-#ifdef DEBUG
-        size_t check_num = 0;
-
-        for (_raw_type_inst(it->second->begin()) it2 = it->second->begin(), end2 = it->second->end(); it2 != end2; ++it2)
-        {
-            if (it2->second->parent() == it2->second) {
-                check_num++;
-            }
-        }
-
- //       assert((check_num == it->second->headssize()));
-#endif
+        delete[] check;
     }
+
 
     stream << "Alias Time    : " << m_seconds_alias << "," << (m_millis_alias < 100 ? "0" : "") << +(m_millis_alias < 10 ? "0" : "") << (int)m_millis_alias
                                                     << "." << (m_micros_alias < 100 ? "0" : "") << +(m_micros_alias < 10 ? "0" : "") << (int)m_micros_alias
@@ -496,26 +555,72 @@ void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
 
     for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
     {
-        sum_no_alias_head += it->second->headssize();
-        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
+        size_t num = it->second->size();
+        bool* check = new bool[num] { true };
+        evaluation_sets* set = it->second.get();
+        for (int i = 0; i < num; i++)
         {
-            size_t size = (*it2)->size();
+            //allready checked
+            if (!check[i] || (*set)[i]->size() == 0) continue;
+            assert((*set)[i]->headssize() == 1);
+            std::set<size_t> ids;
+            unionfind_map* map = (*set)[i].get();
+            bool check_added = false;
+            size_t size = map->size();
+
+            for (unionfind_map::const_iterator it = map->begin(), end = map->end(); it != end; ++it)
+            {
+                size_t id = it->second->value();
+                assert((*set)[id]->headssize() == 1);
+                unionfind_map* comp = (*set)[id].get();
+                if (comp->size() == map->size()) {
+                    //compare
+                    //fill one time if needed
+                    if (ids.size() < map->size()) {
+                        ids.clear();
+                        for (unionfind_map::const_iterator iit = map->begin(), iend = map->end(); iit != iend; iit++)
+                        {
+                            ids.insert(iit->second->value());
+                        }
+                    }
+
+                    bool check_all = true;
+
+                    for (unionfind_map::const_iterator iit = comp->begin(), iend = comp->end(); iit != iend; iit++)
+                    {
+                        //skip own id
+                        if ((*set)[id]->begin()->first == iit->second->value()) continue;
+
+                        if (ids.find(iit->second->value()) == ids.end()) {
+                            check_all = false;
+                            break;
+                        }
+                    }
+
+                    if (check_all) {
+                        continue;
+                    }
+
+                    if (check[id])
+                    {
+                        check[id] = false;
+                    }
+                    else
+                    {
+                        //skip
+                        check_added = true;
+                    }
+                }
+            }
+
+            //already added
+            if (check_added) continue;
+
+            sum_no_alias_head++;
             sum_no_alias += size;
             sum_no_alias_squared += size * size;
         }
-
-#ifdef DEBUG
-        size_t check_num = 0;
-
-        for (_raw_type_inst(it->second->begin()) it2 = it->second->begin(), end2 = it->second->end(); it2 != end2; ++it2)
-        {
-            if (it2->second->parent() == it2->second) {
-                check_num++;
-            }
-        }
-
-//       assert((check_num == it->second->headssize()));
-#endif
+        delete[] check;
     }
 
     uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;

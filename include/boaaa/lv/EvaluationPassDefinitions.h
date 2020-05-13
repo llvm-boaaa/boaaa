@@ -238,6 +238,16 @@ namespace llvm
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SteensAA
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA
 
+	namespace 
+	{
+		//void enableTBAA() {
+			//reinterpret_cast<cl::opt<bool>*>(cl::getRegisteredOptions().find("enable-tbaa")->second)->setValue(false);
+		//}
+	}
+
+
+	//clang -cc1 -O1 -no-struct-path-tbaa -disable-llvm-optzns foo.cpp -emit-llvm -o -
+	// -g generate metadata
 	BOAAA_CREATE_EVAL_PASS_HEADER(TypeBasedAAEvalWrapperPass,		TypeBasedAAWrapperPass)
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++TypeBasedAA

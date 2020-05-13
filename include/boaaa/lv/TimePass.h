@@ -196,6 +196,8 @@ namespace boaaa
 				er.set_aa_name_delete(boaaa::delete_mem);
 				TimeMessure::printToEvalRes(er);
 			}
+
+			void unifyTime() override {};
 		};
 
 		template<class PASS>
@@ -226,6 +228,8 @@ namespace boaaa
 				er.set_aa_name_delete(boaaa::delete_mem);
 				TimeMessure::printToEvalRes(er);
 			}
+
+			void unifyTime() override {};
 		};
 
 		template<class PASS>
@@ -252,6 +256,8 @@ namespace boaaa
 				er.set_aa_name_delete(boaaa::delete_mem);
 				TimeMessure::printToEvalRes(er);
 			}
+
+			void unifyTime() override {};
 		};
 		
 		template<class PASS>
@@ -266,16 +272,11 @@ namespace boaaa
 		using select_time_pass_t = typename select_time_pass<PASS>::type;
 	}
 
-	struct TimePassTemplate 
-	{
-		
-	};
-
 	template<class PASS>
 	struct TimePass : public detail::select_time_pass_t<PASS> {
+	private:
 		using super	= PASS;
 		using timepass = typename detail::select_time_pass<PASS>::type;
-
 	public:
 		TimePass() : timepass() { }
 
@@ -285,7 +286,7 @@ namespace boaaa
 			pm.add(this);
 		}
 
-		void unifyTime() override {}
+		void unifyTime() override {};
 	};
 
 	namespace {

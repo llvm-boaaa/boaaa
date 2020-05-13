@@ -15,7 +15,7 @@ namespace boaaa {
 
 		LLVMValue **            pointers;
 		LLVMValue **            loads;
-		LLVMValue **	         stores;
+		LLVMValue **	        stores;
 		LLVMCallUnifyer **      calls;
 		boaaa::support::AutoDeleter<LLVMCallUnifyer**>* autodeleter;
 
@@ -23,6 +23,7 @@ namespace boaaa {
 		size_t num_loads;
 		size_t num_stores;
 		size_t num_calls;
+		size_t sum_all;
 
 		enum class PLS {
 			P,
@@ -31,7 +32,8 @@ namespace boaaa {
 		};
 
 		EvaluationContainer(size_t _num_pointers = 0, size_t _num_loads = 0, size_t _num_stores = 0, size_t _num_calls = 0)
-			: num_pointers(_num_pointers), num_loads(_num_loads), num_stores(_num_stores), num_calls(_num_calls), autodeleter(nullptr)
+			: num_pointers(_num_pointers), num_loads(_num_loads), num_stores(_num_stores), num_calls(_num_calls), autodeleter(nullptr), 
+			  sum_all(_num_pointers + _num_loads + _num_stores)
 		{
 			pointers = _num_pointers	? new LLVMValue * 			[num_pointers]	: nullptr;
 			loads    = _num_loads		? new LLVMValue * 			[num_loads]		: nullptr;
