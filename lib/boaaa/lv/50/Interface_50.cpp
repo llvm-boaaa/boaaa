@@ -17,6 +17,7 @@
 #include "llvm/IR/LegacyPassManagers.h"
 #include "llvm/Passes/PassBuilder.h"
 
+#include "boaaa/lv/AnalysisDiscrepancyChecker.h"
 #include "boaaa/lv/CountPass.h"
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/EvaluationPassDefinitions.h"
@@ -117,6 +118,11 @@ bool DLInterface50::loadModule(uint64_t module_file_prefix, uint64_t module_file
 
 void DLInterface50::unloadModule()
 {
+	boaaa::AnalysisDiscrepancyChecker adc;
+	std::cout << "start discrapency check\n";
+	adc.checkAnalysis(context.alias_sets, context.no_alias_sets);
+	std::cout << "stop discrapency check\n";
+
 	context.alias_sets.clear();
 	context.no_alias_sets.clear();
 

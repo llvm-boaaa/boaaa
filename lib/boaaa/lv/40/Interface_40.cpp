@@ -18,6 +18,7 @@
 #include "boaaa/lv/CountPass.h"
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/EvaluationPassDefinitions.h"
+#include "boaaa/lv/AnalysisDiscrepancyChecker.h"
 
 using namespace boaaa;
 
@@ -117,6 +118,11 @@ bool DLInterface40::loadModule(uint64_t module_file_prefix, uint64_t module_file
 
 void DLInterface40::unloadModule()
 {
+	boaaa::AnalysisDiscrepancyChecker adc;
+	std::cout << "start discrapency check\n";
+	adc.checkAnalysis(context.alias_sets, context.no_alias_sets);
+	std::cout << "stop discrapency check\n";
+
 	context.alias_sets.clear();
 	context.no_alias_sets.clear();
 

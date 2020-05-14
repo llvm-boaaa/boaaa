@@ -114,8 +114,10 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
         else
         {
             const Function* F2 = getParent(ValueB);
-            assert(F == F2 && "SeaDsa doesn't support interprocedural queries.");
-            if (F != F2) return MayAlias; //return in nodebug-mode MayAlias. 
+            if (F2) {
+                assert(F == F2 && "SeaDsa doesn't support interprocedural queries.");
+                if (F != F2) return MayAlias; //return in nodebug-mode MayAlias. 
+            }
         }
     }
     

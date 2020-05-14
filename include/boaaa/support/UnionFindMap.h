@@ -121,7 +121,7 @@ namespace support {
 		}
 
 		_NODISCARD const_iterator find(const _Key value) {
-			return this->m_ufs.find(hash(value));
+			return this->m_ufs.find(value);
 		}
 
 		_NODISCARD const_iterator begin() {
