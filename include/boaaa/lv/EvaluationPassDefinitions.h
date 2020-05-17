@@ -119,7 +119,9 @@ namespace boaaa {
 				AU.setPreservesAll();
 			}
 
-			void setContext(version_context* _context) { context = _context; }
+			void setContext(version_context* _context) { 
+				context = _context;
+			}
 
 			void printResult(std::ostream& stream) {
 				impl->printResult(stream);
