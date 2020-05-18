@@ -28,7 +28,7 @@ namespace boaaa {
 						bool swap = false;
 						if (ufms->size() > ufml->size())
 						{
-							//swop so in ufm1 is the smaller set
+							//swop so in ufms is the smaller set
 							unionfind_map* tmp = ufms;
 							ufms = ufml;
 							ufml = tmp;
@@ -36,17 +36,17 @@ namespace boaaa {
 						}
 
 						std::set<size_t> headset;
-						for (unionfind_map::const_iterator p_it_s = ufms->begin(), p_end_s = ufms->end(); p_it_s != p_end_s; p_it_s++)
+						for (unionfind_map::const_iterator p_it_l = ufml->begin(), p_end_l = ufml->end(); p_it_l != p_end_l; p_it_l++)
 						{
-							size_t id = p_it_s->second->parent()->value();
+							size_t id = p_it_l->second->parent()->value();
 							//if inserted need to check
 							if (headset.insert(id).second)
 							{
-								unionfind_map::const_iterator checkL = ufml->find(id);
-								if (checkL != ufml->end()) {
-									unionfind_map::const_iterator checkS = ufms->find(checkL->second->parent()->value()); //O(n^6)
-									if (checkS != ufms->end()) {
-										if (checkS->second->parent()->value() == p_it_s->second->parent()->value()) 
+								unionfind_map::const_iterator checkS = ufms->find(id);
+								if (checkS != ufms->end()) {
+									unionfind_map::const_iterator checkL = ufml->find(checkS->second->parent()->value()); //O(n^6)
+									if (checkL != ufms->end()) {
+										if (checkL->second->parent()->value() == p_it_l->second->parent()->value()) 
 										{
 											//all ok
 											continue;
@@ -60,17 +60,17 @@ namespace boaaa {
 									return							 (*es)[id].get();
 								};
 
-								unionfind_map* no_aa_map_l = getMap((!swap ? aa_it : aa_it2));							
+								unionfind_map* no_aa_map_s = getMap((!swap ? aa_it : aa_it2));							
 
-								for (unionfind_map::const_iterator p_it_s2 = ufms->begin(), p_end_s2 = ufms->end(); p_it_s2 != p_end_s2; p_it_s2++)
+								for (unionfind_map::const_iterator p_it_l2 = ufml->begin(), p_end_l2 = ufml->end(); p_it_l2 != p_end_l2; p_it_l2++)
 								{
 									//when alias from id to pointer check if other alias says no alias
-									if (p_it_s2->second->parent()->value() == id) 
+									if (p_it_l2->second->parent()->value() == id) 
 									{
-										if (no_aa_map_l->contains(p_it_s2->second->value()))
+										if (no_aa_map_s->contains(p_it_l2->second->value()))
 										{
 											//the aas are not consistent.
-											std::cout << aa_it->first << " and " << aa_it2->first << " have different results in function: " << GUID <<  " for: " << p_it_s2->first << ", " << id << "\n";
+											std::cout << aa_it->first << " and " << aa_it2->first << " have different results in function: " << GUID <<  " for: " << p_it_l2->first << ", " << id << "\n";
 										}
 									}
 								}

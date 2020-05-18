@@ -192,6 +192,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 		llvm::legacy::PassManager pm;
 		pass->setContext(&context);
 		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
+		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
 		if (*context.basic_ostream) {
@@ -210,6 +211,7 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 		llvm::legacy::PassManager pm;
 		pass->setContext(&context);
 		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
+		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
 		if (*context.basic_ostream) {
