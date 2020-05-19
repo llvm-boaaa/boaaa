@@ -145,32 +145,28 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 	switch (analysis)
 	{
 	case LLV::CFL_ANDERS:
-		run(new llvm::AndersAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::CFLAndersAAWrapperPass>());
+		run(new llvm::AndersAAEvalWrapperPass());
 		break;
 	case LLV::BASIC:
-		run(new llvm::BasicAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::BasicAAWrapperPass>());
+		run(new llvm::BasicAAEvalWrapperPass());
 		break;
 	case LLV::OBJ_CARC:
-		run(new llvm::ObjCARCAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::ObjCARCAAWrapperPass>());
+		run(new llvm::ObjCARCAAEvalWrapperPass());
 		break;
 	case LLV::SCEV:
-		run(new llvm::SCEVAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::SCEVAAWrapperPass>());
+		run(new llvm::SCEVAAEvalWrapperPass());
 		break;
-	case LLV::SCOPEDNA:
-		run(new llvm::ScopedNoAliasEvalWrapperPass(),
-			new boaaa::TimePass<llvm::ScopedNoAliasAAWrapperPass>());
+	case LLV::SCOPEDNOA:
+		run(new llvm::ScopedNoAliasEvalWrapperPass());
 		break;
 	case LLV::CFL_STEENS:
-		run(new llvm::SteensAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::CFLSteensAAWrapperPass>());
+		run(new llvm::SteensAAEvalWrapperPass());
 		break;
 	case LLV::TBAA:
-		run(new llvm::TypeBasedAAEvalWrapperPass(),
-			new boaaa::TimePass<llvm::TypeBasedAAWrapperPass>());
+		run(new llvm::TypeBasedAAEvalWrapperPass());
+		break;
+	case LLV::CLANG:
+		run(new llvm::ClangEvalWrapperPass());
 		break;
 	}
 	return true;
@@ -178,13 +174,14 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 
 bool DLInterface90::runAnalysis(boaaa::aa_id analysis)
 {
-	auto run = [&](auto* pass, auto* timepass) -> void {
+	auto run = [&](auto* pass) -> void {
 		llvm::legacy::PassManager pm;
-		pass->setContext(&context);
-		pm.add(timepass);
+		pass->setContext(&context, analysis);
+		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
+		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
-		if (*context.basic_ostream) {
+		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
@@ -195,13 +192,14 @@ bool DLInterface90::runAnalysis(boaaa::aa_id analysis)
 
 bool DLInterface90::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 {
-	auto run = [&](auto* pass, auto* timepass) -> void {
+	auto run = [&](auto* pass) -> void {
 		llvm::legacy::PassManager pm;
-		pass->setContext(&context);
-		pm.add(timepass);
+		pass->setContext(&context, analysis);
+		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
+		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
-		if (*context.basic_ostream) {
+		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}

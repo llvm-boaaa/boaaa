@@ -98,6 +98,18 @@ namespace boaaa {
 			EvaluationPassImpl* impl;
 			version_context* context;
 			_getter getter;
+			aa_id id;
+
+			void checkIfSetsAreInitalized(version_context* _context, aa_id id) {
+				_raw_type_inst(_context->alias_sets)::const_iterator it_aa = _context->alias_sets.find(id);
+				if (it_aa == _context->alias_sets.end()) {
+					_context->alias_sets.insert({ id, std::make_unique<evaluation_sets>() });
+				}
+				_raw_type_inst(_context->no_alias_sets)::const_iterator it_no_aa = _context->no_alias_sets.find(id);
+				if (it_no_aa == _context->no_alias_sets.end()) {
+					_context->no_alias_sets.insert({ id, std::make_unique<evaluation_explicite_sets>() });
+				}
+			}
 
 		public:
 			EvalPass(char ID) : LLVMFunctionPass(ID), impl(new EvaluationPassImpl()), context(nullptr), getter({ AnalysisGetter<TimePass<PASSES>>()... }) { }
@@ -119,8 +131,12 @@ namespace boaaa {
 				AU.setPreservesAll();
 			}
 
-			void setContext(version_context* _context) { 
+			void setContext(version_context* _context, aa_id _id) { 
 				context = _context;
+				id = _id;
+
+				checkIfSetsAreInitalized(context, id);
+				impl->setSets(context->alias_sets[id].get(), context->no_alias_sets[id].get());
 			}
 
 			void printResult(std::ostream& stream) {

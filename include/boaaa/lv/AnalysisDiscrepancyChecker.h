@@ -45,7 +45,7 @@ namespace boaaa {
 								unionfind_map::const_iterator checkS = ufms->find(id);
 								if (checkS != ufms->end()) {
 									unionfind_map::const_iterator checkL = ufml->find(checkS->second->parent()->value()); //O(n^6)
-									if (checkL != ufms->end()) {
+									if (checkL != ufml->end()) {
 										if (checkL->second->parent()->value() == p_it_l->second->parent()->value()) 
 										{
 											//all ok
@@ -70,7 +70,7 @@ namespace boaaa {
 										if (no_aa_map_s->contains(p_it_l2->second->value()))
 										{
 											//the aas are not consistent.
-											std::cout << aa_it->first << " and " << aa_it2->first << " have different results in function: " << GUID <<  " for: " << p_it_l2->first << ", " << id << "\n";
+											llvm::errs() << aa_it->first << " and " << aa_it2->first << " have different results in function: " << GUID <<  " for: " << p_it_l2->first << ", " << id << "\n";
 										}
 									}
 								}

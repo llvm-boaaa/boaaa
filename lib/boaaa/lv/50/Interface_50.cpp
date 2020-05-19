@@ -153,7 +153,7 @@ bool runAnalysisHelp(F& run, boaaa::aa_id analysis)
 	case LLV::SCEV:
 		run(new llvm::SCEVAAEvalWrapperPass());
 		break;
-	case LLV::SCOPEDNA:
+	case LLV::SCOPEDNOA:
 		run(new llvm::ScopedNoAliasEvalWrapperPass());
 		break;
 	case LLV::CFL_STEENS:
@@ -190,16 +190,15 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis)
 {
 	auto run = [&](auto* pass) -> void {
 		llvm::legacy::PassManager pm;
-		pass->setContext(&context);
+		pass->setContext(&context, analysis);
 		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
 		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
-		if (*context.basic_ostream) {
+		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
-		delete timepass;
 	};
 	
 	return runAnalysisHelp(run, analysis);
@@ -209,31 +208,18 @@ bool DLInterface50::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 {
 	auto run = [&](auto* pass) -> void {
 		llvm::legacy::PassManager pm;
-		pass->setContext(&context);
+		pass->setContext(&context, analysis);
 		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
 		timepass->addPass(pm);
 		pm.add(pass);
 		pm.run(*context.loaded_module);
-		if (*context.basic_ostream) {
+		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
 		timepass->printToEvalRes(er);
 		pass->printToEvalRes(er);
-		delete timepass;
 	};
-
-	using namespace sea_dsa;
-
-	
-	//llvm::legacy::PassManager pm;
-	//pm.add(createDsaPrintStatsPass());
-	//pm.add(createDsaPrinterPass());
-	//pm.add(createDsaViewerPass());
-	//pm.add(createDsaPrintCallGraphStatsPass());
-	//pm.add(createDsaCallGraphPrinterPass());
-	//pm.run(*context.loaded_module);
-	
 
 	return runAnalysisHelp(run, analysis);
 }

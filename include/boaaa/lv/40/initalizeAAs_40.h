@@ -13,19 +13,21 @@ namespace boaaa
 		CFL_STEENS = LLVM_40 + LLVM_ORIGINAL_ANALYSIS::CFL_STEENS_AA,
 		OBJ_CARC   = LLVM_40 + LLVM_ORIGINAL_ANALYSIS::OBJ_CARC_AA,
 		SCEV       = LLVM_40 + LLVM_ORIGINAL_ANALYSIS::SCEV_AA,
-		SCOPEDNA   = LLVM_40 + LLVM_ORIGINAL_ANALYSIS::SCOPED_NA_AA,
+		SCOPEDNOA  = LLVM_40 + LLVM_ORIGINAL_ANALYSIS::SCOPED_NA_AA,
 		TBAA       = LLVM_40 + LLVM_ORIGINAL_ANALYSIS::TBAA_AA,
+		CLANG      = LLVM_40 + LLVM_ORIGINAL_ANALYSIS_COMBINED::CLANG_COMBINED_ANALYSIS,
 	};
 
 	namespace _40 {
 
-		static char BASIC[]      = __STRINGIFY(BASIC);
-		static char CFL_ANDERS[] = __STRINGIFY(CFL-ANDERS);
-		static char CFL_STEENS[] = __STRINGIFY(CFL-STEENS);
-		static char OBJ_CARC[]   = __STRINGIFY(OBJ-CARC);
-		static char SCEV[]       = __STRINGIFY(SCEV);
-		static char SCOPEDNA[]   = __STRINGIFY(SCOPEDNA);
-		static char TBAA[]       = __STRINGIFY(TBAA);
+		static char* BASIC			= __STRINGIFY(BASIC);
+		static char* CFL_ANDERS		= __STRINGIFY(CFL-ANDERS);
+		static char* CFL_STEENS		= __STRINGIFY(CFL-STEENS);
+		static char* OBJ_CARC		= __STRINGIFY(OBJ-CARC);
+		static char* SCEV			= __STRINGIFY(SCEV);
+		static char* SCOPEDNA		= __STRINGIFY(SCOPED-N0-A);
+		static char* TBAA			= __STRINGIFY(TBAA);
+		static char* CLANG			= __STRINGIFY(CLANG-COMBINE);
 	}
 
 	inline cl_aa_store getInitalizedAAs_40()
@@ -33,13 +35,14 @@ namespace boaaa
 		using L4 = LLVM_40_AA;
 
 		cl_aa_store raa;
-		raa.push_back(registeredAA(&_40::BASIC[0],      static_cast<aa_id>(L4::BASIC),      getDescription(L4::BASIC)));
-		raa.push_back(registeredAA(&_40::CFL_ANDERS[0], static_cast<aa_id>(L4::CFL_ANDERS), getDescription(L4::CFL_ANDERS)));
-		raa.push_back(registeredAA(&_40::CFL_STEENS[0], static_cast<aa_id>(L4::CFL_STEENS), getDescription(L4::CFL_STEENS)));
-		raa.push_back(registeredAA(&_40::OBJ_CARC[0],   static_cast<aa_id>(L4::OBJ_CARC),   getDescription(L4::OBJ_CARC)));
-		raa.push_back(registeredAA(&_40::SCEV[0],       static_cast<aa_id>(L4::SCEV),       getDescription(L4::SCEV)));
-		raa.push_back(registeredAA(&_40::SCOPEDNA[0],   static_cast<aa_id>(L4::SCOPEDNA),   getDescription(L4::SCOPEDNA)));
-		raa.push_back(registeredAA(&_40::TBAA[0],       static_cast<aa_id>(L4::TBAA),       getDescription(L4::TBAA)));
+		raa.push_back(registeredAA(_40::BASIC,      static_cast<aa_id>(L4::BASIC),      getDescription(L4::BASIC)));
+		raa.push_back(registeredAA(_40::CFL_ANDERS, static_cast<aa_id>(L4::CFL_ANDERS), getDescription(L4::CFL_ANDERS)));
+		raa.push_back(registeredAA(_40::CFL_STEENS, static_cast<aa_id>(L4::CFL_STEENS), getDescription(L4::CFL_STEENS)));
+		raa.push_back(registeredAA(_40::OBJ_CARC,   static_cast<aa_id>(L4::OBJ_CARC),   getDescription(L4::OBJ_CARC)));
+		raa.push_back(registeredAA(_40::SCEV,       static_cast<aa_id>(L4::SCEV),       getDescription(L4::SCEV)));
+		raa.push_back(registeredAA(_40::SCOPEDNA,   static_cast<aa_id>(L4::SCOPEDNOA),  getDescription(L4::SCOPEDNOA)));
+		raa.push_back(registeredAA(_40::TBAA,       static_cast<aa_id>(L4::TBAA),       getDescription(L4::TBAA)));
+		raa.push_back(registeredAA(_40::CLANG,      static_cast<aa_id>(L4::CLANG),      getCombinedDescription(L4::CLANG)));
 		return raa;
 	}
 }

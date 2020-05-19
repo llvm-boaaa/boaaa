@@ -723,6 +723,8 @@ void initAAs()
 
 void finalize()
 {
+	unloadModule(versions_loaded[versions_count - 1]);
+
 	if (sr_vp_man)
 		delete sr_vp_man;
 
