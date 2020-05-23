@@ -399,7 +399,10 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
     for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
     {
         size_t num = it->second->size();
-        bool* check = new bool[num]{ true };
+        std::vector<bool> check(num);
+        for (int i = 0; i < num; i++)
+            check[i] = true;
+
         evaluation_sets* set = it->second.get();
         for (int i = 0; i < num; i++)
         {
@@ -464,7 +467,6 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
             sum_no_alias += size;
             sum_no_alias_squared += size * size;
         }
-        delete[] check;
     }
 
 
