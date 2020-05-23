@@ -23,6 +23,8 @@
 	LLVM_VERSION_ERROR_CODE
 #endif
 
+#include <iostream>
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 namespace boaaa {
