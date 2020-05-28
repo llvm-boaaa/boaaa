@@ -1,0 +1,42 @@
+// this file is used to run multiple incremental runs of boaaa, 
+// each line gets passt to boaaa like it is called from the command line with this arguments
+// "//" at the beginning of the line get treaded as a blank line
+//
+// boaaa -h returns:
+//
+//
+//USAGE: boaaa [options] <input bitcode file>
+//
+//OPTIONS:
+//
+//BOAAA options:
+//
+//  Choose which Alias-Analysis-Passes to run in specific version:
+//  ...(defined analysis per version)
+//  Choose which Alias-Analysis-Passes to run in all available versions:
+//	...(defined analysis grouped by commandline argument)
+//
+//  --all-AAs                - If Flag is set, run all Analysis, for each version
+//  --all-Versions           - If Flag is set, run all Analysis if available under all loaded versions
+//  -f=<path/filename.cline> - Specifies the file of multiple commandline arguments
+//  -l=<path/filename>       - Specify log filename
+//  --no-json                - boaaa exports by default all results to a json: path/to/boaaa/results.json
+//  -p=<prefix>              - The prefix-path of the Bitecodefile, it will get concatet to: prefix${llvm_version}InputFile
+//  -v=<XX>                  - The version of the analysises
+//
+//Generic Options:
+//
+//  --help                   - Display available options (--help-hidden for more)
+//  --help-list              - Display list of available options (--help-list-hidden for more)
+//  --version                - Display the version of this program
+//
+// Note: All Generic Options break the pipelining file, all lines before a Generic Option get calculated correctly.
+//
+//
+//-p "../../../../bc_sources/llvm_90/" "/count.bc" --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --SEA-DSA-BU --SEA-DSA-CS --CLANG-COMBINE --TBAA --SCOPED-NO-A -v=90
+--version
+-p "../../../../bc_sources/llvm_90/" "/libLLVMIRReader.a.bc" --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --SEA-DSA-BU --SEA-DSA-CS --CLANG-COMBINE --TBAA --SCOPED-NO-A -v=90
+
+
+
+

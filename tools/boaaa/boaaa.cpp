@@ -48,7 +48,7 @@ namespace fs = std::filesystem;
 //command line arg variables
 
 static cl::OptionCategory 
-BoaaaCat("BOAAA options:");
+BoaaaCat("BOAAA options");
 
 static::cl::opt<std::string> 
 FileInput("f", cl::desc("Specifies the file of multiple commandline arguments"),
@@ -173,10 +173,10 @@ int main(int argc, char** argv) {
 	finalize();
 	return res;
 #endif
-
+	
 	cl::ParseCommandLineOptions(argc, argv);
 
-	if (!FileInput.isDefaultOption()) { //no inputflie set because cl::init(-)
+	if (FileInput.compare(FileInput.getDefault().getValue()) == 0) { //no inputflie set because cl::init(-)
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			writeJson();
 			if (static_cast<int8_t>(state) < 0) {
@@ -212,9 +212,13 @@ int main(int argc, char** argv) {
 	uint64_t line_count = 0;
 	while (std::getline(cl_inst, line)) {
 		line_count++;
-
 		//skip line starting with //
 		if (line.rfind("//", 0) == 0) continue;
+		//print all noncomment lines to see the input when running boaaa
+		std::cout << line << "\n";
+
+		std::string file(InputFilename.getValue());
+		InputFilename.reset();
 
 		cl::ResetAllOptionOccurrences();
 		int _argc;
@@ -224,8 +228,11 @@ int main(int argc, char** argv) {
 			res--;
 			continue;
 		}
-
+		
 		cl::ParseCommandLineOptions(_argc, _argv);
+		if (InputFilename.getValue().compare(InputFilename.getDefault().getValue()) == 0)
+			InputFilename.setValue(file);
+
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			writeJson();
 			if (static_cast<int8_t>(state) < 0) {
@@ -436,6 +443,7 @@ COROUTINESTATES_MAIN mainloop()
 			coroutine_state = CSM::NO_ARGS_LEFT;
 			return coroutine_state; //skip because of previos error
 		}
+	case CSM::NO_ARGS_LEFT:
 	case CSM::INIT:
 		analysis_to_run.clear(); //clear analysis bevore
 		aa_index = 0;
@@ -452,7 +460,7 @@ COROUTINESTATES_MAIN mainloop()
 				}
 				else
 				{
-					if (!Version.isDefaultOption()) {
+					if (Version.getValue() == Version.getDefault().getValue()) {
 						for (boaaa::aa_id i = 0; i < aa_map_size; i++)
 						{
 							boaaa::aa_id id = getCurrentVersionId();

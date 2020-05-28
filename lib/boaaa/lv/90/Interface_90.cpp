@@ -73,7 +73,7 @@ bool loadModuleHelper(llvm::StringRef ref, boaaa::version_context& context)
 	context.module_result.reset(new ModuleResult());
 	llvm::SMDiagnostic Err;
 
-	context.loaded_module = llvm::parseIRFile(ref, Err, *context.context_to_module);
+	context.loaded_module.reset(llvm::parseIRFile(ref, Err, *context.context_to_module).release());
 	if (!context.loaded_module) {
 		*(context.basic_ostream)  << "Error: while loading LLVMModule " << ref.str()
 								  << " \nMSG  : " << Err.getMessage().str() << "\n";
