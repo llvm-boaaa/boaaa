@@ -127,6 +127,8 @@ namespace boaaa {
 		EvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
 			MustAliasCount(), NoModRefCount(), ModCount(), RefCount(), ModRefCount(), MustCount(), 
 			MustRefCount(), MustModCount(), MustModRefCount(), 
+			evaluated(false), AliasSetCount(), NoAliasSetCount(),
+			MeanAlias(), VarAlias(), MeanNoAlias(), VarNoAlias(),
 			m_nanos_alias(), m_micros_alias(), m_millis_alias(), m_seconds_alias(),
 			m_nanos_modref(), m_micros_modref(), m_millis_modref(),m_seconds_modref(),
 			delete_aa_set(false), delete_no_aa_set(false), alias_set(nullptr), no_alias_set(nullptr) {};
@@ -154,6 +156,8 @@ namespace boaaa {
 
         void evaluateAAResultOnModule(LLVMModule& M, LLVMAAResults &AAResult, evaluation_storage& storage);
 		void evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResults& AAResult, EvaluationContainer& container);
+
+		void evaluateResult();
 
 		void printResult(::std::ostream &stream);
 		void printToEvalRes(EvaluationResult& er);
@@ -205,6 +209,14 @@ namespace boaaa {
 		evaluation_explicite_sets* no_alias_set;
 		bool delete_aa_set;
 		bool delete_no_aa_set;
+
+		bool evaluated;
+		uint64_t AliasSetCount;
+		uint64_t NoAliasSetCount;
+		double   MeanAlias;
+		double   VarAlias;
+		double   MeanNoAlias;
+		double   VarNoAlias;
 	};
 }
 

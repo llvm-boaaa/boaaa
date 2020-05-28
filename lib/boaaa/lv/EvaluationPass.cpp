@@ -103,6 +103,8 @@ void EvaluationPassImpl::evaluateAAResultOnModule(LLVMModule& M, LLVMAAResults& 
 
 void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResults& AAResult, boaaa::EvaluationContainer& container)
 {
+    evaluated = false;
+
     checkInitSets();
     unionfind_map* aa_set = initAASet(F.getGUID());
     evaluation_sets* no_aa_set = initNoAASets(F.getGUID(), container.sum_all);
@@ -176,8 +178,8 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMLoadInst>(load)),
                 LLVMMemoryLocation::get(cast<LLVMStoreInst>(store)));
             addAliasTime(start);
-            size_t valX = pointer_offset + x;
-            size_t valY = pointer_offset + y;
+            size_t valX = store_offset + x;
+            size_t valY = load_offset + y;
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
@@ -210,8 +212,8 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
             LLVMAliasResult AR = AAResult.alias(LLVMMemoryLocation::get(cast<LLVMStoreInst>(I1)),
                 LLVMMemoryLocation::get(cast<LLVMStoreInst>(I2)));
             addAliasTime(start);
-            size_t valX = pointer_offset + x;
-            size_t valY = pointer_offset + y;
+            size_t valX = store_offset + x;
+            size_t valY = store_offset + y;
             switch (AR) {
             case NoAlias:
                 ++NoAliasCount;
@@ -367,173 +369,17 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
     }
 }
 
-void EvaluationPassImpl::printResult(std::ostream &stream) {
-
-    uint64_t sum_alias = 0, sum_alias_head = 0, sum_no_alias = 0, sum_no_alias_head = 0;
-    uint64_t sum_alias_squared = 0, sum_no_alias_squared = 0;
-
-    for (_raw_type_inst(alias_set)::iterator it = alias_set->begin(), end = alias_set->end(); it != end; ++it)
-    {
-        sum_alias_head += it->second->headssize();
-        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
-        {
-            size_t size = (*it2)->size();
-            sum_alias += size;
-            sum_alias_squared += size * size;
-        }
-
-#ifdef DEBUG
-        size_t check_num = 0;
-
-        for (_raw_type_inst(it->second->begin()) it2 = it->second->begin(), end2 = it->second->end(); it2 != end2; ++it2)
-        {
-            if (it2->second->parent() == it2->second) {
-                check_num++;
-            }
-        }
-
-//        assert((check_num == it->second->headssize()));
-#endif
-    }
-
-    for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
-    {
-        size_t num = it->second->size();
-        std::vector<bool> check(num);
-        for (int i = 0; i < num; i++)
-            check[i] = true;
-
-        evaluation_sets* set = it->second.get();
-        for (int i = 0; i < num; i++)
-        {
-            //allready checked
-            if (!check[i] || (*set)[i]->size() == 0) continue;
-            if ((*set)[i])
-            assert((*set)[i]->headssize() == 1);
-            std::set<size_t> ids;
-            unionfind_map* map = (*set)[i].get();
-            bool check_added = false;
-            size_t size = map->size();
-
-            for (unionfind_map::const_iterator it = map->begin(), end = map->end(); it != end; ++it)
-            {
-                size_t id = it->second->value();
-                assert((*set)[id]->headssize() == 1);
-                unionfind_map* comp = (*set)[id].get();
-                if (comp->size() == map->size()) {
-                    //compare
-                    //fill one time if needed
-                    if (ids.size() < map->size()) {
-                        ids.clear();
-                        for (unionfind_map::const_iterator iit = map->begin(), iend = map->end(); iit != iend; iit++)
-                        {
-                            ids.insert(iit->second->value());
-                        }
-                    }
-
-                    bool check_all = true;
-
-                    for (unionfind_map::const_iterator iit = comp->begin(), iend = comp->end(); iit != iend; iit++)
-                    {
-                        //skip own id
-                        if ((*set)[id]->begin()->first == iit->second->value()) continue;
-
-                        if (ids.find(iit->second->value()) == ids.end()) {
-                            check_all = false;
-                            break;
-                        }
-                    }
-
-                    if (check_all) {
-                        continue;
-                    }
-
-                    if (check[id]) 
-                    {
-                        check[id] = false;
-                    }
-                    else 
-                    {
-                        //skip
-                        check_added = true;
-                    }
-                }
-            }
-
-            //already added
-            if (check_added) continue;
-
-            sum_no_alias_head++;
-            sum_no_alias += size;
-            sum_no_alias_squared += size * size;
-        }
-    }
-
-
-    stream << "Alias Time    : " << m_seconds_alias << "," << (m_millis_alias < 100 ? "0" : "") << +(m_millis_alias < 10 ? "0" : "") << (int)m_millis_alias
-                                                    << "." << (m_micros_alias < 100 ? "0" : "") << +(m_micros_alias < 10 ? "0" : "") << (int)m_micros_alias
-                                                    << "." << (m_nanos_alias  < 100 ? "0" : "") << +(m_nanos_alias  < 10 ? "0" : "") << (int)m_nanos_alias << "\n";
-
-    stream << "ModRef Time   : " << m_seconds_modref << "," << (m_millis_modref < 100 ? "0" : "") << +(m_millis_modref < 10 ? "0" : "") << (int)m_millis_modref
-                                                     << "." << (m_micros_modref < 100 ? "0" : "") << +(m_micros_modref < 10 ? "0" : "") << (int)m_micros_modref
-                                                     << "." << (m_nanos_modref  < 100 ? "0" : "") << +(m_nanos_modref  < 10 ? "0" : "") << (int)m_nanos_modref << "\n";
-    stream << "=========================================\n";
-
-    uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
-
-    double mean_alias        = (double)sum_alias / (double)sum_alias_head;
-    double variance_alias    = ((double)(sum_alias_squared - sum_alias)) / (double)sum_alias_head;
-    double mean_no_alias     = (double)sum_no_alias / (double)sum_no_alias_head;
-    double variance_no_alias = ((double)(sum_alias_squared - sum_no_alias)) / (double)sum_no_alias_head;
-
-    if (AliasSum == 0) {
-        stream << "AliasSum = 0 ...skipping\n";
-        return;
-    }
-    stream << "No Alias      : " << formatPercentage(NoAliasCount, AliasSum) << " " << NoAliasCount << "\n";
-    stream << "May Alias     : " << formatPercentage(MayAliasCount, AliasSum) << " " << MayAliasCount << "\n";
-    stream << "Partial Alias : " << formatPercentage(PartialAliasCount, AliasSum) << " " << PartialAliasCount << "\n";
-    stream << "Must Alias    : " << formatPercentage(MustAliasCount, AliasSum) << " " << MustAliasCount << "\n";
-    stream << "-----------------------------------------\n";
-    stream << "AliasSum      : " << "         " << " " << AliasSum << "\n";
-
-    stream << "=========================================\n";
-
-    uint64_t ModRefSum = NoModRefCount + RefCount + ModCount + ModRefCount + MustCount + MustRefCount + MustModCount + MustModRefCount;
-
-    if (ModRefSum == 0) {
-        stream << "ModRefSum = 0 ...skipping\n";
-        return;
-    }
-
-    stream << "No ModRef     : " << formatPercentage(NoModRefCount, ModRefSum) << " " << NoModRefCount << "\n";
-    stream << "Mod           : " << formatPercentage(ModCount, ModRefSum) << " " << ModCount << "\n";
-    stream << "Ref           : " << formatPercentage(RefCount, ModRefSum) << " " << RefCount << "\n";
-    stream << "ModRef        : " << formatPercentage(ModRefCount, ModRefSum) << " " << ModRefCount << "\n";
-    stream << "Must          : " << formatPercentage(MustCount, ModRefSum) << " " << MustCount << "\n";
-    stream << "MustMod       : " << formatPercentage(MustModCount, ModRefSum) << " " << MustModCount << "\n";
-    stream << "MustRef       : " << formatPercentage(MustRefCount, ModRefSum) << " " << MustRefCount << "\n";
-    stream << "MustModRef    : " << formatPercentage(MustModRefCount, ModRefSum) << " " << MustModRefCount << "\n";
-    stream << "-----------------------------------------\n";
-    stream << "ModRefSum     : " << "         " << " " << ModRefSum << "\n";
-
-    stream << "=========================================\n";
-
-    stream << "Alias Sets    : " << "         " << " " << sum_alias_head << "\n";
-    stream << "mean, var     : " << mean_alias << ", " << variance_alias << "\n";
-    stream << "No Alias Sets : " << "         " << " " << sum_no_alias_head << "\n";
-    stream << "mean, var     : " << mean_no_alias << ", " << variance_no_alias << "\n";
-    stream << "\n";
-}
-
-void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
+void EvaluationPassImpl::evaluateResult()
 {
-    uint64_t sum_alias = 0, sum_alias_head = 0, sum_no_alias = 0, sum_no_alias_head = 0;
+    uint64_t sum_alias = 0, sum_no_alias = 0;
     uint64_t sum_alias_squared = 0, sum_no_alias_squared = 0;
+
+    AliasSetCount = 0;
+    NoAliasSetCount = 0;
 
     for (_raw_type_inst(alias_set)::iterator it = alias_set->begin(), end = alias_set->end(); it != end; ++it)
     {
-        sum_alias_head += it->second->headssize();
+        AliasSetCount += it->second->headssize();
         for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
         {
             size_t size = (*it2)->size();
@@ -551,7 +397,7 @@ void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
             }
         }
 
-//        assert((check_num == it->second->headssize()));
+        //        assert((check_num == it->second->headssize()));
 #endif
     }
 
@@ -590,7 +436,7 @@ void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
                     }
 
                     bool check_all = true;
-
+                    //check set[i]\i == set[id]\id
                     for (unionfind_map::const_iterator iit = comp->begin(), iend = comp->end(); iit != iend; iit++)
                     {
                         //skip own id
@@ -621,19 +467,82 @@ void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
             //already added
             if (check_added) continue;
 
-            sum_no_alias_head++;
+            NoAliasSetCount++;
             sum_no_alias += size;
             sum_no_alias_squared += size * size;
         }
     }
 
+    MeanAlias = (double)sum_alias / (double)AliasSetCount;
+    VarAlias = ((double)(sum_alias_squared - sum_alias)) / (double)AliasSetCount;
+    MeanNoAlias = (double)sum_no_alias / (double)NoAliasSetCount;
+    VarNoAlias = ((double)(sum_alias_squared - sum_no_alias)) / (double)NoAliasSetCount;
+
+    evaluated = true;
+}
+
+void EvaluationPassImpl::printResult(std::ostream &stream) {
+
+    stream << "Alias Time    : " << m_seconds_alias << "," << (m_millis_alias < 100 ? "0" : "") << +(m_millis_alias < 10 ? "0" : "") << (int)m_millis_alias
+                                                    << "." << (m_micros_alias < 100 ? "0" : "") << +(m_micros_alias < 10 ? "0" : "") << (int)m_micros_alias
+                                                    << "." << (m_nanos_alias  < 100 ? "0" : "") << +(m_nanos_alias  < 10 ? "0" : "") << (int)m_nanos_alias << "\n";
+
+    stream << "ModRef Time   : " << m_seconds_modref << "," << (m_millis_modref < 100 ? "0" : "") << +(m_millis_modref < 10 ? "0" : "") << (int)m_millis_modref
+                                                     << "." << (m_micros_modref < 100 ? "0" : "") << +(m_micros_modref < 10 ? "0" : "") << (int)m_micros_modref
+                                                     << "." << (m_nanos_modref  < 100 ? "0" : "") << +(m_nanos_modref  < 10 ? "0" : "") << (int)m_nanos_modref << "\n";
+    stream << "=========================================\n";
+
+    if (!evaluated)
+        evaluateResult();
+
     uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
 
-    double mean_alias = (double)sum_alias / (double)sum_alias_head;
-    double variance_alias = ((double)(sum_alias_squared - sum_alias)) / (double)sum_alias_head;
-    double mean_no_alias = (double)sum_no_alias / (double)sum_no_alias_head;
-    double variance_no_alias = ((double)(sum_alias_squared - sum_no_alias)) / (double)sum_no_alias_head;
+    if (AliasSum == 0) {
+        stream << "AliasSum = 0 ...skipping\n";
+        return;
+    }
+    stream << "No Alias      : " << formatPercentage(NoAliasCount, AliasSum)        << " " << NoAliasCount << "\n";
+    stream << "May Alias     : " << formatPercentage(MayAliasCount, AliasSum)       << " " << MayAliasCount << "\n";
+    stream << "Partial Alias : " << formatPercentage(PartialAliasCount, AliasSum)   << " " << PartialAliasCount << "\n";
+    stream << "Must Alias    : " << formatPercentage(MustAliasCount, AliasSum)      << " " << MustAliasCount << "\n";
+    stream << "-----------------------------------------\n";
+    stream << "AliasSum      : " << "         " << " " << AliasSum << "\n";
 
+    stream << "=========================================\n";
+
+    uint64_t ModRefSum = NoModRefCount + RefCount + ModCount + ModRefCount + MustCount + MustRefCount + MustModCount + MustModRefCount;
+
+    if (ModRefSum == 0) {
+        stream << "ModRefSum = 0 ...skipping\n";
+        return;
+    }
+
+    stream << "No ModRef     : " << formatPercentage(NoModRefCount, ModRefSum)      << " " << NoModRefCount << "\n";
+    stream << "Mod           : " << formatPercentage(ModCount, ModRefSum)           << " " << ModCount << "\n";
+    stream << "Ref           : " << formatPercentage(RefCount, ModRefSum)           << " " << RefCount << "\n";
+    stream << "ModRef        : " << formatPercentage(ModRefCount, ModRefSum)        << " " << ModRefCount << "\n";
+    stream << "Must          : " << formatPercentage(MustCount, ModRefSum)          << " " << MustCount << "\n";
+    stream << "MustMod       : " << formatPercentage(MustModCount, ModRefSum)       << " " << MustModCount << "\n";
+    stream << "MustRef       : " << formatPercentage(MustRefCount, ModRefSum)       << " " << MustRefCount << "\n";
+    stream << "MustModRef    : " << formatPercentage(MustModRefCount, ModRefSum)    << " " << MustModRefCount << "\n";
+    stream << "-----------------------------------------\n";
+    stream << "ModRefSum     : " << "         " << " " << ModRefSum << "\n";
+
+    stream << "=========================================\n";
+
+    stream << "Alias Sets    : " << "         " << " "  << AliasSetCount << "\n";
+    stream << "mean, var     : " << MeanAlias   << ", " << VarAlias << "\n";
+    stream << "No Alias Sets : " << "         " << " "  << NoAliasSetCount << "\n";
+    stream << "mean, var     : " << MeanNoAlias << ", " << VarNoAlias << "\n";
+    stream << "\n";
+}
+
+void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
+{
+    if (!evaluated)
+        evaluateResult();
+
+    uint64_t AliasSum = NoAliasCount + MayAliasCount + PartialAliasCount + MustAliasCount;
     uint64_t ModRefSum = NoModRefCount + RefCount + ModCount + ModRefCount + MustCount + MustRefCount + MustModCount + MustModRefCount;
 
     //time
@@ -666,11 +575,11 @@ void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
     er.set_must_modref_count(MustModRefCount);
    
     //alias set
-    er.set_alias_sets(sum_alias_head);
-    er.set_mean_alias_sets(mean_alias);
-    er.set_var_alias_sets(variance_alias);
+    er.set_alias_sets(AliasSetCount);
+    er.set_mean_alias_sets(MeanAlias);
+    er.set_var_alias_sets(VarAlias);
 
-    er.set_no_alias_sets(sum_no_alias_head);
-    er.set_mean_no_alias_sets(mean_no_alias);
-    er.set_var_no_alias_sets(variance_no_alias);
+    er.set_no_alias_sets(NoAliasSetCount);
+    er.set_mean_no_alias_sets(MeanNoAlias);
+    er.set_var_no_alias_sets(VarNoAlias);
 }
