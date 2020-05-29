@@ -213,6 +213,7 @@ int main(int argc, char** argv) {
 	while (std::getline(cl_inst, line)) {
 		line_count++;
 		//skip line starting with //
+		if (line.empty()) continue;
 		if (line.rfind("//", 0) == 0) continue;
 		//print all noncomment lines to see the input when running boaaa
 		std::cout << line << "\n";
@@ -531,6 +532,8 @@ COROUTINESTATES_MAIN mainloop()
 		return coroutine_state;
 	//case CSM::NO_ARGS_LEFT: do nothing
 	}
+	//unload loaded module
+	unloadModule(versions_loaded[index]);
 
 	coroutine_state = CSM::NO_ARGS_LEFT;
 	return coroutine_state;
@@ -731,8 +734,6 @@ void initAAs()
 
 void finalize()
 {
-	unloadModule(versions_loaded[versions_count - 1]);
-
 	if (sr_vp_man)
 		delete sr_vp_man;
 

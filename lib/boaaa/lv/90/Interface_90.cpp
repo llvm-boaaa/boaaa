@@ -69,11 +69,11 @@ boaaa::cl_aa_store DLInterface90::getAvailableAAs()
 
 bool loadModuleHelper(llvm::StringRef ref, boaaa::version_context& context)
 {
-	context.context_to_module.reset(new LLVMLLVMContext());
-	context.module_result.reset(new ModuleResult());
+	context.context_to_module = std::make_unique<LLVMLLVMContext>();
+	context.module_result = std::make_unique<ModuleResult>();
 	llvm::SMDiagnostic Err;
 
-	context.loaded_module.reset(llvm::parseIRFile(ref, Err, *context.context_to_module).release());
+	context.loaded_module = llvm::parseIRFile(ref, Err, *context.context_to_module);
 	if (!context.loaded_module) {
 		*(context.basic_ostream)  << "Error: while loading LLVMModule " << ref.str()
 								  << " \nMSG  : " << Err.getMessage().str() << "\n";

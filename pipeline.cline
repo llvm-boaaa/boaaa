@@ -2,6 +2,8 @@
 // each line gets passt to boaaa like it is called from the command line with this arguments
 // "//" at the beginning of the line get treaded as a blank line
 //
+// this file is used in visual studio to run fresh build boaaa-instances.
+//
 // boaaa -h returns:
 //
 //
@@ -33,10 +35,8 @@
 // Note: All Generic Options break the pipelining file, all lines before a Generic Option get calculated correctly.
 //
 //
-//-p "../../../../bc_sources/llvm_90/" "/count.bc" --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --SEA-DSA-BU --SEA-DSA-CS --CLANG-COMBINE --TBAA --SCOPED-NO-A -v=90
---version
+-p "../../../../bc_sources/llvm_90/" "/count.bc" --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --SEA-DSA-BU --SEA-DSA-CS --CLANG-COMBINE --TBAA --SCOPED-NO-A -v=90
 -p "../../../../bc_sources/llvm_90/" "/libLLVMIRReader.a.bc" --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --SEA-DSA-BU --SEA-DSA-CS --CLANG-COMBINE --TBAA --SCOPED-NO-A -v=90
-
 
 
 
