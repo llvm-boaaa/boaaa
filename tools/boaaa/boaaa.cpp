@@ -211,13 +211,14 @@ int main(int argc, char** argv) {
 	//while lines in file seperate arguments, parse them and run main loop to calculate what the arguments describe.
 	uint64_t line_count = 0;
 	while (std::getline(cl_inst, line)) {
-		line_count++;
-		//skip line starting with //
+		//skip empty lines and lines starting with //
 		if (line.empty()) continue;
 		if (line.rfind("//", 0) == 0) continue;
 		//print all noncomment lines to see the input when running boaaa
-		std::cout << line << "\n";
+		std::cout <<line_count << ": " << line << "\n";
+		line_count++;
 
+		std::string prefix(PrefixFilePath.getValue());
 		std::string file(InputFilename.getValue());
 		InputFilename.reset();
 
@@ -233,6 +234,8 @@ int main(int argc, char** argv) {
 		cl::ParseCommandLineOptions(_argc, _argv);
 		if (InputFilename.getValue().compare(InputFilename.getDefault().getValue()) == 0)
 			InputFilename.setValue(file);
+		if (PrefixFilePath.getValue().compare(PrefixFilePath.getDefault().getValue()) == 0)
+			PrefixFilePath.setValue(prefix);
 
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			writeJson();
