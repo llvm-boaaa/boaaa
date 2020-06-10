@@ -27,3 +27,8 @@ LLVMVersionConfig.cmake
 /MACROLIST_GEN/.idea
 /MACROLIST_GEN/.idea
 mac_bc_build/config.conf
+/.idea
+/analyse/.gradle
+/analyse/.idea
+/analyse/gradle/wrapper
+/analyse/*.svg

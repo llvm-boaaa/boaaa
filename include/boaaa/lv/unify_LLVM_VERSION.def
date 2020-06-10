@@ -17,6 +17,35 @@
 // using Module = llvm::Module;
 //
 // define "LLVM_VERSION_ONLY_INCLUDE 1" when only headerfiles get included
+//
+// ============================================================
+// implementation details
+// 
+// when included it checks for the current active version XX if LLVM_VERSION_XX_INCLUDE is defined, 
+// or afterwards if LLVM_VERSION_REST_INCLUDE is defined. In each case the file specified behind the 
+// macro gets included with the normal #include-statement. When LLVM_VERSION_ONLY_INCLUDE is defined   
+// the rest of the file gets ignored except the undefs at the end.
+//
+// In case of the LLVM_VERSION_ONLY_INCLUDE is not defined, the implementation checks for the version XX if 
+// LLVM_VERSION_XX_UNIFY is defined, or afterwards LLVM_VERSION_REST_UNIFY is defined. In each case the file
+// adds the expresion combined of 
+// LLVM_VERSION_UNIFY (LLVM_VERSION_XX_UNIFY | LLVM_VERSION_REST_UNIFY) LLVM_VERSION_UNIFY_FINALIZE
+// if it can't find a implementation for LLVM_VERSION_XX_UNIFY or LLVM_VERSION_REST_UNIFY the macro 
+// LLVM_VERSION_ERROR_CODE gets defined, because of this macro, we could write: 
+// #ifdef LLVM_VERSION_ERROR_CODE
+// LLVM_VERSION_ERROR_CODE
+// #endif
+// To find a potential error if for a version is no unification is defined. This helps to find errors 
+// more quickly.
+//
+// At the end of this file, all macros get undefined, so we don't get undefined behavior when including 
+// this file again and not all macros are overriden.
+//
+// #Note: this file uses a lot of assumptions about what the macros contain, and in wrong use, it can create 
+// code that does unpredictable things. In fact it is also possible for a evil person to add 
+// definitions(inline-functions, structs/classes, macros,...) to a project because of precompiled headers 
+// and the posibility to add macro-definitions as compiler arguments.
+// ============================================================
 
 
 #include "sup_LLVM_VERSION.h"
