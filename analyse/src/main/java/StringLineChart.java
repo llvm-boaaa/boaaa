@@ -2,6 +2,7 @@ import com.sun.org.apache.bcel.internal.classfile.StackMapEntry;
 import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 
 import java.awt.*;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
@@ -9,28 +10,21 @@ import java.util.function.Consumer;
 
 public class StringLineChart extends Diagramm {
 
-    private static final double PERCENT_2 = 0.02;
-    private static final double PERCENT_5 = 0.05;
-    private static final double PERCENT_7 = 0.07;
-    private static final double PERCENT_10 = 0.1;
-    private static final double PERCENT_15 = 0.15;
-    private static final double PERCENT_80 = 0.8;
-    private static final double PERCENT_85 = 0.85;
-    private static final double PERCENT_90 = 0.9;
-    private static final double PERCENT_100 = 1.0;
-
     private double minY = Double.POSITIVE_INFINITY;
     private double maxY = Double.NEGATIVE_INFINITY;
 
     private HashMap<Integer, String> m_order = new HashMap<>();
     private HashMap<String, HashMap<Integer, Double>> m_values = new HashMap<>();
+    private HashMap<String, HashMap<Integer, Double>> m_alt_values = new HashMap<>();
     private HashMap<Integer, Integer> colorIdMap = new HashMap<>();
+    private HashMap<Integer, String> sideboard;
 
     private String headline;
 
     public StringLineChart(int width, int height) {
         super(width, height);
         headline = "";
+        sideboard = null;
     }
 
     public void startAtZero() {
@@ -38,6 +32,14 @@ public class StringLineChart extends Diagramm {
     }
 
     public void addHeadline(String head) {headline = head; }
+
+    public void addAltData(Integer order, String id, HashMap<Integer, Double> values) {
+
+    }
+
+    public void addSideboard(HashMap<Integer, String> sb) {
+        sideboard = sb;
+    }
 
     public void addData(Integer order, String id, HashMap<Integer, Double> values) {
         m_order.put(order, id);
@@ -92,11 +94,18 @@ public class StringLineChart extends Diagramm {
         }
 
         Rectangle2D canvas = vg.getClipBounds();
-        double percent_x = PERCENT_7;
-        double percent_y = PERCENT_5 + (headline.isEmpty() ? 0.0 : PERCENT_7);
+        double top_y       = (PERCENT_5 + (headline.isEmpty() ? 0.0 : PERCENT_7))   * canvas.getHeight();
+        double down_y      = PERCENT_5                                              * canvas.getHeight() + maxWidth;
+        double hight_y     = canvas.getHeight() - top_y - down_y;
 
-        Rectangle2D dimension = new Rectangle2D.Double(canvas.getWidth() * percent_x, canvas.getHeight() * percent_y,
-                canvas.getWidth() * (PERCENT_100 - percent_x - PERCENT_5), canvas.getHeight() * (PERCENT_100 - percent_y - PERCENT_5) - maxWidth);
+        double left_x      = PERCENT_7                                             * canvas.getWidth();
+        double right_x     = PERCENT_3                                             * canvas.getWidth();
+        double right_axis_x= (m_alt_values.isEmpty() ? PERCENT_2 : PERCENT_7)      * canvas.getWidth();
+        double sideboard_x = (sideboard == null      ? 0.0       : PERCENT_10)     * canvas.getWidth();
+        double width_x     = canvas.getWidth() - left_x - right_x - right_axis_x - sideboard_x;
+
+        Rectangle2D dimension = new Rectangle2D.Double(left_x,  top_y, width_x, hight_y);
+        Rectangle2D sb_dim = new Rectangle2D.Double(left_x + width_x + right_axis_x, top_y, sideboard_x, hight_y);
 
         minY = Util.roundToBeforeStep(minY);
         maxY = Util.roundToNextStep(maxY);
@@ -109,7 +118,9 @@ public class StringLineChart extends Diagramm {
         }
 
         PrintUtil.StepContext con = PrintUtil.getIntervals((int) minY, (int) maxY);
-        PrintUtil.printDiagrammLines(vg, dimension, null, con, PrintUtil.Align.left, m_yAxisText, m_xAxisText, new Rectangle2D.Double(0, minY, 0, maxY));
+        //PrintUtil.printDiagrammLines(vg, dimension, null, con, PrintUtil.Align.right, m_yAxisText, m_xAxisText, new Rectangle2D.Double(0, minY, 0, maxY), false);
+
+        PrintUtil.printDiagrammLines(vg, dimension, null, con, PrintUtil.Align.left, m_yAxisText, m_xAxisText, new Rectangle2D.Double(0, minY, 0, maxY), false);
         double lower = headline.isEmpty() ? dimension.getY() : dimension.getY() / 3;
         dimension = new Rectangle2D.Double(dimension.getX(), dimension.getY() + lower, dimension.getWidth(), dimension.getHeight() - lower);
         PrintUtil.printYAxisScala(vg, dimension, con, minY, maxY);
@@ -153,6 +164,14 @@ public class StringLineChart extends Diagramm {
             i++;
             lp.step();
         }
-        System.out.println(idmap);
+
+        if (sideboard != null && !sideboard.isEmpty()) {
+            HashMap<Integer, String> id_name = new HashMap<>();
+            for (Map.Entry<Integer, String> entry : sideboard.entrySet()) {
+                assert(idmap.containsKey(entry.getKey()));
+                id_name.put(idmap.get(entry.getKey()), entry.getValue());
+            }
+            PrintUtil.printSideboard(vg, sb_dim, id_name);
+        }
     }
 }

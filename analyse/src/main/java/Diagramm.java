@@ -6,6 +6,18 @@ public abstract class Diagramm {
 
     public static final float STROKE_WIDTH = 15.0f;
 
+    public static final double PERCENT_2 = 0.02;
+    public static final double PERCENT_2_5 = 0.025;
+    public static final double PERCENT_3 = 0.03;
+    public static final double PERCENT_5 = 0.05;
+    public static final double PERCENT_7 = 0.07;
+    public static final double PERCENT_10 = 0.1;
+    public static final double PERCENT_15 = 0.15;
+    public static final double PERCENT_80 = 0.8;
+    public static final double PERCENT_85 = 0.85;
+    public static final double PERCENT_90 = 0.9;
+    public static final double PERCENT_100 = 1.0;
+
     protected int m_width;
     protected int m_height;
     protected String m_xAxisText;

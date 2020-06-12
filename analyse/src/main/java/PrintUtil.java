@@ -3,6 +3,10 @@ import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class PrintUtil {
 
@@ -25,6 +29,10 @@ public class PrintUtil {
     static final int SCALA_SCALE_OFFSET = FontUtil.Standart.getSize() / 4;
 
     public static void printDiagrammLines(VectorGraphics2D vg, Rectangle2D dimension, StepContext conX, StepContext conY, Align alignAxis, String yAxis, String xAxis, Rectangle2D values) {
+        printDiagrammLines(vg, dimension, conX, conY, alignAxis, yAxis, xAxis, values, true);
+    }
+
+    public static void printDiagrammLines(VectorGraphics2D vg, Rectangle2D dimension, StepContext conX, StepContext conY, Align alignAxis, String yAxis, String xAxis, Rectangle2D values, boolean xArrow) {
 
         Point2D startX;
         Point2D endX;
@@ -55,7 +63,8 @@ public class PrintUtil {
         vg.draw(new Line2D.Double(startX, endX));
         vg.draw(new Line2D.Double(startY, endY));
 
-        printArrow(vg, endX, Orientation.right);
+        if (xArrow)
+            printArrow(vg, endX, Orientation.right);
         printArrow(vg, startY, Orientation.up);
 
         if (conX != null && !scalarString(conX.digits).isEmpty()) {
@@ -106,8 +115,6 @@ public class PrintUtil {
         int lastIndex = con.steps + 1;
         double smin = con.minStep;
 
-        System.out.println("digits: " + con.digits);
-
         double []scala   = new         double[con.steps + 2];
         Point2D []lefts  = new Point2D.Double[con.steps + 2];
         Point2D []rights = new Point2D.Double[con.steps + 2];
@@ -147,6 +154,32 @@ public class PrintUtil {
                 vg.draw(new Line2D.Double(new Point2D.Double(x, lefts[i].getY()), new Point2D.Double(notX, lefts[i].getY())));
                 vg.setStroke(s);
             }
+        }
+    }
+
+    public static void printSideboard(VectorGraphics2D vg, Rectangle2D sb_dim, HashMap<Integer, String> id_name) {
+        assert(!id_name.isEmpty());
+        LinkedList<Integer> order = new LinkedList<>();
+        for (Map.Entry<Integer, String> entry : id_name.entrySet()) {
+            if (!order.contains(entry.getKey()) && entry.getKey() != null)
+                order.push(entry.getKey());
+        }
+        order.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        Point2D pIcon = new Point2D.Double(sb_dim.getX() + ((double) ICON_SIZE / 2), sb_dim.getY());
+        int k = 0;
+        for (Integer i : order ) {
+            String s = id_name.get(i);
+            Rectangle2D bounds = Util.getTextDimension(vg, s);
+            Point2D p = new Point2D.Double(pIcon.getX(), pIcon.getY() + 2 * k * bounds.getHeight());
+            IconUtil.printIconColor(vg, p, i);
+            printTextRightOfPoint(vg, p, s, 2 * ICON_SIZE);
+            k++;
         }
     }
 
@@ -213,10 +246,12 @@ public class PrintUtil {
             dimension.getY() + dimension.getHeight());
 
         Rectangle2D dim = Util.getTextDimension(vg, text);
+        //System.out.println(dim);
 
         Point2D textCenter = new Point2D.Double(pointOnAxis.getX() + dim.getHeight() / 2.0 - vg.getFontMetrics().getAscent(),
                 // this /3 is incorrect, but looks at the moment at best...                     v
-                pointOnAxis.getY() + (vg.getClipBounds().getHeight() - pointOnAxis.getY()) / 3 + dim.getWidth() / 2);
+                pointOnAxis.getY() + vg.getClipBounds().getHeight() * Diagramm.PERCENT_2_5 + dim.getWidth() / 2);
+        //System.out.println(textCenter.getY());
         AffineTransform af = vg.getTransform();
         vg.translate(textCenter.getX(), textCenter.getY());
         vg.rotate(-Math.PI/2);

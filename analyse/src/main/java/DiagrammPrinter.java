@@ -4,6 +4,7 @@ import de.erichseifert.vectorgraphics2d.Processors;
 import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import de.erichseifert.vectorgraphics2d.util.PageSize;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -17,8 +18,11 @@ public class DiagrammPrinter {
         Processor processor = Processors.get(fileExtension);
         Document doc = processor.getDocument(vg.getCommands(),
                 new PageSize(vg.getClipBounds().width, vg.getClipBounds().height));
+        File dir = new File(fileExtension);
+        if (!dir.exists())
+            dir.mkdir();
         try {
-            doc.writeTo(new FileOutputStream(filename + "." + fileExtension));
+            doc.writeTo(new FileOutputStream(fileExtension + "/" + filename + "." + fileExtension));
             System.out.println("written file: " + filename + "." + fileExtension);
         } catch (IOException e) {
             e.printStackTrace();

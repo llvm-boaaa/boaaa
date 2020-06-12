@@ -44,7 +44,122 @@ public class DiagrammGenerator {
                 }
             }
         }
+        chart.addSideboard(Main.version_label);
+
         return chart;
+    }
+
+    public static Diagramm generateVersionAASpecificStringLineChart(JSONObject obj, String aa, String key, String Headline, String yAxisText, HashMap<Integer, String> label) {
+        return generateVersionAASpecificStringLineChart(obj, 0, aa, key, Headline, yAxisText, label);
+    }
+
+    public static Diagramm generateVersionAASpecificStringLineChart(JSONObject obj, int version, String key, String Headline, String yAxisText, HashMap<Integer, String> label) {
+        return generateVersionAASpecificStringLineChart(obj, version, "", key, Headline, yAxisText, label);
+    }
+
+    private static Diagramm generateVersionAASpecificStringLineChart(JSONObject obj, int version, String aa, String key, String Headline, String yAxisText, HashMap<Integer, String> label) {
+        StringLineChart chart = new StringLineChart(4000, 2000);
+        chart.addHeadline(Headline);
+        chart.addYAxisText(yAxisText);
+        chart.startAtZero();
+        //chart.addColorIdMap(Main.colorid);
+        if ((version == 0) == (aa.isEmpty())) {
+            System.out.println(version + " " + aa);
+            throw new IllegalArgumentException("version == 0 or key. has to be empty");
+        }
+        HashMap<Integer, Integer> color_id = new HashMap<>();
+        for (String file : obj.keySet()) {
+            if (file.equals("libLLVMCore.a")) continue;
+            Object cur = obj.get(file);
+            if (cur instanceof JSONObject) {
+                JSONObject jo_file = (JSONObject) cur;
+                long sum = 0;
+                int count = 0;
+                for (String id : jo_file.keySet() ) {
+                    boolean error = false;
+                    Integer iid = 0;
+                    try {
+                        iid = Integer.parseInt(id);
+                    } catch(NumberFormatException nfe) {
+                        error = true;
+                    }
+                    if (!error) {
+                        Object o_ver = jo_file.get(id);
+                        if (o_ver instanceof JSONObject) {
+                            JSONObject jo_ver = (JSONObject) o_ver;
+                            if (jo_ver.has("instruction_count")) {
+                                long val = jo_ver.getLong("instruction_count");
+                                sum += val;
+                                count++;
+                            }
+                        }
+                    }
+                }
+
+                HashMap<Integer, Double> values = new HashMap<>();
+                if (version == 0) {
+                    for (String ver_key : jo_file.keySet()) {
+                        boolean error = false;
+                        Integer iid = 0;
+                        try {
+                            iid = Integer.parseInt(ver_key);
+                        } catch(NumberFormatException nfe) {
+                            error = true;
+                        }
+                        if (!error) {
+                            if (!color_id.containsKey(iid)) {
+                                color_id.put(iid, Main.colorid.get(iid));
+                            }
+                            Object ver = jo_file.get(ver_key);
+                            if (ver instanceof JSONObject) {
+                                JSONObject jo_ver = (JSONObject) ver;
+                                //key not empty
+                                if (jo_ver.has(aa)) {
+                                    Object aao = jo_ver.get(aa);
+                                    if (aao instanceof JSONObject) {
+                                        JSONObject jo_aa = (JSONObject) aao;
+                                        addKeyToHashMap(jo_aa, values, iid, key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (jo_file.has("" + version)) {
+                        Object ver = jo_file.get("" + version);
+                        if (ver instanceof JSONObject) {
+                            JSONObject jo_ver = (JSONObject) ver;
+                            for (String aa_id : jo_ver.keySet()) {
+                                if (Main.aa_id_map.containsKey(aa_id)) {
+                                    int iid = Main.aa_id_map.get(aa_id);
+                                    if (Main.aa_color_map.containsKey(iid)) {
+                                        int cid = Main.aa_color_map.get(iid);
+                                        color_id.put(iid, cid);
+                                    }
+                                    Object aao = jo_ver.get(aa_id);
+                                    if (aao instanceof JSONObject) {
+                                        JSONObject jo_aa = (JSONObject) aao;
+                                        addKeyToHashMap(jo_aa, values, iid, key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (count != 0) {
+                    chart.addData((int) (sum / count), file, values);
+                }
+            }
+        }
+        chart.addColorIdMap(color_id);
+        chart.addSideboard(label);
+        return chart;
+    }
+
+    private static void addKeyToHashMap(JSONObject aa, HashMap<Integer, Double> map, Integer id, String key) {
+        if (aa.has(key)) {
+            map.put(id, aa.getDouble(key));
+        }
     }
 
 
