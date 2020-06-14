@@ -95,6 +95,21 @@ public class PrintUtil {
         }
     }
 
+    public static void printBox(VectorGraphics2D vg, Rectangle2D dimension, double percent,  double start, double end, double min, double max, int id, double width) {
+        Color c = vg.getColor();
+        if (id < ColorUtil.COLORS.length )
+            vg.setColor(ColorUtil.COLORS[id]);
+
+        double height = Util.map(Math.abs(end - start), min, max, 0, dimension.getHeight());
+
+        vg.fill(new Rectangle2D.Double(dimension.getX() + Util.map(percent, 0, 1, 0, dimension.getWidth()) - width / 2,
+                                       dimension.getY() + Util.map(start, min, max, dimension.getHeight(), 0) - height,
+                                       width,
+                                       height));
+
+        vg.setColor(c);
+    }
+
     public static void printXAxisScala(VectorGraphics2D vg, Rectangle2D dimension, StepContext con, double min, double max, boolean printLine) {
 
     }
@@ -158,6 +173,10 @@ public class PrintUtil {
     }
 
     public static void printSideboard(VectorGraphics2D vg, Rectangle2D sb_dim, HashMap<Integer, String> id_name) {
+        printSideboard(vg, sb_dim, id_name, true);
+    }
+
+    public static void printSideboard(VectorGraphics2D vg, Rectangle2D sb_dim, HashMap<Integer, String> id_name, boolean icon) {
         assert(!id_name.isEmpty());
         LinkedList<Integer> order = new LinkedList<>();
         for (Map.Entry<Integer, String> entry : id_name.entrySet()) {
@@ -177,7 +196,14 @@ public class PrintUtil {
             String s = id_name.get(i);
             Rectangle2D bounds = Util.getTextDimension(vg, s);
             Point2D p = new Point2D.Double(pIcon.getX(), pIcon.getY() + 2 * k * bounds.getHeight());
-            IconUtil.printIconColor(vg, p, i);
+            Color c = vg.getColor();
+            vg.setColor(ColorUtil.getColorOfId(i));
+            if (icon) {
+                IconUtil.printIcon(vg, p, i);
+            } else {
+                IconUtil.printIcon(vg, p, IconUtil.IconType.Square);
+            }
+            vg.setColor(c);
             printTextRightOfPoint(vg, p, s, 2 * ICON_SIZE);
             k++;
         }
@@ -422,10 +448,14 @@ public class PrintUtil {
             this(0, 0);
         }
 
-        public StepContext(int steps, int minStep) {
+        public StepContext(int steps, double minStep) {
+            this(steps, minStep, 0);
+        }
+
+        public StepContext(int steps, double minStep, int digits) {
             this.steps = steps;
             this.minStep = minStep;
-            this.digits = 0;
+            this.digits = digits;
         }
     }
 

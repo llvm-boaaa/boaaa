@@ -18,6 +18,8 @@ public abstract class Diagramm {
     public static final double PERCENT_90 = 0.9;
     public static final double PERCENT_100 = 1.0;
 
+    public static final PrintUtil.StepContext PERCENT_STEP_CONTEXT = new PrintUtil.StepContext(4,20, 3);
+
     protected int m_width;
     protected int m_height;
     protected String m_xAxisText;

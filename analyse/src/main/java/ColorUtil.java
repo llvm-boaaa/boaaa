@@ -24,5 +24,4 @@ public class ColorUtil {
         }
         throw new IndexOutOfBoundsException("color with id: " + id + "is unknown!");
     }
-
 }

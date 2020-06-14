@@ -4,6 +4,122 @@ import java.util.HashMap;
 
 public class DiagrammGenerator {
 
+    public static Diagramm generateAliasResults(JSONObject obj, String headline, int version, String aa) {
+        RelationChart chart = new RelationChart(4000, 2000);
+        chart.addHeadline(headline);
+        chart.addColorIdMap(Main.ar_color_map);
+        chart.addSideboard(Main.ar_label);
+
+        for (String file : obj.keySet()) {
+            if (file.equals("libLLVMCore.a")) continue;
+            Object fileo = obj.get(file);
+            HashMap<Integer, Double> data = new HashMap<>();
+            int instructions = Integer.MAX_VALUE;
+            if (fileo instanceof JSONObject) {
+                JSONObject jo_file = (JSONObject) fileo;
+                if (jo_file.has("" + version)) {
+                    Object ver = jo_file.get("" + version);
+                    if (ver instanceof JSONObject) {
+                        JSONObject jo_ver = (JSONObject) ver;
+                        if (jo_ver.has("instruction_count")) {
+                            instructions = jo_ver.getInt("instruction_count");
+                        }
+                        if (jo_ver.has(aa)) {
+                            Object aao = jo_ver.get(aa);
+                            if (aao instanceof JSONObject) {
+                                JSONObject jo_aa = (JSONObject) aao;
+                                if (jo_aa.has(Main.NO_ALIAS_COUNT)) {
+                                    Double no_alias = jo_aa.getDouble(Main.NO_ALIAS_COUNT);
+                                    data.put(AliasResult.NoALias.id, no_alias);
+                                }
+                                if (jo_aa.has(Main.MAY_ALIAS_COUNT)) {
+                                    Double may_alias = jo_aa.getDouble(Main.MAY_ALIAS_COUNT);
+                                    data.put(AliasResult.MayAlias.id, may_alias);
+                                }
+                                if (jo_aa.has(Main.PARTIAL_ALIAS_COUNT)) {
+                                    Double partial_alias = jo_aa.getDouble(Main.PARTIAL_ALIAS_COUNT);
+                                    data.put(AliasResult.PartialAlias.id, partial_alias);
+                                }
+                                if (jo_aa.has(Main.MUST_ALIAS_COUNT)) {
+                                    Double must_alias = jo_aa.getDouble(Main.MUST_ALIAS_COUNT);
+                                    data.put(AliasResult.MustAlias.id, must_alias);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            chart.addData(instructions, file, data);
+        }
+        return chart;
+    }
+
+    public static Diagramm generateModRefInfo(JSONObject obj, String headline, int version, String aa) {
+        RelationChart chart = new RelationChart(4000, 2000);
+        chart.addHeadline(headline);
+        chart.addColorIdMap(Main.mr_color_map);
+        chart.addSideboard(Main.mr_label);
+
+        for (String file : obj.keySet()) {
+            if (file.equals("libLLVMCore.a")) continue;
+            Object fileo = obj.get(file);
+            HashMap<Integer, Double> data = new HashMap<>();
+            int instructions = Integer.MAX_VALUE;
+            if (fileo instanceof JSONObject) {
+                JSONObject jo_file = (JSONObject) fileo;
+                if (jo_file.has("" + version)) {
+                    Object ver = jo_file.get("" + version);
+                    if (ver instanceof JSONObject) {
+                        JSONObject jo_ver = (JSONObject) ver;
+                        if (jo_ver.has("instruction_count")) {
+                            instructions = jo_ver.getInt("instruction_count");
+                        }
+                        if (jo_ver.has(aa)) {
+                            Object aao = jo_ver.get(aa);
+                            if (aao instanceof JSONObject) {
+                                JSONObject jo_aa = (JSONObject) aao;
+                                if (jo_aa.has(Main.NO_MODREF_COUNT)) {
+                                    Double no_modref = jo_aa.getDouble(Main.NO_MODREF_COUNT);
+                                    data.put(ModRefInfo.NoModRef.id, no_modref);
+                                }
+                                if (jo_aa.has(Main.MOD_COUNT)) {
+                                    Double mod = jo_aa.getDouble(Main.MOD_COUNT);
+                                    data.put(ModRefInfo.Mod.id, mod);
+                                }
+                                if (jo_aa.has(Main.REF_COUNT)) {
+                                    Double ref = jo_aa.getDouble(Main.REF_COUNT);
+                                    data.put(ModRefInfo.Ref.id, ref);
+                                }
+                                if (jo_aa.has(Main.MODREF_COUNT)) {
+                                    Double modref = jo_aa.getDouble(Main.MODREF_COUNT);
+                                    data.put(ModRefInfo.ModRef.id, modref);
+                                }
+                                if (jo_aa.has(Main.MUST_COUNT)) {
+                                    Double must = jo_aa.getDouble(Main.MUST_COUNT);
+                                    data.put(ModRefInfo.Must.id, must);
+                                }
+                                if (jo_aa.has(Main.MUST_MOD_COUNT)) {
+                                    Double must_mod = jo_aa.getDouble(Main.MUST_MOD_COUNT);
+                                    data.put(ModRefInfo.MustMod.id, must_mod);
+                                }
+                                if (jo_aa.has(Main.MUST_REF_COUNT)) {
+                                    Double must_ref = jo_aa.getDouble(Main.MUST_REF_COUNT);
+                                    data.put(ModRefInfo.MustRef.id, must_ref);
+                                }
+                                if (jo_aa.has(Main.MUST_MODREF_COUNT)) {
+                                    Double must_modref = jo_aa.getDouble(Main.MUST_MODREF_COUNT);
+                                    data.put(ModRefInfo.MustModRef.id, must_modref);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            chart.addData(instructions, file, data);
+        }
+        return chart;
+    }
+
     public static Diagramm generateInstructionCount(JSONObject obj) {
         StringLineChart chart = new StringLineChart(4000, 2000);
         chart.addHeadline("Instruction in each LLVM_Version");
@@ -163,7 +279,7 @@ public class DiagrammGenerator {
     }
 
 
-    public static Diagramm generateTest() {
+    public static Diagramm generateTestStringLineChart() {
         StringLineChart chart = new StringLineChart(4000, 2000);
         chart.addColorIdMap(Main.colorid);
         HashMap<Integer, Double> m1 = new HashMap<>();
@@ -206,6 +322,52 @@ public class DiagrammGenerator {
         //chart.addXAxisText("x-Axis");
         chart.addYAxisText("y-Axis");
         chart.startAtZero();
+        chart.addHeadline("Headline");
+        return chart;
+    }
+
+    public static Diagramm generateTestRelationChart() {
+        RelationChart chart = new RelationChart(4000, 2000);
+        chart.addColorIdMap(Main.colorid);
+        HashMap<Integer, Double> m1 = new HashMap<>();
+        m1.put(40, 100.0);
+        m1.put(50, 150.0);
+        m1.put(60, 200.0);
+
+        HashMap<Integer, Double> m2 = new HashMap<>();
+        m2.put(40, 150.0);
+        m2.put(50, 100.0);
+        m2.put(60, 300.0);
+
+        HashMap<Integer, Double> m3 = new HashMap<>();
+        m3.put(40, 20.0);
+        m3.put(50, 150.0);
+        m3.put(60, 200.0);
+
+        HashMap<Integer, Double> m4 = new HashMap<>();
+        //m4.put(40, 75.0);
+        m4.put(50, 230.0);
+        m4.put(60, 100.0);
+
+        HashMap<Integer, Double> m5 = new HashMap<>();
+        m5.put(40, 50.0);
+        m5.put(50, 100.0);
+        m5.put(60, 500.0);
+
+
+        chart.addData(1, "file1", m1);
+        chart.addData(2, "file2", m2);
+        chart.addData(3, "file3", m3);
+        chart.addData(4, "file4", m4);
+        chart.addData(5, "file5", m5);
+        chart.addData(6, "file1", m1);
+        chart.addData(7, "file2", m2);
+        chart.addData(8, "file3", m3);
+        chart.addData(9, "file4", m4);
+        chart.addData(10, "file5", m5);
+
+        //chart.addXAxisText("x-Axis");
+        chart.addYAxisText("y-Axis");
         chart.addHeadline("Headline");
         return chart;
     }

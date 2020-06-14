@@ -7,14 +7,39 @@ import de.erichseifert.vectorgraphics2d.util.PageSize;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DiagrammPrinter {
 
-    public static void printDiagram(VectorGraphics2D vg, String filename) {
-        printDiagram(vg, filename, "svg");
+    public enum EXPORT {
+        SVG("svg"),
+        EPS("eps"),
+        PDF("pdf");
+
+        public String ext;
+        EXPORT(String extension) {
+            ext = extension;
+        }
     }
 
-    public static void printDiagram(VectorGraphics2D vg, String filename, String fileExtension) {
+    public static void printDiagramms(HashMap<String, Diagramm> charts, EXPORT ef) {
+        for (Map.Entry<String, Diagramm> chart : charts.entrySet())
+            DiagrammPrinter.printDiagram(chart.getValue().generateVG(), chart.getKey(), ef);
+    }
+
+    public static void printDiagramms(HashMap<String, Diagramm> charts) {
+        for (Map.Entry<String, Diagramm> chart : charts.entrySet())
+            DiagrammPrinter.printDiagram(chart.getValue().generateVG(), chart.getKey());
+    }
+
+    public static void printDiagram(VectorGraphics2D vg, String filename) {
+        printDiagram(vg, filename, EXPORT.SVG);
+    }
+
+    public static void printDiagram(VectorGraphics2D vg, String filename, EXPORT ef) {
+        String fileExtension = ef.ext;
+
         Processor processor = Processors.get(fileExtension);
         Document doc = processor.getDocument(vg.getCommands(),
                 new PageSize(vg.getClipBounds().width, vg.getClipBounds().height));
