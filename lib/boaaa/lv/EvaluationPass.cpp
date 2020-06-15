@@ -401,75 +401,77 @@ void EvaluationPassImpl::evaluateResult()
 #endif
     }
 
-    for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
-    {
-        size_t num = it->second->size();
-        std::vector<bool> check(num);
-        for (int i = 0; i < num; i++)
-            check[i] = true;
-
-        evaluation_sets* set = it->second.get();
-        for (int i = 0; i < num; i++)
+    if (sum_alias <= 10000) {
+        for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
         {
-            //allready checked
-            if (!check[i] || (*set)[i]->size() == 0) continue;
-            assert((*set)[i]->headssize() == 1);
-            std::set<size_t> ids;
-            unionfind_map* map = (*set)[i].get();
-            bool check_added = false;
-            size_t size = map->size();
+            size_t num = it->second->size();
+            std::vector<bool> check(num);
+            for (int i = 0; i < num; i++)
+                check[i] = true;
 
-            for (unionfind_map::const_iterator it = map->begin(), end = map->end(); it != end; ++it)
+            evaluation_sets* set = it->second.get();
+            for (int i = 0; i < num; i++)
             {
-                size_t id = it->second->value();
-                assert((*set)[id]->headssize() == 1);
-                unionfind_map* comp = (*set)[id].get();
-                if (comp->size() == map->size()) {
-                    //compare
-                    //fill one time if needed
-                    if (ids.size() < map->size()) {
-                        ids.clear();
-                        for (unionfind_map::const_iterator iit = map->begin(), iend = map->end(); iit != iend; iit++)
+                //allready checked
+                if (!check[i] || (*set)[i]->size() == 0) continue;
+                assert((*set)[i]->headssize() == 1);
+                std::set<size_t> ids;
+                unionfind_map* map = (*set)[i].get();
+                bool check_added = false;
+                size_t size = map->size();
+
+                for (unionfind_map::const_iterator it = map->begin(), end = map->end(); it != end; ++it)
+                {
+                    size_t id = it->second->value();
+                    assert((*set)[id]->headssize() == 1);
+                    unionfind_map* comp = (*set)[id].get();
+                    if (comp->size() == map->size()) {
+                        //compare
+                        //fill one time if needed
+                        if (ids.size() < map->size()) {
+                            ids.clear();
+                            for (unionfind_map::const_iterator iit = map->begin(), iend = map->end(); iit != iend; iit++)
+                            {
+                                ids.insert(iit->second->value());
+                            }
+                        }
+
+                        bool check_all = true;
+                        //check set[i]\i == set[id]\id
+                        for (unionfind_map::const_iterator iit = comp->begin(), iend = comp->end(); iit != iend; iit++)
                         {
-                            ids.insert(iit->second->value());
+                            //skip own id
+                            if ((*set)[id]->begin()->first == iit->second->value()) continue;
+
+                            if (ids.find(iit->second->value()) == ids.end()) {
+                                check_all = false;
+                                break;
+                            }
                         }
-                    }
 
-                    bool check_all = true;
-                    //check set[i]\i == set[id]\id
-                    for (unionfind_map::const_iterator iit = comp->begin(), iend = comp->end(); iit != iend; iit++)
-                    {
-                        //skip own id
-                        if ((*set)[id]->begin()->first == iit->second->value()) continue;
-
-                        if (ids.find(iit->second->value()) == ids.end()) {
-                            check_all = false;
-                            break;
+                        if (check_all) {
+                            continue;
                         }
-                    }
 
-                    if (check_all) {
-                        continue;
-                    }
-
-                    if (check[id])
-                    {
-                        check[id] = false;
-                    }
-                    else
-                    {
-                        //skip
-                        check_added = true;
+                        if (check[id])
+                        {
+                            check[id] = false;
+                        }
+                        else
+                        {
+                            //skip
+                            check_added = true;
+                        }
                     }
                 }
+
+                //already added
+                if (check_added) continue;
+
+                NoAliasSetCount++;
+                sum_no_alias += size;
+                sum_no_alias_squared += size * size;
             }
-
-            //already added
-            if (check_added) continue;
-
-            NoAliasSetCount++;
-            sum_no_alias += size;
-            sum_no_alias_squared += size * size;
         }
     }
 

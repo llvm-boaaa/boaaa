@@ -3,7 +3,7 @@
 #include "boaaa/support/raw_type.h"
 
 #include <iostream>
-#include <vector>
+#include <set>
 
 #ifdef SEA_DSA
 using namespace llvm;
@@ -17,7 +17,7 @@ namespace {
 
         NodeAndOffset(const sea_dsa::Node* node, unsigned int offset) : Node(node), Offset(offset) {}
 
-        bool operator< (const NodeAndOffset& other) {
+        bool operator< (const NodeAndOffset& other) const {
             if (this->Node == other.Node) return this->Offset < other.Offset;
             return this->Node < other.Node;
         }
@@ -38,6 +38,15 @@ namespace {
                 return check(lhs.Offset, rhs.Offset, lhs_size);
             else
                 return check(rhs.Offset, lhs.Offset, rhs_size);
+        }
+    };
+
+    struct NodeAndOffsetComparetor {
+
+        NodeAndOffsetComparetor() = default;
+
+        bool operator() (const NodeAndOffset& lhs, const NodeAndOffset& rhs) const {
+            return lhs.Node < rhs.Node;
         }
     };
 
@@ -140,38 +149,51 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
     const Node* NA = CA.getNode();
     const Node* NB = CB.getNode();
 
-    std::vector<NodeAndOffset> SetA;
-    std::vector<NodeAndOffset> SetB;
+    typedef std::set<NodeAndOffset, NodeAndOffsetComparetor> NodeAndOffsetSet;
 
-    std::function<void(unsigned int, const Node*, std::vector<NodeAndOffset>&)> dfs;
-    dfs = [&dfs](unsigned int offset, const Node* node, std::vector<NodeAndOffset>& set) {
-        assert(node->getNumLinks() > 0);
-        for (auto& link : node->getLinks())
-        {
-            const Node* _node = link.second.get()->getNode();
-            unsigned int new_offset = offset + link.second.get()->getOffset() + link.first.getOffset();
+    NodeAndOffsetSet SetA;
+    NodeAndOffsetSet SetB;
 
-            if (_node->getNumLinks() > 0)
-                dfs(new_offset, _node, set);
-            else
-                set.push_back({ _node, new_offset });
+    NodeAndOffsetSet recursion_break;
+
+    std::function<bool(unsigned int, const Node*, NodeAndOffsetSet&)> dfs;
+    dfs = [&dfs, &recursion_break](unsigned int offset, const Node* node, NodeAndOffsetSet& set) -> bool {
+        bool recursion = false;
+        if (recursion_break.find({ node, offset }) != recursion_break.end()) {
+            return false;
         }
+        if (node->isForwarding()) {
+            Cell c = node->getForwardDest();
+            recursion |= dfs(offset + c.getOffset(), c.getNode(), set);
+        } else if (node->getNumLinks() > 0) {
+            recursion_break.insert({ node, offset });
+            for (auto& FieldCell : node->getLinks()) {
+                Cell c = *FieldCell.second.get();
+                Node *n = c.getNode();
+                if (n && n != node) {
+                    //recursion |= dfs(offset + FieldCell.first.getOffset() + c.getOffset(), n, set);
+                    recursion |= dfs(offset + c.getOffset(), n, set);
+                }
+            }
+        }
+        else {
+            set.insert({ node, offset });
+            return true;
+        }
+        return recursion;
     };
 
+    if (!dfs(CA.getOffset(), NA, SetA)) {
+        SetA.insert({ NA, CA.getOffset() });
+    }
+    recursion_break.clear();
+    if (!dfs(CB.getOffset(), NB, SetB)) {
+        SetB.insert({ NB, CB.getOffset() });
+    }
+    recursion_break.clear();
 
-    if (NA->getNumLinks() > 0) {
-        dfs(CA.getOffset(), NA, SetA);
-    } 
-    else {
-        SetA.push_back({ NA, CA.getOffset() });
-    }
-
-    if (NB->getNumLinks() > 0) {
-        dfs(CB.getOffset(), NB, SetB);
-    }
-    else {
-        SetB.push_back({ NB, CB.getOffset() });
-    }
+    assert(SetA.size() > 0);
+    assert(SetB.size() > 0);
 
     AliasMerger merger;
 

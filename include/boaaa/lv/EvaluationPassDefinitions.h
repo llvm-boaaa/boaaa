@@ -293,13 +293,17 @@ namespace llvm {
 		inline void changeDsaOption(GlobalAnalysisKind kind) {
 			reinterpret_cast<cl::opt<::sea_dsa::GlobalAnalysisKind>*>(cl::getRegisteredOptions().find("sea-dsa")->second)->setValue(kind);
 		}
+
+		inline void changeTDBU() {
+			reinterpret_cast<cl::opt<bool>*>(cl::getRegisteredOptions().find("sea-dsa-no-td-copying-opt")->second)->setValue(true);
+		}
 	}
 
 
 	//rename passes, so they get show correctly in JSON export
-	BOAAA_CREATE_RENAME_PASS(ContextSensitiveSeaDsaWrapperPass,					SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::CONTEXT_SENSITIVE))
+	BOAAA_CREATE_RENAME_PASS(ContextSensitiveSeaDsaWrapperPass, SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::CONTEXT_SENSITIVE))
 
-	BOAAA_CREATE_RENAME_PASS(ContextSensitiveBottomUpTopDownSeaDsaWrapperPass,	SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::BUTD_CONTEXT_SENSITIVE))
+	BOAAA_CREATE_RENAME_PASS(ContextSensitiveBottomUpTopDownSeaDsaWrapperPass, SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::BUTD_CONTEXT_SENSITIVE); changeTDBU())
 
 	BOAAA_CREATE_RENAME_PASS(BottomUpSeaDsaWrapperPass,							SeaDsaWrapperPass, changeDsaOption(sea_dsa::GlobalAnalysisKind::BU))
 
