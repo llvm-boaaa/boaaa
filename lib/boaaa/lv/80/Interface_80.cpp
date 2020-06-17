@@ -19,6 +19,7 @@
 #include "boaaa/lv/CountPass.h"
 #include "boaaa/lv/EvaluationPass.h"
 #include "boaaa/lv/EvaluationPassDefinitions.h"
+#include "boaaa/lv/PassManagerTimeMessure.h"
 
 using namespace boaaa;
 
@@ -117,10 +118,12 @@ bool DLInterface80::loadModule(uint64_t module_file_prefix, uint64_t module_file
 
 void DLInterface80::unloadModule()
 {
-	boaaa::AnalysisDiscrepancyChecker adc;
-	std::cout << "start discrapency check\n";
-	adc.checkAnalysis(context.alias_sets, context.no_alias_sets);
-	std::cout << "stop discrapency check\n";
+	if (context.store_aa_results) {
+		boaaa::AnalysisDiscrepancyChecker adc;
+		*(context.basic_ostream) << "start discrapency check\n";
+		adc.checkAnalysis(context.alias_sets, context.no_alias_sets);
+		*(context.basic_ostream) << "stop discrapency check\n";
+	}
 
 	context.alias_sets.clear();
 	context.no_alias_sets.clear();
@@ -178,9 +181,13 @@ bool DLInterface80::runAnalysis(boaaa::aa_id analysis)
 		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
 		timepass->addPass(pm);
 		pm.add(pass);
+		PassManagerTimeMessure pmtm;
+		pmtm.start();
 		pm.run(*context.loaded_module);
+		pmtm.end();
 		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
+			pmtm.printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
 	};
@@ -196,12 +203,17 @@ bool DLInterface80::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 		_raw_type_inst(pass)::timepass* timepass = pass->createTimePass();
 		timepass->addPass(pm);
 		pm.add(pass);
+		PassManagerTimeMessure pmtm;
+		pmtm.start();
 		pm.run(*context.loaded_module);
+		pmtm.end();
 		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
+			pmtm.printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
 		timepass->printToEvalRes(er);
+		pmtm.printToEvalRes(er);
 		pass->printToEvalRes(er);
 	};
 

@@ -57,6 +57,7 @@ namespace boaaa {
 		std::ostream* basic_ostream;
 		bool del_strm_after_use;
 		std::unique_ptr<ModuleResult> module_result;
+		bool store_aa_results;
 		
 		version_context() : relevant_pointers(), alias_sets(), no_alias_sets()
 		{
@@ -66,6 +67,7 @@ namespace boaaa {
 			module_result.reset(nullptr);
             basic_ostream = nullptr;
 			del_strm_after_use = false;
+			store_aa_results = true;
 		}
 
 		~version_context() {

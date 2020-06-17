@@ -92,6 +92,7 @@ namespace boaaa {
 
 		//time definitions
 		BOAAA_ADD_TIME_MEMBERS(pm_time)
+		BOAAA_ADD_TIME_MEMBERS(analysis_time)
 		BOAAA_ADD_TIME_MEMBERS(function_time)
 		BOAAA_ADD_TIME_MEMBERS(alias_time)
 		BOAAA_ADD_TIME_MEMBERS(modref_time)
@@ -119,6 +120,10 @@ namespace boaaa {
 		BOAAA_SETTER_GETTER(double, mean_alias_sets)
 		BOAAA_SETTER_GETTER(double, var_alias_sets)
 
+		BOAAA_SETTER_GETTER(uint64_t, ex_alias_sets)
+		BOAAA_SETTER_GETTER(double, mean_ex_alias_sets)
+		BOAAA_SETTER_GETTER(double, var_ex_alias_sets)
+
 		BOAAA_SETTER_GETTER(uint64_t, no_alias_sets)
 		BOAAA_SETTER_GETTER(double, mean_no_alias_sets)
 		BOAAA_SETTER_GETTER(double, var_no_alias_sets)
@@ -127,6 +132,7 @@ namespace boaaa {
 			m_aa_name(nullptr), m_aa_name_delete(nullptr),
 			//time
 			m_pm_time_seconds(0),       m_pm_time_millis(0),       m_pm_time_micros(0),       m_pm_time_nanos(0),
+			m_analysis_time_seconds(0), m_analysis_time_millis(0), m_analysis_time_micros(0), m_analysis_time_nanos(0),
 			m_function_time_seconds(0), m_function_time_millis(0), m_function_time_micros(0), m_function_time_nanos(0),
 			m_alias_time_seconds(0),    m_alias_time_millis(0),    m_alias_time_micros(0),    m_alias_time_nanos(0),
 			m_modref_time_seconds(0),   m_modref_time_millis(0),   m_modref_time_micros(0),   m_modref_time_nanos(0),
@@ -137,6 +143,7 @@ namespace boaaa {
 			m_must_count(0), m_must_mod_count(0), m_must_ref_count(0), m_must_modref_count(0),
 			//alias sets
 			m_alias_sets(0),    m_mean_alias_sets(0.0),    m_var_alias_sets(0.0),
+			m_ex_alias_sets(0), m_mean_ex_alias_sets(0.0), m_var_ex_alias_sets(0.0),
 			m_no_alias_sets(0), m_mean_no_alias_sets(0.0), m_var_no_alias_sets(0.0)
 		{ }
 		~EvaluationResult() { if (m_aa_name_delete) m_aa_name_delete(m_aa_name); }
@@ -163,7 +170,9 @@ namespace boaaa {
 			rapidjson::Value& value = _value[str];
 
 			//time
+
 			BOAAA_CHECK_AND_WRITE_TIME(value, pm_time,			alloc)
+			BOAAA_CHECK_AND_WRITE_TIME(value, analysis_time,    alloc)
 			BOAAA_CHECK_AND_WRITE_TIME(value, function_time,	alloc)
 			BOAAA_CHECK_AND_WRITE_TIME(value, alias_time,		alloc)
 			BOAAA_CHECK_AND_WRITE_TIME(value, modref_time,		alloc)
@@ -190,11 +199,18 @@ namespace boaaa {
 
 			//alias sets	
 			BOAAA_CHECK_AND_WRITE(value, m_alias_sets,							"alias_sets",				SetUint64, alloc)
+			BOAAA_CHECK_AND_WRITE(value, m_ex_alias_sets,						"ex_alias_sets",            SetUint64, alloc)
 			BOAAA_CHECK_AND_WRITE(value, m_no_alias_sets,						"no_alias_sets",			SetUint64, alloc)
 			if (m_alias_sets) {
 				BOAAA_CHECK_AND_WRITE(value, m_mean_alias_sets,					"mean_alias_sets",			SetDouble, alloc)
 				BOAAA_CHECK_AND_WRITE(value, m_var_alias_sets,					"var_alias_sets",			SetDouble, alloc)
 			}
+
+			if (m_ex_alias_sets) {
+				BOAAA_CHECK_AND_WRITE(value, m_mean_ex_alias_sets,				"mean_ex_alias_sets",		SetDouble, alloc)
+				BOAAA_CHECK_AND_WRITE(value, m_var_ex_alias_sets,				"var_ex_alias_sets",		SetDouble, alloc)
+			}
+
 			if (m_no_alias_sets) {
 				BOAAA_CHECK_AND_WRITE(value, m_mean_no_alias_sets,				"mean_no_alias_sets",		SetDouble, alloc)
 				BOAAA_CHECK_AND_WRITE(value, m_var_no_alias_sets,				"var_no_alias_sets",		SetDouble, alloc)
@@ -215,6 +231,7 @@ namespace boaaa {
 
 			//time 
 			BOAAA_CHECK_AND_ASIGN_TIME(value, result, tmp, pm_time)
+			BOAAA_CHECK_AND_ASIGN_TIME(value, result, tmp, analysis_time)
 			BOAAA_CHECK_AND_ASIGN_TIME(value, result, tmp, function_time)
 			BOAAA_CHECK_AND_ASIGN_TIME(value, result, tmp, alias_time)
 			BOAAA_CHECK_AND_ASIGN_TIME(value, result, tmp, modref_time)
@@ -239,10 +256,13 @@ namespace boaaa {
 
 			//alias sets	
 			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_alias_sets,				"alias_sets",				IsUint64, GetUint64)
+			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_ex_alias_sets,			"ex_alias_sets",            IsUint64, GetUint64)
 			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_no_alias_sets,			"no_alias_sets",			IsUint64, GetUint64)
 
 			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_mean_alias_sets,		"mean_alias_sets",			IsDouble, GetDouble)
 			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_var_alias_sets,			"mean_alias_sets",			IsDouble, GetDouble)
+			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_mean_ex_alias_sets,     "mean_ex_alias_sets",       IsDouble, GetDouble)
+			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_var_ex_alias_sets,      "mean_ex_alias_sets",       IsDouble, GetDouble)
 			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_mean_no_alias_sets,		"mean_no_alias_sets",		IsDouble, GetDouble)
 			BOAAA_CHECK_AND_ASIGN(value, result, tmp, m_var_no_alias_sets,		"mean_var_alias_sets",		IsDouble, GetDouble)
 				
