@@ -126,12 +126,13 @@ namespace boaaa {
 	public:
 		EvaluationPassImpl() : FunctionCount(), NoAliasCount(), MayAliasCount(), PartialAliasCount(), 
 			MustAliasCount(), NoModRefCount(), ModCount(), RefCount(), ModRefCount(), MustCount(), 
-			MustRefCount(), MustModCount(), MustModRefCount(), 
-			evaluated(false), AliasSetCount(), NoAliasSetCount(),
-			MeanAlias(), VarAlias(), MeanNoAlias(), VarNoAlias(),
+			MustRefCount(), MustModCount(), MustModRefCount(), evaluated(false), 
+			AliasSetCount(), ExAliasSetCount(), NoAliasSetCount(),
+			MeanAlias(), VarAlias(), MeanExAlias(), VarExAlias(), MeanNoAlias(), VarNoAlias(),
 			m_nanos_alias(), m_micros_alias(), m_millis_alias(), m_seconds_alias(),
 			m_nanos_modref(), m_micros_modref(), m_millis_modref(),m_seconds_modref(),
-			delete_aa_set(false), delete_no_aa_set(false), alias_set(nullptr), no_alias_set(nullptr) {};
+			delete_aa_set(false), delete_ex_aa_set(false), delete_no_aa_set(false), 
+			alias_set(nullptr), ex_alias_set(nullptr), no_alias_set(nullptr) {};
 
 		~EvaluationPassImpl() { deleteSets(); }
 
@@ -141,6 +142,10 @@ namespace boaaa {
 			if (alias_set && delete_aa_set) {
 				delete alias_set;
 				delete_aa_set = false;
+			}
+			if (ex_alias_set && delete_ex_aa_set) {
+				delete ex_alias_set;
+				delete_ex_aa_set = false;
 			}
 			if (no_alias_set && delete_no_aa_set) {
 				delete no_alias_set;
@@ -172,6 +177,11 @@ namespace boaaa {
 				delete_aa_set = true;
 				alias_set = new evaluation_sets();
 			}
+			if (!ex_alias_set)
+			{
+				delete_ex_aa_set = true;
+				ex_alias_set = new evaluation_sets();
+			}
 			if (!no_alias_set)
 			{
 				delete_no_aa_set = true;
@@ -185,6 +195,12 @@ namespace boaaa {
 			return alias_set->insert(std::make_pair(
 				GUID, std::unique_ptr<unionfind_map>(new unionfind_map())
 				)).first->second.get();
+		}
+
+		unionfind_map* initEXAASet(uint64_t GUID) {
+			return ex_alias_set->insert(std::make_pair(
+				GUID, std::unique_ptr<unionfind_map>(new unionfind_map())
+			)).first->second.get();
 		}
 
 		evaluation_sets* initNoAASets(uint64_t GUID, size_t num)
@@ -206,15 +222,20 @@ namespace boaaa {
 		int64_t MustCount, MustRefCount, MustModCount, MustModRefCount;
 
 		evaluation_sets* alias_set;
+		evaluation_sets* ex_alias_set;
 		evaluation_explicite_sets* no_alias_set;
 		bool delete_aa_set;
+		bool delete_ex_aa_set;
 		bool delete_no_aa_set;
 
 		bool evaluated;
 		uint64_t AliasSetCount;
+		uint64_t ExAliasSetCount;
 		uint64_t NoAliasSetCount;
 		double   MeanAlias;
 		double   VarAlias;
+		double   MeanExAlias;
+		double   VarExAlias;
 		double   MeanNoAlias;
 		double   VarNoAlias;
 	};

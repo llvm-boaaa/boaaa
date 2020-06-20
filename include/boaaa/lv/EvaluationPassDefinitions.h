@@ -134,9 +134,10 @@ namespace boaaa {
 			void setContext(version_context* _context, aa_id _id) { 
 				context = _context;
 				id = _id;
-
-				checkIfSetsAreInitalized(context, id);
-				impl->setSets(context->alias_sets[id].get(), context->no_alias_sets[id].get());
+				if (context->store_aa_results) {
+					checkIfSetsAreInitalized(context, id);
+					impl->setSets(context->alias_sets[id].get(), context->no_alias_sets[id].get());
+				}
 			}
 
 			void printResult(std::ostream& stream) {

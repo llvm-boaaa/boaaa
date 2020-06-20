@@ -105,7 +105,7 @@ namespace boaaa
 				uint16_t  sum_millis  = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start).count() % 1000;
 				uint64_t sum_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_end - m_start).count();
 				
-				stream << "Total PM Time : " << sum_seconds << "," << (sum_millis < 100 ? "0" : "") << +(sum_millis < 10 ? "0" : "") << (int) sum_millis
+				stream << "Analysis Time : " << sum_seconds << "," << (sum_millis < 100 ? "0" : "") << +(sum_millis < 10 ? "0" : "") << (int) sum_millis
 															<< "." << (sum_micros < 100 ? "0" : "") << +(sum_micros < 10 ? "0" : "") << (int) sum_micros
 															<< "." << (sum_nanos  < 100 ? "0" : "") << +(sum_nanos  < 10 ? "0" : "") << (int) sum_nanos << "\n";
 
@@ -120,10 +120,11 @@ namespace boaaa
 				uint16_t  sum_millis = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start).count() % 1000;
 				uint64_t sum_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_end - m_start).count();
 
-				er.set_pm_time_seconds(sum_seconds);
-				er.set_pm_time_millis(sum_millis);
-				er.set_pm_time_micros(sum_micros);
-				er.set_pm_time_nanos(sum_nanos);
+				er.set_analysis_time_seconds(sum_seconds);
+				er.set_analysis_time_millis(sum_millis);
+				er.set_analysis_time_micros(sum_micros);
+				er.set_analysis_time_nanos(sum_nanos);
+
 
 				er.set_function_time_seconds(m_seconds);
 				er.set_function_time_millis(m_millis);

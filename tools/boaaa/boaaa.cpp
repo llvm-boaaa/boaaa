@@ -78,6 +78,10 @@ static cl::opt<bool>
 NoJsonExport("no-json", cl::desc("boaaa exports by default all results to a json: path/to/boaaa/results.json"),
 	cl::init(false), cl::cat(BoaaaCat));
 
+static cl::opt<bool> 
+StoreAAResults("store", cl::desc("If Flag is set it stores all AAResuls for inter-Analysis comperison"), 
+	cl::cat(BoaaaCat));
+
 static cl::opt<std::string>
 InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 	cl::init("-"), cl::value_desc("path/filename"), cl::cat(BoaaaCat));
@@ -139,6 +143,7 @@ void setup();
 void initAAs();
 void finalize();
 void writeJson();
+void setStoreAAResults();
 
 void evaluateMainloopError(COROUTINESTATES_MAIN cms, uint64_t line_count) {
 	
@@ -175,6 +180,7 @@ int main(int argc, char** argv) {
 #endif
 	
 	cl::ParseCommandLineOptions(argc, argv);
+	setStoreAAResults();
 
 	if (FileInput.compare(FileInput.getDefault().getValue()) == 0) { //no inputflie set because cl::init(-)
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
@@ -220,6 +226,7 @@ int main(int argc, char** argv) {
 
 		std::string prefix(PrefixFilePath.getValue());
 		std::string file(InputFilename.getValue());
+		bool store = StoreAAResults.getValue();
 		InputFilename.reset();
 
 		cl::ResetAllOptionOccurrences();
@@ -236,6 +243,15 @@ int main(int argc, char** argv) {
 			InputFilename.setValue(file);
 		if (PrefixFilePath.getValue().compare(PrefixFilePath.getDefault().getValue()) == 0)
 			PrefixFilePath.setValue(prefix);
+		//if (StoreAAResults.getValue() != store) {
+		if (StoreAAResults.getNumOccurrences() > 0) {
+			if (StoreAAResults.getValue() != store) setStoreAAResults();
+			std::cout << "[Info] store AAResults: " << (StoreAAResults.getValue() ? "true" : "false") << "\n";
+		} else {
+			StoreAAResults.setValue(store);
+		}
+		std::cout << "store_num: " << StoreAAResults.getNumOccurrences() << " : " << StoreAAResults.getValue() << "\n";
+		//}
 
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			writeJson();
@@ -749,4 +765,19 @@ void finalize()
 	delete llvm_man;
 
 	writeJson();
+}
+
+void setStoreAAResults() {
+	if (llvm40)
+		llvm40->storeAAResults(StoreAAResults.getValue());
+	if (llvm50)
+		llvm50->storeAAResults(StoreAAResults.getValue());
+	if (llvm60)
+		llvm60->storeAAResults(StoreAAResults.getValue());
+	if (llvm71)
+		llvm71->storeAAResults(StoreAAResults.getValue());
+	if (llvm80)
+		llvm80->storeAAResults(StoreAAResults.getValue());
+	if (llvm90)
+		llvm90->storeAAResults(StoreAAResults.getValue());
 }

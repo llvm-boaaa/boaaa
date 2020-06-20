@@ -162,6 +162,7 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
         if (recursion_break.find({ node, offset }) != recursion_break.end()) {
             return false;
         }
+        bool local = false;
         if (node->isForwarding()) {
             Cell c = node->getForwardDest();
             recursion |= dfs(offset + c.getOffset(), c.getNode(), set);
@@ -171,12 +172,12 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
                 Cell c = *FieldCell.second.get();
                 Node *n = c.getNode();
                 if (n && n != node) {
-                    //recursion |= dfs(offset + FieldCell.first.getOffset() + c.getOffset(), n, set);
-                    recursion |= dfs(offset + c.getOffset(), n, set);
+                    recursion |= dfs(offset + FieldCell.first.getOffset() + c.getOffset(), n, set);
+                    //recursion |= dfs(offset + c.getOffset(), n, set);
+                    
                 }
             }
-        }
-        else {
+        } else {
             set.insert({ node, offset });
             return true;
         }

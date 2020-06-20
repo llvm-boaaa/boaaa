@@ -87,6 +87,8 @@ namespace boaaa {
 		bool runAnalysis(boaaa::aa_id analysis) override { return false; }
 		bool runAnalysis(boaaa::aa_id analysis, EvaluationResult& er) override { return false; }
 
+		void storeAAResults(bool store) override { }
+
 		ModuleResult* getModuleResult() override
 		{
 			return nullptr;

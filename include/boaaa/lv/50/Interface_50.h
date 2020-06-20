@@ -31,6 +31,10 @@ namespace boaaa {
 		void unloadModule() override;
 		bool runAnalysis(boaaa::aa_id analysis) override;
 		bool runAnalysis(boaaa::aa_id analysis, EvaluationResult& er) override;
+
+		void storeAAResults(bool store) override {
+			context.store_aa_results = store;
+		}
 		
 		ModuleResult* getModuleResult() override
 		{

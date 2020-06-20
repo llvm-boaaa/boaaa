@@ -107,6 +107,7 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
 
     checkInitSets();
     unionfind_map* aa_set = initAASet(F.getGUID());
+    unionfind_map* ex_aa_set = initEXAASet(F.getGUID());
     evaluation_sets* no_aa_set = initNoAASets(F.getGUID(), container.sum_all);
     using namespace llvm;
     llvm::DataLayout DL = F.getParent()->getDataLayout();
@@ -155,14 +156,17 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
                 break;
             case MayAlias:
                 ++MayAliasCount;
+                ex_aa_set->concat(valX, valY);
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
                 aa_set->concat(valX, valY);
+                ex_aa_set->concat(valX, valY);
                 break;
             case MustAlias:
                 ++MustAliasCount;
                 aa_set->concat(valX, valY);
+                ex_aa_set->concat(valX, valY);
                 break;
             }
         }
@@ -189,14 +193,17 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
                 break;
             case MayAlias:
                 ++MayAliasCount;
+                ex_aa_set->concat(valX, valY);
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
                 aa_set->concat(valX, valY);
+                ex_aa_set->concat(valX, valY);
                 break;
             case MustAlias:
                 ++MustAliasCount;
                 aa_set->concat(valX, valY);
+                ex_aa_set->concat(valX, valY);
                 break;
             }
         }
@@ -223,14 +230,17 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
                 break;
             case MayAlias:
                 ++MayAliasCount;
+                ex_aa_set->concat(valX, valY);
                 break;
             case PartialAlias:
                 ++PartialAliasCount;
                 aa_set->concat(valX, valY);
+                ex_aa_set->concat(valX, valY);
                 break;
             case MustAlias:
                 ++MustAliasCount;
                 aa_set->concat(valX, valY);
+                ex_aa_set->concat(valX, valY);
                 break;
             }
         }
@@ -371,8 +381,8 @@ void EvaluationPassImpl::evaluateAAResultOnFunction(LLVMFunction& F, LLVMAAResul
 
 void EvaluationPassImpl::evaluateResult()
 {
-    uint64_t sum_alias = 0, sum_no_alias = 0;
-    uint64_t sum_alias_squared = 0, sum_no_alias_squared = 0;
+    uint64_t sum_alias = 0, sum_ex_alias = 0, sum_no_alias = 0;
+    uint64_t sum_alias_squared = 0, sum_ex_alias_squared = 0, sum_no_alias_squared = 0;
 
     AliasSetCount = 0;
     NoAliasSetCount = 0;
@@ -399,6 +409,17 @@ void EvaluationPassImpl::evaluateResult()
 
         //        assert((check_num == it->second->headssize()));
 #endif
+    }
+
+    for (_raw_type_inst(ex_alias_set)::iterator it = ex_alias_set->begin(), end = ex_alias_set->end(); it != end; ++it)
+    {
+        ExAliasSetCount += it->second->headssize();
+        for (_raw_type_inst(it->second->heads()) it2 = it->second->heads(), end2 = it->second->headsend(); it2 != end2; ++it2)
+        {
+            size_t size = (*it2)->size();
+            sum_ex_alias += size;
+            sum_ex_alias_squared += size * size;
+        }
     }
 
     if (sum_alias <= 10000) {
@@ -477,6 +498,8 @@ void EvaluationPassImpl::evaluateResult()
 
     MeanAlias = (double)sum_alias / (double)AliasSetCount;
     VarAlias = ((double)(sum_alias_squared - sum_alias)) / (double)AliasSetCount;
+    MeanExAlias = (double)sum_ex_alias / (double)ExAliasSetCount;
+    VarExAlias = ((double)(sum_ex_alias_squared - sum_ex_alias)) / (double)ExAliasSetCount;
     MeanNoAlias = (double)sum_no_alias / (double)NoAliasSetCount;
     VarNoAlias = ((double)(sum_alias_squared - sum_no_alias)) / (double)NoAliasSetCount;
 
@@ -534,6 +557,8 @@ void EvaluationPassImpl::printResult(std::ostream &stream) {
 
     stream << "Alias Sets    : " << "         " << " "  << AliasSetCount << "\n";
     stream << "mean, var     : " << MeanAlias   << ", " << VarAlias << "\n";
+    stream << "Ex. Alias Sets: " << "         " << " "  << ExAliasSetCount << "\n";
+    stream << "mean, var     : " << MeanExAlias << ", " << VarExAlias << "\n";
     stream << "No Alias Sets : " << "         " << " "  << NoAliasSetCount << "\n";
     stream << "mean, var     : " << MeanNoAlias << ", " << VarNoAlias << "\n";
     stream << "\n";
@@ -580,6 +605,10 @@ void EvaluationPassImpl::printToEvalRes(EvaluationResult& er)
     er.set_alias_sets(AliasSetCount);
     er.set_mean_alias_sets(MeanAlias);
     er.set_var_alias_sets(VarAlias);
+
+    er.set_ex_alias_sets(ExAliasSetCount);
+    er.set_mean_ex_alias_sets(MeanExAlias);
+    er.set_var_ex_alias_sets(VarExAlias);
 
     er.set_no_alias_sets(NoAliasSetCount);
     er.set_mean_no_alias_sets(MeanNoAlias);

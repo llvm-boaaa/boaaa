@@ -120,6 +120,13 @@ bool DLInterface100::loadModule(uint64_t module_file_prefix, uint64_t module_fil
 
 void DLInterface100::unloadModule()
 {
+	if (context.store_aa_results) {
+		boaaa::AnalysisDiscrepancyChecker adc;
+		*(context.basic_ostream) << "start discrapency check\n";
+		adc.checkAnalysis(context.alias_sets, context.no_alias_sets);
+		*(context.basic_ostream) << "stop discrapency check\n";
+	}
+
 	context.alias_sets.clear();
 	context.no_alias_sets.clear();
 
@@ -177,9 +184,13 @@ bool DLInterface100::runAnalysis(boaaa::aa_id analysis)
 		pass->setContext(&context);
 		pm.add(timepass);
 		pm.add(pass);
+		PassManagerTimeMessure pmtm;
+		pmtm.start();
 		pm.run(*context.loaded_module);
-		if (*context.basic_ostream) {
+		pmtm.end();
+		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
+			pmtm.printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
 	};
@@ -194,12 +205,17 @@ bool DLInterface100::runAnalysis(boaaa::aa_id analysis, EvaluationResult& er)
 		pass->setContext(&context);
 		pm.add(timepass);
 		pm.add(pass);
+		PassManagerTimeMessure pmtm;
+		pmtm.start();
 		pm.run(*context.loaded_module);
-		if (*context.basic_ostream) {
+		pmtm.end();
+		if (context.basic_ostream) {
 			timepass->printResult(*context.basic_ostream);
+			pmtm.printResult(*context.basic_ostream);
 			pass->printResult(*context.basic_ostream);
 		}
 		timepass->printToEvalRes(er);
+		pmtm.printToEvalRes(er);
 		pass->printToEvalRes(er);
 	};
 
