@@ -54,6 +54,7 @@ foulder_set=$false
 if [ "$1" == "-r" ] 
 then
     if [ -z $2 ]
+
     then
     echo ""
     else
@@ -130,7 +131,7 @@ export LLVM_COMPILER_PATH=$clang_foulder
 export CC=${config[wllvm_path]}/wllvm
 export CXX=${config[wllvm_path]}/wllvm++
 export LLVM_COMPILER=clang
-export LLVM_BITCODE_GENERATION_FLAGS="-O1 -Xclang -disable-llvm-passes"
+export LLVM_BITCODE_GENERATION_FLAGS="-O1 -Xclang -fstack-size-section -disable-llvm-passes -X -disable-lazy-loading -disable-llvm-passes -enable-import-metadata"
 
 if [[ -z $build_foulder ]] || [[ -z $clang_foulder ]]
 then
