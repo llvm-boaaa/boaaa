@@ -25,7 +25,7 @@ namespace boaaa
 		static char* CFL_STEENS = __STRINGIFY(CFL-STEENS);
 		static char* OBJ_CARC   = __STRINGIFY(OBJ-CARC);
 		static char* SCEV       = __STRINGIFY(SCEV);
-		static char* SCOPEDNOA  = __STRINGIFY(SCOPED-N0-A);
+		static char* SCOPEDNOA  = __STRINGIFY(SCOPED-NO-A);
 		static char* TBAA       = __STRINGIFY(TBAA);
 		static char* CLANG      = __STRINGIFY(CLANG-COMBINE);
 	}
