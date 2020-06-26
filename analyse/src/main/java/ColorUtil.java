@@ -24,4 +24,10 @@ public class ColorUtil {
         }
         throw new IndexOutOfBoundsException("color with id: " + id + "is unknown!");
     }
+
+    public static Color getTransparentColorOfId(int id) {
+        Color c = getColorOfId(id);
+
+        return new Color(c.getRed(), c.getGreen(), c.getBlue(), 164);
+    }
 }

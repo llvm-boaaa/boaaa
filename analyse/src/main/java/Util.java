@@ -1,5 +1,7 @@
 import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 public class Util {
@@ -24,8 +26,14 @@ public class Util {
             if (d > 10) {
                 result *= 10.0;
                 d /= 10.0;
-            } else if (d > 2) {
-                result *= 3;
+            } else if (d <= 5 && d > 4) {
+                result *= 5.0;
+                d /= 5.0;
+            } else if (d <= 4 && d > 3) {
+                result *= 4.0;
+                d /= 4.0;
+            } else if (d <= 3 && d > 2) {
+                result *= 3.0;
                 d /= 3.0;
             } else if (d > 1) {
                 result *= 2.0;

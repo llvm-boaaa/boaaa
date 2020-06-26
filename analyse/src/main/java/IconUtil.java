@@ -11,11 +11,13 @@ public class IconUtil {
         Square,
         Circle,
         Hexagon,
+        Rhombus,
 
         YShape,
         Cross,
         Ring,
-        Star;
+        Star,
+        Plus;
 
         static int ICON_TYPE_NUMBER = values().length;
     }
@@ -66,7 +68,13 @@ public class IconUtil {
             } break;
             case Star: {
                 PrintUtil.printStar(vg, p);
-            }
+            } break;
+            case Rhombus: {
+                PrintUtil.printRhombus(vg, p);
+            } break;
+            case Plus: {
+                PrintUtil.printPlus(vg, p);
+            } break;
         }
         vg.setStroke(temps);
     }

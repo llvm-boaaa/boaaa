@@ -5,21 +5,47 @@ import java.io.IOException;
 import java.lang.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class Main {
+    //add/remove "/" below to switch mode
+    /*
+    public static boolean TEST = true;
+    public static boolean DATA = false;
+    /*/
     public static boolean TEST = false;
     public static boolean DATA = true;
+    //*/
+
+    //format
+    //*
+    public static final DiagrammPrinter.EXPORT FORMAT = DiagrammPrinter.EXPORT.EPS;
+    /*/
+    public static final DiagrammPrinter.EXPORT FORMAT = DiagrammPrinter.EXPORT.SVG;
+    //*/
 
 
-    public static final String pathToJson = "./results_full_4.json";
+    //add/remove "/" below to switch mode
+    //*
+    public static boolean metadata = true;
+    /*/
+    public static boolean metadata = false;
+    //*/
+
+    public static final String pathToJson = "./results_llvm.json";
+    public static final String pathToMetaJson = "./results_slib_seadsa.json";
 
     public static HashMap<Integer, Integer> colorid = new HashMap<>();
     public static HashMap<Integer, String> version_label = new HashMap<>();
 
     public static HashMap<String, String>   aa_key_map = new HashMap<>();
+    public static HashMap<String, String>   aa_key_map_50 = new HashMap<>();
     public static HashMap<Integer, String>  aa_label = new HashMap<>();
     public static HashMap<String, Integer>  aa_id_map = new HashMap<>();
     public static HashMap<Integer, Integer> aa_color_map = new HashMap<>();
@@ -30,15 +56,22 @@ public class Main {
     public static HashMap<Integer, String> mr_label = new HashMap<>();
     public static HashMap<Integer, Integer> mr_color_map = new HashMap<>();
 
+    public static HashMap<Integer, String> time_label = new HashMap<>();
+    public static  HashMap<Integer, Integer> time_color_map = new HashMap<>();
+
     public static void main(String[] args) {
         init();
 
         //read Json
         JSONObject obj = null;
         if (!pathToJson.isEmpty()) {
-            String jsonContent;
+            String jsonContent = "";
             try {
-                jsonContent = new String(Files.readAllBytes(Paths.get(pathToJson)));
+                if (metadata) {
+                    jsonContent = new String(Files.readAllBytes(Paths.get(pathToMetaJson)));
+                } else {
+                    jsonContent = new String(Files.readAllBytes(Paths.get(pathToJson)));
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -47,11 +80,28 @@ public class Main {
             obj = new JSONObject(jsonContent);
         }
 
+        //sometimes "-" gets generated, but contains no date, so get removed
+        if (obj.has("-")) {
+            obj.remove("-");
+        }
+
         HashMap<String, Diagramm> diagrams = new HashMap<>();
 
         if (DATA) {
 
             diagrams.put("instructions", DiagrammGenerator.generateInstructionCount(obj));
+
+            if (metadata) {
+                //diagrams.put("AR_genann", DiagrammGenerator.generateAliasResultForFile(obj, "", "genann", 50));
+                //diagrams.put("AR_lodepng", DiagrammGenerator.generateAliasResultForFile(obj, "", "lodepng", 50));
+                for(String file : obj.keySet()) {
+                    String filename = "AR_" + file;
+                    diagrams.put(filename, DiagrammGenerator.generateAliasResultForFile(obj, "AR for " + file, file, 50));
+                }
+            } else {
+                diagrams.put("AR_libLLVMIRReader", DiagrammGenerator.generateAliasResultForFile(obj, "", "libLLVMIRReader.a", 50));
+                diagrams.put("AR_libLLVMMC.a", DiagrammGenerator.generateAliasResultForFile(obj, "", "libLLVMMC.a", 50));
+            }
             //all possible ids: "sec_pm_time", "mil_pm_time", "mic_pm_time", "nan_pm_time",
             //                  "sec_function_time", "mil_function_time", "mic_function_time", "nan_function_time",
             //                  "sec_alias_time", "mil_alias_time", "mic_alias_time", "nan_alias_time",
@@ -60,13 +110,12 @@ public class Main {
             //                  "alias_sum", "no_alias_count", "may_alias_count", "partial_alias_count", "must_alias_count",
             //                  "modref_sum", "no_modref_count", "mod_count", "ref_count", "modref_count", "must_count", "must_mod_count", "must_ref_count", "must_modref_count",
             //                  "alias_sets", "no_alias_sets", "mean_alias_sets", "var_alias_sets", "mean_no_alias_sets", "var_no_alias_sets"
-            String[] aa_keys = new String[]{"alias_sum", "alias_sets", "no_alias_sets", "mean_alias_sets", "var_alias_sets", "mean_no_alias_sets", "var_no_alias_sets"};
+            String[] aa_keys = new String[]{"sec_pm_time", "alias_sum", "alias_sets", "ex_alias_sets", "no_alias_sets", "mean_alias_sets", "var_alias_sets", "mean_ex_alias_sets", "var_ex_alias_sets", "mean_no_alias_sets", "var_no_alias_sets"};
 
-            //for (int ver : new int[]{40, 50, 60, 71, 80, 90}) {
-            for (int ver : new int[]{40, 60, 71, 80, 90}) {
+            for (int ver : new int[]{40, 50, 60, 71, 80, 90}) {
                 for (String key : aa_keys) {
                     String file = key.replace(" ", "-") + "_" + ver;
-                    //diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, ver, key, "LLVM_" + ver + " " + key + " for each Analysis", key, aa_label));
+                    diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, ver, key, "LLVM_" + ver + " " + key + " for each Analysis", key, aa_label));
                 }
             }
 
@@ -74,19 +123,29 @@ public class Main {
                 String aa = entry.getKey();
                 for (String key : aa_keys) {
                     String file = key.replace(" ", "-") + "_" + entry.getValue();
-                    //diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, aa, key, key + " for " + entry.getValue(), key, version_label));
+                    diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, aa, key, key + " for " + entry.getValue(), key, version_label));
                 }
             }
 
-            for(Map.Entry<String, String> entry : aa_key_map.entrySet()) {
-                //for (int ver : new int[]{40, 50, 60, 71, 80, 90}) {
-                for (int ver : new int[]{40, 60, 71, 80, 90}) {
+            for (int ver : new int[]{40, 50, 60, 71, 80, 90}) {
+                Set<Map.Entry<String, String>> set;
+                if (ver == 50) {
+                    set = aa_key_map_50.entrySet();
+                } else {
+                    set = aa_key_map.entrySet();
+                }
+                for(Map.Entry<String, String> entry : set) {
                     String headline_alias = "Alias-Result for " + entry.getValue() + " in LLVM_" + ver;
                     String file_alias = "AR_" + entry.getValue() + "_" + ver;
                     diagrams.put(file_alias, DiagrammGenerator.generateAliasResults(obj, headline_alias, ver, entry.getKey()));
+
                     String headline_modref = "ModRefInfo for " + entry.getValue() + " in LLVM_" + ver;
                     String file_modref = "MRI_" + entry.getValue() + "_" + ver;
                     diagrams.put(file_modref, DiagrammGenerator.generateModRefInfo(obj, headline_modref, ver, entry.getKey()));
+
+                    String headline_time = "Time for " + entry.getValue() + " in LLVM_" + ver;
+                    String file_time = "time_" + entry.getValue() + "_" + ver;
+                    diagrams.put(file_time, DiagrammGenerator.generateTimeResult(obj, headline_time, ver, entry.getKey()));
                 }
             }
         }
@@ -95,12 +154,20 @@ public class Main {
         if (TEST) {
             diagrams.put("StringLineChartTest", DiagrammGenerator.generateTestStringLineChart());
             diagrams.put("RelationChartTest", DiagrammGenerator.generateTestRelationChart());
+            diagrams.put("AreaChartTest", DiagrammGenerator.generateTestAreaChart());
         }
 
         //Diagramm chart = DiagrammGenerator.generateTest();
         //write diagrams to disc
-
-        DiagrammPrinter.printDiagramms(diagrams, DiagrammPrinter.EXPORT.SVG);
+        if (TEST) {
+            DiagrammPrinter.printDiagramms(diagrams, "", DiagrammPrinter.EXPORT.SVG);
+        } else {
+            if (metadata) {
+                DiagrammPrinter.printDiagramms(diagrams, "slib", FORMAT);
+            } else {
+                DiagrammPrinter.printDiagramms(diagrams, "llvm", FORMAT);
+            }
+        }
     }
 
     public static void init() {
@@ -154,6 +221,28 @@ public class Main {
         aa_color_map.put(id, id);
         aa_id_map.put("llvm::TypeBasedAAWrapperPass->llvm::ScopedNoAliasAAWrapperPass->llvm::BasicAAWrapperPass", id++);
 
+        aa_key_map.forEach(new BiConsumer<String, String>() {
+            @Override
+            public void accept(String s, String s2) {
+                aa_key_map_50.put(s, s2);
+            }
+        });
+
+        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::BottomUpSeaDsaWrapperPass", "SeaDsa-BU");
+        aa_label.put(id, "SeaDsa-BU");
+        aa_color_map.put(id, id);
+        aa_id_map.put("sea_dsa::DsaAnalysis->llvm::BottomUpSeaDsaWrapperPass", id++);
+
+        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass", "SeaDsa-BUTD");
+        aa_label.put(id, "SeaDsa-BUTD");
+        aa_color_map.put(id, id);
+        aa_id_map.put("sea_dsa::DsaAnalysis->llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass", id++);
+
+        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::ContextInsensitiveSeaDsaWrapperPass", "SeaDsa-CIS");
+        aa_label.put(id, "SeaDsa-CIS");
+        aa_color_map.put(id, id);
+        aa_id_map.put("sea_dsa::DsaAnalysis->llvm::ContextInsensitiveSeaDsaWrapperPass", id++);
+
         ar_label.put(AliasResult.NoALias.id, "NoAlias");
         ar_color_map.put(AliasResult.NoALias.id, 3);
 
@@ -191,6 +280,21 @@ public class Main {
 
         mr_label.put(ModRefInfo.MustModRef.id, "MustModRef");
         mr_color_map.put(ModRefInfo.MustModRef.id, id++);
+
+        time_label.put(TimeInfo.PM_TIME.id, "PassManager");
+        time_label.put(TimeInfo.ANALYSIS_TIME.id, "analyse");
+        time_label.put(TimeInfo.FUNCTION_TIME.id, "funktion");
+        time_label.put(TimeInfo.ALIAS_TIME.id, "alias");
+        time_label.put(TimeInfo.MODREF_TIME.id, "ModRef");
+        id = 0;
+        time_color_map.put(TimeInfo.PM_TIME.id, TimeInfo.PM_TIME.id);
+        time_color_map.put(TimeInfo.ANALYSIS_TIME.id, TimeInfo.ANALYSIS_TIME.id);
+        time_color_map.put(TimeInfo.FUNCTION_TIME.id, TimeInfo.FUNCTION_TIME.id);
+        time_color_map.put(TimeInfo.ALIAS_TIME.id, TimeInfo.ALIAS_TIME.id);
+        time_color_map.put(TimeInfo.MODREF_TIME.id, TimeInfo.MODREF_TIME.id);
+
+
+
     }
 
     public static final String SEC_PM_TIME = "sec_pm_time";

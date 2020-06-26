@@ -241,17 +241,16 @@ int main(int argc, char** argv) {
 		cl::ParseCommandLineOptions(_argc, _argv);
 		if (InputFilename.getValue().compare(InputFilename.getDefault().getValue()) == 0)
 			InputFilename.setValue(file);
+
 		if (PrefixFilePath.getValue().compare(PrefixFilePath.getDefault().getValue()) == 0)
 			PrefixFilePath.setValue(prefix);
-		//if (StoreAAResults.getValue() != store) {
+
 		if (StoreAAResults.getNumOccurrences() > 0) {
 			if (StoreAAResults.getValue() != store) setStoreAAResults();
 			std::cout << "[Info] store AAResults: " << (StoreAAResults.getValue() ? "true" : "false") << "\n";
 		} else {
 			StoreAAResults.setValue(store);
 		}
-		std::cout << "store_num: " << StoreAAResults.getNumOccurrences() << " : " << StoreAAResults.getValue() << "\n";
-		//}
 
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			writeJson();
