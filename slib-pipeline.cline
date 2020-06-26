@@ -45,6 +45,7 @@
 //"/avl.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
 
 //lib: genann
+--store=false --timestamp
 -p "../../../../bc_sources/genann/"
 
 //"/genann.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40

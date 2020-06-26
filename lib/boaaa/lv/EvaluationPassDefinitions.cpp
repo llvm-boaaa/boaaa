@@ -86,4 +86,4 @@ BOAAA_CREATE_EVAL_PASS_SOURCE(FlatMemorySeaDsaEvalWrapperPass, "fm-sea-dsa-eval"
 #endif //!LLVM_VERSION_50
 
 BOAAA_CREATE_EVAL_PASS_SOURCE(ClangEvalWrapperPass, "CLANG", "Clang Analysis Pipeline", 
-					          BasicAAWrapperPass, ScopedNoAliasAAWrapperPass, TypeBasedAAWrapperPass)
+					          BasicAAWrapperPass, ScopedNoAliasAAWrapperPass, TypeBasedAAWrapperPass, GlobalsAAWrapperPass)

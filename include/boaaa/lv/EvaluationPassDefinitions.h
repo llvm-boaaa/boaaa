@@ -21,6 +21,7 @@
 #include "llvm/Analysis/ScalarEvolutionAliasAnalysis.h"
 #include "llvm/Analysis/ScopedNoAliasAA.h"
 #include "llvm/Analysis/TypeBasedAliasAnalysis.h"
+#include "llvm/Analysis/GlobalsModRef.h"
 
 namespace boaaa {
 
@@ -352,7 +353,7 @@ namespace llvm {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++CLANG_DEFAULT
 
-	BOAAA_CREATE_EVAL_PASS_HEADER(ClangEvalWrapperPass, BasicAAWrapperPass, ScopedNoAliasAAWrapperPass, TypeBasedAAWrapperPass)
+	BOAAA_CREATE_EVAL_PASS_HEADER(ClangEvalWrapperPass, BasicAAWrapperPass, ScopedNoAliasAAWrapperPass, TypeBasedAAWrapperPass, GlobalsAAWrapperPass)
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++CLANG_DEFAULT

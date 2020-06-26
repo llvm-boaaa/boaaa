@@ -252,7 +252,7 @@ int main(int argc, char** argv) {
 		//if (StoreAAResults.getValue() != store) {
 		if (StoreAAResults.getNumOccurrences() > 0) {
 			if (StoreAAResults.getValue() != store) setStoreAAResults();
-			std::cout << "[Info] store AAResults: " << (StoreAAResults.getValue() ? "true" : "false") << "\n";
+			//std::cout << "[Info] store AAResults: " << (StoreAAResults.getValue() ? "true" : "false") << "\n";
 		} else {
 			StoreAAResults.setValue(store);
 		}
@@ -794,10 +794,17 @@ void setStoreAAResults() {
 void writeTimeStemp() {
 	using timestamp = typename std::chrono::time_point<std::chrono::system_clock>;
 
+	static bool first = false;
+	static timestamp old = std::chrono::system_clock::now().operator-=(std::chrono::seconds(120));
+
 	timestamp now = std::chrono::system_clock::now();
-	std::time_t now_t = std::chrono::system_clock::to_time_t(now);
 
-	std::cout << "timestamp: " << std::ctime(&now_t) << "\n";
+	//print timestamp if last is longer than 1 minute ago, prevents multi timestamps when skipping analysis and version.
+	if (std::chrono::duration_cast<std::chrono::seconds>(now - old) > std::chrono::seconds(20)) {
 
+		std::time_t now_t = std::chrono::system_clock::to_time_t(now);
 
+		std::cout << "timestamp: " << std::ctime(&now_t) << "\n";
+		old = now;
+	}
 }
