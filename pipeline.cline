@@ -197,87 +197,127 @@
 
 // < 20 MB version 50
 //SCEV crashes in Debug
-"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
-"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
-"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
-"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
-"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//SCEV crashes in Debug
+//"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//SCEV crashes in Debug
+//"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//SCEV crashes in Debug
+//"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
 
 // < 20 MB version 60
 //SCEV crashes in Debug
-"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
+//"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
 //SCEV crashes in Debug
-"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
+//"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
 //"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=60
-"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=60
 //SCEV crashes in Debug
-"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
+//"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
+//SCEV crashes in Debug
+//"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
 
 // < 20 MB version 71
-"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
-"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
-"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
-"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
-"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
 
 // < 20 MB version 80
-"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
-"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
-"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
-"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
-"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
 
 // < 20 MB version 90
-"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
-"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
-"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
-"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
-"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/libclangFormat.a.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/llvm-rc.bc"                          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/libLLVMMC.a.bc"                      --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/libclangTooling.a.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/libclangParse.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
 
 //========================================================================================================================
 
 // < 40 MB version 40
-"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
-"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
-"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
-"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
+//"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
+//"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
+//"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
+//"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=40
 
 // < 40 MB version 50
-"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
-"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
-"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
-"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//SCEV crashes in Debug
+//"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//SCEV crashes in Debug
+//"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
 
 // < 40 MB version 60
 //SCEV crashes in Debug
-"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
+//"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
 //SCEV crashes in Debug
-"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
-"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=60
-"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=60
+//"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=60
+//"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=60
+//"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=60
 
 // < 40 MB version 71
 //SCEV crashes in Debug
-"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=71
-"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
-"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
-"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=71
+//"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
+//"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=71
 
 // < 40 MB version 80
 //SCEV crashes in Debug
-"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=80
-"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
-"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
-"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=80
+//"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
+//"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=80
 
 // < 40 MB version 90
 //SCEV crashes in Debug
-"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=90
-"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
-"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
-"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/libLLVMPasses.a.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --CLANG-COMBINE -v=90
+//"/libclangAnalysis.a.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/libLLVMSelectionDAG.a.bc"            --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
+//"/libLLVMCore.a.bc"                    --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --CLANG-COMBINE -v=90
 
 //========================================================================================================================
 
 
+//only seadsa:
+// < 1 MB version 50
+//"/count.bc"                          --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libbenchmark_main.a.bc"            --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/llvm-PerfectShuffle.bc"            --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libclangDirectoryWatcher.a.bc"     --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMBitstreamReader.a.bc"       --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
 
+// < 5 MB version 50
+//"/libLLVMOption.a.bc"                --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMIRReader.a.bc"              --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMLibDriver.a.bc"             --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libclangToolingInclusions.a.bc"    --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMLinker.a.bc"                --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+
+// < 10 MB version 50
+//"/libLLVMCoroutines.a.bc"            --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMMCParser.a.bc"              --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMTableGen.a.bc"              --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/not.bc"                            --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/llvm-config.bc"                    --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libc++.a.bc"                       --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+
+// < 20 MB version 50n
+//"/libclangFormat.a.bc"               --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/llvm-rc.bc"                        --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMMC.a.bc"                    --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libclangTooling.a.bc"              --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libclangParse.a.bc"                --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+
+// < 40 MB version 50
+//"/libLLVMPasses.a.bc"                --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+"/libclangAnalysis.a.bc"             --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMSelectionDAG.a.bc"          --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
+//"/libLLVMCore.a.bc"                  --SEA-DSA-CS-BUTD --SEA-DSA-BU --SEA-DSA-CIS -v=50
