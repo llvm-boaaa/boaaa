@@ -422,7 +422,7 @@ void EvaluationPassImpl::evaluateResult()
         }
     }
 
-    if (sum_alias <= 10000) {
+    if (sum_alias <= 20000) {
         for (_raw_type_inst(no_alias_set)::iterator it = no_alias_set->begin(), end = no_alias_set->end(); it != end; ++it)
         {
             size_t num = it->second->size();

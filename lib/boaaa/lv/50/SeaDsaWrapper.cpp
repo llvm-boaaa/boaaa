@@ -117,7 +117,7 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
     {//only needed F2 for check
         if (!F) {
             F = getParent(ValueB);
-            
+
             if (!F) return MayAlias; //no alias Information Found
         }
         else
@@ -129,7 +129,7 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
             }
         }
     }
-    
+
     //F must be a valide Function
     assert(F);
 
@@ -149,6 +149,40 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
     const Node* NA = CA.getNode();
     const Node* NB = CB.getNode();
 
+    unsigned int MA_size = (LocA.Size == MemoryLocation::UnknownSize ? 0 : LocA.Size);
+    unsigned int MB_size = (LocB.Size == MemoryLocation::UnknownSize ? 0 : LocB.Size);
+
+
+    if (NA != NB) return NoAlias;
+    if (NA->isOffsetCollapsed()) return MayAlias;
+    if (CA == CB) {
+        //cells start at Same Offset
+        if (MA_size == MB_size)
+            return MustAlias;
+        return PartialAlias;
+    }
+    else {
+        //getRawOffset is in Bytes, getOffset can be in other metric, example when Node is sequencal  
+        unsigned int OA = CA.getRawOffset();
+        unsigned int OB = CB.getRawOffset();
+
+        auto check = [](unsigned int lowerStart, unsigned int higherStart, unsigned int sizeLower) -> AliasResult
+        {
+            if (lowerStart + sizeLower > higherStart) return PartialAlias;
+            //no unknown size
+            if (sizeLower > 0) { 
+                return NoAlias;
+            }
+            return MayAlias;
+        };
+
+        if (OA < OB) {
+            return check(OA, OB, MA_size);
+        } else {
+            return check(OB, OA, MB_size);
+        }
+    }
+    /*
     typedef std::set<NodeAndOffset, NodeAndOffsetComparetor> NodeAndOffsetSet;
 
     NodeAndOffsetSet SetA;
@@ -166,7 +200,9 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
         if (node->isForwarding()) {
             Cell c = node->getForwardDest();
             recursion |= dfs(offset + c.getOffset(), c.getNode(), set);
-        } else if (node->getNumLinks() > 0) {
+        } 
+        /*
+        else if (node->getNumLinks() > 0) {
             recursion_break.insert({ node, offset });
             for (auto& FieldCell : node->getLinks()) {
                 Cell c = *FieldCell.second.get();
@@ -177,7 +213,9 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
                     
                 }
             }
-        } else {
+        }
+        
+        else {
             set.insert({ node, offset });
             return true;
         }
@@ -207,6 +245,7 @@ AliasResult SeaDsaResult::alias(const MemoryLocation& LocA, const MemoryLocation
     }
 
     return merger.get();
+    */
 }
 
 

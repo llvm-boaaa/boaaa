@@ -31,5 +31,8 @@ mac_bc_build/config.conf
 /analyse/.gradle
 /analyse/.idea
 /analyse/gradle/wrapper
-/analyse/**/*.svg
-/analyse/*.svg
+
+*.svg
+*.eps
+*.pdf
+*.json

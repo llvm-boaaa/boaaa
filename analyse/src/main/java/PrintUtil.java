@@ -73,7 +73,7 @@ public class PrintUtil {
         }
         if (conY != null && !scalarString(conY.digits).isEmpty()) {
             printTextOverPoint(vg, new Point2D.Double(dimension.getX() + (alignAxis == Align.left ? 0 : dimension.getWidth()),
-                    dimension.getY()), "in " + scalarString(conY.digits), SCALA_SCALE_OFFSET);
+                    dimension.getY()), "in " + scalarString(conY.digits), -SCALA_SCALE_OFFSET / 2.f);
         }
 
         if (!yAxis.isEmpty()) {
@@ -408,9 +408,27 @@ public class PrintUtil {
         }
     }
 
+    public static void printRhombus(VectorGraphics2D vg, Point2D p) {
+        AffineTransform temp = vg.getTransform();
+        vg.translate(p.getX(), p.getY());
+        vg.rotate(Math.PI / 4);
+        printSquare(vg, new Point2D.Double(0,0));
+        vg.setTransform(temp);
+    }
+
+    public static void printPlus(VectorGraphics2D vg, Point2D p) {
+        AffineTransform temp = vg.getTransform();
+        vg.translate(p.getX(), p.getY());
+        vg.rotate(Math.PI / 4);
+        printCross(vg, new Point2D.Double(0,0));
+        vg.setTransform(temp);
+    }
+
     private static double findAngle(double fraction, double rotation) {
         return fraction * Math.PI * 2 + Math.toRadians((rotation + 180) % 360);
     }
+
+
 
     private static Point findPoint(Point2D p, double angle, double radius) {
         int x = (int) (p.getX() + Math.cos(angle) * radius);

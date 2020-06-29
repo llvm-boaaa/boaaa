@@ -82,6 +82,10 @@ static cl::opt<bool>
 StoreAAResults("store", cl::desc("If Flag is set it stores all AAResuls for inter-Analysis comperison"), 
 	cl::cat(BoaaaCat));
 
+static cl::opt<bool>
+TimeStamp("timestamp", cl::desc("Print a timestemp whenever call mainloop"),
+	cl::cat(BoaaaCat));
+
 static cl::opt<std::string>
 InputFilename(cl::Positional, cl::desc("<input bitcode file>"),
 	cl::init("-"), cl::value_desc("path/filename"), cl::cat(BoaaaCat));
@@ -143,6 +147,7 @@ void setup();
 void initAAs();
 void finalize();
 void writeJson();
+void writeTimeStemp();
 void setStoreAAResults();
 
 void evaluateMainloopError(COROUTINESTATES_MAIN cms, uint64_t line_count) {
@@ -227,6 +232,7 @@ int main(int argc, char** argv) {
 		std::string prefix(PrefixFilePath.getValue());
 		std::string file(InputFilename.getValue());
 		bool store = StoreAAResults.getValue();
+		bool timestamp = TimeStamp.getValue();
 		InputFilename.reset();
 
 		cl::ResetAllOptionOccurrences();
@@ -246,15 +252,18 @@ int main(int argc, char** argv) {
 		//if (StoreAAResults.getValue() != store) {
 		if (StoreAAResults.getNumOccurrences() > 0) {
 			if (StoreAAResults.getValue() != store) setStoreAAResults();
-			std::cout << "[Info] store AAResults: " << (StoreAAResults.getValue() ? "true" : "false") << "\n";
+			//std::cout << "[Info] store AAResults: " << (StoreAAResults.getValue() ? "true" : "false") << "\n";
 		} else {
 			StoreAAResults.setValue(store);
 		}
-		std::cout << "store_num: " << StoreAAResults.getNumOccurrences() << " : " << StoreAAResults.getValue() << "\n";
-		//}
+		if (TimeStamp.getNumOccurrences() == 0) {
+			TimeStamp.setValue(timestamp);
+		}
+
 
 		for (CSM state = mainloop(); state != CSM::NO_ARGS_LEFT; state = mainloop()) {
 			writeJson();
+			if (TimeStamp.getValue()) writeTimeStemp();
 			if (static_cast<int8_t>(state) < 0) {
 				evaluateMainloopError(state, line_count);
 				--res;
@@ -780,4 +789,22 @@ void setStoreAAResults() {
 		llvm80->storeAAResults(StoreAAResults.getValue());
 	if (llvm90)
 		llvm90->storeAAResults(StoreAAResults.getValue());
+}
+
+void writeTimeStemp() {
+	using timestamp = typename std::chrono::time_point<std::chrono::system_clock>;
+
+	static bool first = false;
+	static timestamp old = std::chrono::system_clock::now().operator-=(std::chrono::seconds(120));
+
+	timestamp now = std::chrono::system_clock::now();
+
+	//print timestamp if last is longer than 1 minute ago, prevents multi timestamps when skipping analysis and version.
+	if (std::chrono::duration_cast<std::chrono::seconds>(now - old) > std::chrono::seconds(20)) {
+
+		std::time_t now_t = std::chrono::system_clock::to_time_t(now);
+
+		std::cout << "timestamp: " << std::ctime(&now_t) << "\n";
+		old = now;
+	}
 }

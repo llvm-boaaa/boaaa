@@ -47,7 +47,7 @@ public abstract class Diagramm {
         VectorGraphics2D  vg = new VectorGraphics2D();
         vg.setClip(0, 0, m_width, m_height);
         vg.setBackground(Color.WHITE);
-        vg.setFont(FontUtil.Standart.deriveFont(Font.PLAIN, (float) (Math.min(m_width, m_height) / 40.0)));
+        vg.setFont(FontUtil.Standart.deriveFont(Font.PLAIN, (float) (Math.min(m_width, m_height) / 30.0)));
         vg.setStroke(new BasicStroke(STROKE_WIDTH));
         printToVG(vg);
         return vg;

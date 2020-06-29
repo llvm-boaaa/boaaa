@@ -1,0 +1,183 @@
+// this file is used to run multiple incremental runs of boaaa, 
+// each line gets passt to boaaa like it is called from the command line with this arguments
+// "//" at the beginning of the line get treaded as a blank line
+//
+// this file is used in visual studio to run fresh build boaaa-instances.
+//
+// boaaa -h returns:
+//
+//
+//USAGE: boaaa [options] <input bitcode file>
+//
+//OPTIONS:
+//
+//BOAAA options:
+//
+//  Choose which Alias-Analysis-Passes to run in specific version:
+//  ...(defined analysis per version - not listed)
+//  Choose which Alias-Analysis-Passes to run in all available versions:
+//	...(defined analysis grouped by commandline argument - not listed)
+//
+//  --all-AAs                - If Flag is set, run all Analysis, for each version
+//  --all-Versions           - If Flag is set, run all Analysis if available under all loaded versions
+//  -f=<path/filename.cline> - Specifies the file of multiple commandline arguments
+//  -l=<path/filename>       - Specify log filename
+//  --no-json                - boaaa exports by default all results to a json: path/to/boaaa/results.json
+//  -p=<prefix>              - The prefix-path of the Bitecodefile, it will get concatet to: prefix${llvm_version}InputFile
+//  -v=<XX>                  - The version of the analysises
+//
+//Generic Options:
+//
+//  --help                   - Display available options (--help-hidden for more)
+//  --help-list              - Display list of available options (--help-list-hidden for more)
+//  --version                - Display the version of this program
+//
+// Note: All Generic Options break the pipelining file, all lines before a Generic Option get calculated correctly.
+//
+//lib: avl
+-p "../../../../bc_sources/avl/"
+
+"/avl.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/avl.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/avl.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/avl.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/avl.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/avl.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: genann
+--store=false --timestamp
+-p "../../../../bc_sources/genann/"
+
+"/genann.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/genann.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/genann.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/genann.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/genann.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/genann.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: inih
+-p "../../../../bc_sources/ini/"
+
+"/ini.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/ini.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/ini.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/ini.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/ini.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/ini.bc"                  --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: lodepng
+-p "../../../../bc_sources/lodepng/"
+
+"/lodepng.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/lodepng.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/lodepng.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/lodepng.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/lodepng.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/lodepng.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: micropather
+-p "../../../../bc_sources/micropather/"
+
+"/micropather.bc"          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/micropather.bc"          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/micropather.bc"          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/micropather.bc"          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/micropather.bc"          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/micropather.bc"          --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: miniz
+-p "../../../../bc_sources/miniz/"
+
+"/miniz.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/miniz.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/miniz.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/miniz.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/miniz.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/miniz.bc"                --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: mongoose
+-p "../../../../bc_sources/mongoose/"
+
+"/mongoose.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/mongoose.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/mongoose.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/mongoose.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/mongoose.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/mongoose.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: objzero
+-p "../../../../bc_sources/objzero/"
+
+"/objzero.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/objzero.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/objzero.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/objzero.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/objzero.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/objzero.bc"              --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: polypartition
+-p "../../../../bc_sources/polypartition/"
+
+"/polypartition.bc"        --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+//SCEV crashed
+"/polypartition.bc"        --BASIC --CFL-ANDERS --CFL-STEENS --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+//SCEV crashed
+"/polypartition.bc"        --BASIC --CFL-ANDERS --CFL-STEENS --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+//SCEV crashed
+"/polypartition.bc"        --BASIC --CFL-ANDERS --CFL-STEENS --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+//SCEV crashed
+"/polypartition.bc"        --BASIC --CFL-ANDERS --CFL-STEENS --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+//SCEV crashed
+"/polypartition.bc"        --BASIC --CFL-ANDERS --CFL-STEENS --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: tigr
+-p "../../../../bc_sources/tigr/"
+
+"/tigr.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/tigr.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/tigr.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/tigr.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/tigr.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/tigr.bc"                 --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: tinyexpr
+-p "../../../../bc_sources/tinyexpr/"
+
+"/tinyexpr.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/tinyexpr.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/tinyexpr.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/tinyexpr.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/tinyexpr.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/tinyexpr.bc"             --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: tinythread
+-p "../../../../bc_sources/tinythread/"
+
+"/tinythread.bc"           --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/tinythread.bc"           --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/tinythread.bc"           --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/tinythread.bc"           --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/tinythread.bc"           --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/tinythread.bc"           --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: xatlas
+-p "../../../../bc_sources/xatlas/"
+
+"/xatlas.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+//SCEV crashed
+"/xatlas.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+//SCEV crashed
+"/xatlas.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/xatlas.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/xatlas.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/xatlas.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90
+
+//lib: xxhash
+-p "../../../../bc_sources/xxhash/"
+
+"/xxhash.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=40
+"/xxhash.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE --SEA-DSA-BU --SEA-DSA-CS-BUTD --SEA-DSA-CIS -v=50
+"/xxhash.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=60
+"/xxhash.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=71
+"/xxhash.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=80
+"/xxhash.bc"               --BASIC --CFL-ANDERS --CFL-STEENS --SCEV --TBAA --SCOPED-NO-A --CLANG-COMBINE -v=90

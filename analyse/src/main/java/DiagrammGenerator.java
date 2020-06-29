@@ -4,9 +4,144 @@ import java.util.HashMap;
 
 public class DiagrammGenerator {
 
+    public static Diagramm generateTimeResult(JSONObject obj, String headline, int version, String aa) {
+        AreaDiagramm chart = new AreaDiagramm(4000, 2000);
+        //chart.addHeadline(headline);
+        chart.addColorIdMap(Main.time_color_map);
+        chart.addSideboard(Main.time_label);
+        //chart.setTransparent(true);
+
+        for (String file : obj.keySet()) {
+            if (file.equals("libLLVMCore.a")) continue;
+            Object fileo = obj.get(file);
+            HashMap<Integer, Double> data = new HashMap<>();
+            int instructions = Integer.MAX_VALUE;
+            if (fileo instanceof JSONObject) {
+                JSONObject jo_file = (JSONObject) fileo;
+                if (jo_file.has("" + version)) {
+                    Object ver = jo_file.get("" + version);
+                    if (ver instanceof JSONObject) {
+                        JSONObject jo_ver = (JSONObject) ver;
+                        if (jo_ver.has("instruction_count")) {
+                            instructions = jo_ver.getInt("instruction_count");
+                        }
+                        if (jo_ver.has(aa)) {
+                            Object aao = jo_ver.get(aa);
+                            if (aao instanceof JSONObject) {
+                                JSONObject jo_aa = (JSONObject) aao;
+
+                                double pm     = getTimeInSeconds(jo_aa, "pm_time");
+                                double ana    = getTimeInSeconds(jo_aa, "analysis_time");
+                                double func   = getTimeInSeconds(jo_aa, "function_time");
+                                double alias  = getTimeInSeconds(jo_aa, "alias_time");
+                                double modref = getTimeInSeconds(jo_aa, "modref_time");
+
+                                if (modref + alias + func > pm) {
+                                    System.out.println("WARNING: check chart " + aa + " - " + version);
+                                }
+
+                                double modref_add = modref;
+                                double alias_add = modref + alias;
+                                double func_add = modref + alias + func;
+                                double ana_add = ana;
+                                double pm_add = pm;
+
+                                data.put(TimeInfo.MODREF_TIME.id, modref_add);
+                                data.put(TimeInfo.ALIAS_TIME.id, alias_add);
+                                data.put(TimeInfo.FUNCTION_TIME.id, ana_add);
+                                data.put(TimeInfo.ANALYSIS_TIME.id, func_add);
+                                data.put(TimeInfo.PM_TIME.id, pm_add);
+                            }
+                        }
+                    }
+                }
+            }
+            chart.addData(instructions, file, data);
+        }
+        return chart;
+    }
+
+    private static double getTimeInSeconds(JSONObject obj, String timeId) {
+        String sec = "sec_" + timeId;
+        String mil = "mil_" + timeId;
+        String mic = "mic_" + timeId;
+        String nan = "nan_" + timeId;
+
+        double seconds = 0.d;
+
+        if (obj.has(sec)) {
+            seconds = obj.getDouble(sec);
+        }
+        if (obj.has(mil)) {
+            seconds += obj.getDouble(mil) / 1_000.d;
+        }
+        if (obj.has(mic)) {
+            seconds += obj.getDouble(mic) / 1_000_000.d;
+        }
+        if (obj.has(nan)) {
+            seconds += obj.getDouble(nan) / 1_000_000_000.d;
+        }
+
+        return seconds;
+    }
+
+    public static Diagramm generateAliasResultForFile(JSONObject obj, String headline, String file, int version) {
+        RelationChart chart = new RelationChart(2000, 2000);
+        chart.addColorIdMap(Main.ar_color_map);
+        chart.addSideboard(Main.ar_label);
+        if (!headline.isEmpty())
+            chart.addHeadline(headline);
+        HashMap<Integer, Double> data = new HashMap<>();
+        if (obj.has(file)) {
+            Object file_o = obj.get(file);
+            if (file_o instanceof JSONObject) {
+                JSONObject jo_file = (JSONObject) file_o;
+                if (jo_file.has("" + version)) {
+                    Object ver = jo_file.get("" + version);
+                    if (ver instanceof JSONObject) {
+                        JSONObject jo_ver = (JSONObject) ver;
+                        for (String aa_id : jo_ver.keySet()) {
+                            if (Main.aa_id_map.containsKey(aa_id)) {
+                                Object aao = jo_ver.get(aa_id);
+                                if (aao instanceof JSONObject) {
+                                    JSONObject jo_aa = (JSONObject) aao;
+                                    String aa_key = Main.aa_key_map_50.get(aa_id);
+                                    Integer id = Main.aa_id_map.get(aa_id);
+
+                                    if (jo_aa.has(Main.NO_ALIAS_COUNT)) {
+                                        Double no_alias = jo_aa.getDouble(Main.NO_ALIAS_COUNT);
+                                        data.put(AliasResult.NoALias.id, no_alias);
+                                    }
+                                    if (jo_aa.has(Main.MAY_ALIAS_COUNT)) {
+                                        Double may_alias = jo_aa.getDouble(Main.MAY_ALIAS_COUNT);
+                                        data.put(AliasResult.MayAlias.id, may_alias);
+                                    }
+                                    if (jo_aa.has(Main.PARTIAL_ALIAS_COUNT)) {
+                                        Double partial_alias = jo_aa.getDouble(Main.PARTIAL_ALIAS_COUNT);
+                                        data.put(AliasResult.PartialAlias.id, partial_alias);
+                                    }
+                                    if (jo_aa.has(Main.MUST_ALIAS_COUNT)) {
+                                        Double must_alias = jo_aa.getDouble(Main.MUST_ALIAS_COUNT);
+                                        data.put(AliasResult.MustAlias.id, must_alias);
+                                    }
+                                    if (data.size() > 0) {
+                                        chart.addData(id, aa_key, data);
+                                    }
+                                    data = new HashMap<>();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return chart;
+    }
+
     public static Diagramm generateAliasResults(JSONObject obj, String headline, int version, String aa) {
         RelationChart chart = new RelationChart(4000, 2000);
-        chart.addHeadline(headline);
+        //chart.addHeadline(headline);
         chart.addColorIdMap(Main.ar_color_map);
         chart.addSideboard(Main.ar_label);
 
@@ -56,7 +191,7 @@ public class DiagrammGenerator {
 
     public static Diagramm generateModRefInfo(JSONObject obj, String headline, int version, String aa) {
         RelationChart chart = new RelationChart(4000, 2000);
-        chart.addHeadline(headline);
+        //chart.addHeadline(headline);
         chart.addColorIdMap(Main.mr_color_map);
         chart.addSideboard(Main.mr_label);
 
@@ -122,7 +257,7 @@ public class DiagrammGenerator {
 
     public static Diagramm generateInstructionCount(JSONObject obj) {
         StringLineChart chart = new StringLineChart(4000, 2000);
-        chart.addHeadline("Instruction in each LLVM_Version");
+        //chart.addHeadline("Instruction in each LLVM_Version");
         chart.addYAxisText("Instructions");
         chart.startAtZero();
         chart.addColorIdMap(Main.colorid);
@@ -175,7 +310,7 @@ public class DiagrammGenerator {
 
     private static Diagramm generateVersionAASpecificStringLineChart(JSONObject obj, int version, String aa, String key, String Headline, String yAxisText, HashMap<Integer, String> label) {
         StringLineChart chart = new StringLineChart(4000, 2000);
-        chart.addHeadline(Headline);
+        //chart.addHeadline(Headline);
         chart.addYAxisText(yAxisText);
         chart.startAtZero();
         //chart.addColorIdMap(Main.colorid);
@@ -278,7 +413,6 @@ public class DiagrammGenerator {
         }
     }
 
-
     public static Diagramm generateTestStringLineChart() {
         StringLineChart chart = new StringLineChart(4000, 2000);
         chart.addColorIdMap(Main.colorid);
@@ -369,6 +503,54 @@ public class DiagrammGenerator {
         //chart.addXAxisText("x-Axis");
         chart.addYAxisText("y-Axis");
         chart.addHeadline("Headline");
+        return chart;
+    }
+
+    public static Diagramm generateTestAreaChart() {
+        AreaDiagramm chart = new AreaDiagramm(4000, 2000);
+        chart.setTransparent(true);
+        chart.addColorIdMap(Main.colorid);
+        HashMap<Integer, Double> m1 = new HashMap<>();
+        m1.put(40, 180.0);
+        m1.put(50, 150.0);
+        m1.put(60, 200.0);
+
+        HashMap<Integer, Double> m2 = new HashMap<>();
+        m2.put(40, 200.0);
+        m2.put(50, 100.0);
+        m2.put(60, 300.0);
+
+        HashMap<Integer, Double> m3 = new HashMap<>();
+        m3.put(40, 20.0);
+        m3.put(50, 150.0);
+        m3.put(60, 200.0);
+
+        HashMap<Integer, Double> m4 = new HashMap<>();
+        //m4.put(40, 75.0);
+        m4.put(50, 200.0);
+        m4.put(60, 270.0);
+
+        HashMap<Integer, Double> m5 = new HashMap<>();
+        m5.put(40, 40.0);
+        m5.put(50, 100.0);
+        m5.put(60, 330.0);
+
+
+        chart.addData(1, "file1", m1);
+        chart.addData(2, "file2", m2);
+        chart.addData(3, "file3", m3);
+        chart.addData(4, "file4", m4);
+        chart.addData(5, "file5", m5);
+        chart.addData(6, "file6", m1);
+        chart.addData(7, "file7", m2);
+        chart.addData(8, "file8", m3);
+        chart.addData(9, "file9", m4);
+        chart.addData(10, "file10", m5);
+
+        //chart.addXAxisText("x-Axis");
+        chart.addYAxisText("y-Axis");
+        chart.addHeadline("Headline");
+        chart.startAtZero();
         return chart;
     }
 }

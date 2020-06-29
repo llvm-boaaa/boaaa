@@ -1,30 +1,33 @@
-import com.sun.org.apache.bcel.internal.classfile.StackMapEntry;
 import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 
 import java.awt.*;
-import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class StringLineChart extends Diagramm {
+public class AreaDiagramm extends Diagramm {
 
     private double minY = Double.POSITIVE_INFINITY;
     private double maxY = Double.NEGATIVE_INFINITY;
 
     private HashMap<Integer, String> m_order = new HashMap<>();
     private HashMap<String, HashMap<Integer, Double>> m_values = new HashMap<>();
-    private HashMap<String, HashMap<Integer, Double>> m_alt_values = new HashMap<>();
     private HashMap<Integer, Integer> colorIdMap = new HashMap<>();
     private HashMap<Integer, String> sideboard;
 
     private String headline;
+    private boolean transparent;
 
-    public StringLineChart(int width, int height) {
+    public AreaDiagramm(int width, int height) {
+        this(width, height, false);
+    }
+
+    public AreaDiagramm(int width, int height, boolean trans) {
         super(width, height);
         headline = "";
         sideboard = null;
+        transparent = trans;
     }
 
     public void startAtZero() {
@@ -32,10 +35,6 @@ public class StringLineChart extends Diagramm {
     }
 
     public void addHeadline(String head) {headline = head; }
-
-    public void addAltData(Integer order, String id, HashMap<Integer, Double> values) {
-
-    }
 
     public void addSideboard(HashMap<Integer, String> sb) {
         sideboard = sb;
@@ -60,8 +59,10 @@ public class StringLineChart extends Diagramm {
         colorIdMap = idmap;
     }
 
+    public void setTransparent(boolean trans) { transparent = trans; }
+
     @Override
-    public void printToVG(VectorGraphics2D vg) {
+    void printToVG(VectorGraphics2D vg) {
         double maxWidth = 0;
         double maxHeight = 0;
         for (Map.Entry<Integer, String> entry : m_order.entrySet()) {
@@ -100,13 +101,17 @@ public class StringLineChart extends Diagramm {
 
         double left_x      = PERCENT_7                                             * canvas.getWidth();
         double right_x     = PERCENT_3                                             * canvas.getWidth();
-        double right_axis_x= (m_alt_values.isEmpty() ? PERCENT_2 : PERCENT_7)      * canvas.getWidth();
+        double right_axis_x= PERCENT_2                                             * canvas.getWidth();
         double sideboard_x = (sideboard == null      ? 0.0       : PERCENT_10)     * canvas.getWidth();
         double width_x     = canvas.getWidth() - left_x - right_x - right_axis_x - sideboard_x;
 
         Rectangle2D dimension = new Rectangle2D.Double(left_x,  top_y, width_x, hight_y);
         Rectangle2D sb_dim = new Rectangle2D.Double(left_x + width_x + right_axis_x, top_y, sideboard_x, hight_y);
-
+        if (Math.abs(minY) == Double.POSITIVE_INFINITY || Math.abs(maxY) == Double.POSITIVE_INFINITY) {
+            PrintUtil.printTextCenter(vg, new Point2D.Double(vg.getClipBounds().getCenterX(), vg.getClipBounds().getCenterY()), "NO DATA");
+            System.out.println("NO-DATA");
+            return;
+        }
         minY = Util.roundToBeforeStep(minY);
         maxY = Util.roundToNextStep(maxY);
 
@@ -126,9 +131,8 @@ public class StringLineChart extends Diagramm {
         PrintUtil.printYAxisScala(vg, dimension, con, minY, maxY);
 
         Rectangle2D printDimension = new Rectangle2D.Double(dimension.getX() * 1.5, dimension.getY(), dimension.getWidth() - dimension.getX(), dimension.getHeight());
-        /*
-        // old implementation
         int i = 0;
+
         int idnum = 0;
         HashMap<Integer, Integer> idmap;
         if (colorIdMap != null) {
@@ -136,7 +140,8 @@ public class StringLineChart extends Diagramm {
         } else {
             idmap = new HashMap<>();
         }
-        LinePrinter lp = new LinePrinter();
+        AreaPrinter ap = new AreaPrinter(transparent);
+        ap.setSingleOffset((float) (printDimension.getWidth() / (4.f * (double)(ids.size() - 1))));
         for(String s : ids) {
             //print text
             //first 0% last 100%
@@ -156,65 +161,20 @@ public class StringLineChart extends Diagramm {
                 }
                 int id = idmap.get(entry.getKey());
 
-
-
                 Point2D p = PrintUtil.printPosition(printDimension, percent, entry.getValue(), minY, maxY);
-                lp.addPoint(vg, id, p);
-                IconUtil.printIconColor(vg, PrintUtil.printPosition(printDimension, percent, entry.getValue(), minY, maxY), id);
+                try {
+                    ap.addPoint(vg, id, p);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                //IconUtil.printIconColor(vg, PrintUtil.printPosition(printDimension, percent, entry.getValue(), minY, maxY), id);
             }
 
             //increment
             i++;
-            lp.step();
+            ap.step(printDimension);
         }
-        /*/
-
-        int i = 0;
-        int idnum = 0;
-        HashMap<Integer, Integer> idmap;
-        if (colorIdMap != null) {
-            idmap = new HashMap<>(colorIdMap);
-        } else {
-            idmap = new HashMap<>();
-        }
-        for(String s : ids) {
-            double percent = 1.0 - ((double) i /(double) (ids.size() - 1));
-            PrintUtil.printTextUnderXAxis(vg, printDimension, s, percent);
-            HashMap<Integer, Double> map = m_values.get(s);
-            for(Map.Entry<Integer, Double> entry : map.entrySet()) {
-                if (!idmap.containsKey(entry.getKey())) {
-                    if (i >= ColorUtil.COLORS.length || i >= IconUtil.IconType.values().length) {
-                        throw new IndexOutOfBoundsException("Maximal number of ids: " + Math.min(ColorUtil.COLORS.length, IconUtil.IconType.values().length));
-                    }
-                    idmap.put(entry.getKey(), idnum++);
-                }
-            }
-            i++;
-        }
-
-        LinePrinter lp = new LinePrinter();
-        for(Map.Entry<Integer, Integer> ii : idmap.entrySet()) {
-            i = 0;
-            for (String s: ids) {
-                int id = ii.getValue();
-                double percent = 1.0 - ((double) i /(double) (ids.size() - 1));
-                Double value = m_values.get(s).get(ii.getKey());
-                if (value == null) {
-                    lp.step();
-                    i++;
-                    continue;
-                }
-
-                Point2D p = PrintUtil.printPosition(printDimension, percent, value, minY, maxY);
-                lp.addPoint(vg, id, p);
-                IconUtil.printIconColor(vg, PrintUtil.printPosition(printDimension, percent, value, minY, maxY), id);
-
-                //increment
-                i++;
-                lp.step();
-            }
-        }
-        //*/
+        ap.finish(vg, printDimension);
 
         if (sideboard != null && !sideboard.isEmpty()) {
             HashMap<Integer, String> id_name = new HashMap<>();
