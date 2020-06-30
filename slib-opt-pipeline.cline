@@ -1,0 +1,92 @@
+// this file is used to run multiple incremental runs of boaaa, 
+// each line gets passt to boaaa like it is called from the command line with this arguments
+// "//" at the beginning of the line get treaded as a blank line
+//
+// this file is used in visual studio to run fresh build boaaa-instances.
+//
+// boaaa -h returns:
+//
+//
+//USAGE: boaaa [options] <input bitcode file>
+//
+//OPTIONS:
+//
+//BOAAA options:
+//
+//  Choose which Alias-Analysis-Passes to run in specific version:
+//  ...(defined analysis per version - not listed)
+//  Choose which Alias-Analysis-Passes to run in all available versions:
+//	...(defined analysis grouped by commandline argument - not listed)
+//
+//  --all-AAs                - If Flag is set, run all Analysis, for each version
+//  --all-Versions           - If Flag is set, run all Analysis if available under all loaded versions
+//  -f=<path/filename.cline> - Specifies the file of multiple commandline arguments
+//  -l=<path/filename>       - Specify log filename
+//  --no-json                - boaaa exports by default all results to a json: path/to/boaaa/results.json
+//  -p=<prefix>              - The prefix-path of the Bitecodefile, it will get concatet to: prefix${llvm_version}InputFile
+//  -v=<XX>                  - The version of the analysises
+//
+//Generic Options:
+//
+//  --help                   - Display available options (--help-hidden for more)
+//  --help-list              - Display list of available options (--help-list-hidden for more)
+//  --version                - Display the version of this program
+//
+// Note: All Generic Options break the pipelining file, all lines before a Generic Option get calculated correctly.
+//
+--store=false --timestamp
+//lib: avl
+-p "../../../../bc_sources/slibextra/avl/"
+"/avl.bc"                  --TBAA --all-Versions
+
+//lib: genann
+-p "../../../../bc_sources/slibextra/genann/"
+"/genann.bc"               --TBAA --all-Versions
+
+//lib: inih
+-p "../../../../bc_sources/slibextra/ini/"
+"/ini.bc"                  --TBAA --all-Versions
+
+//lib: lodepng
+-p "../../../../bc_sources/slibextra/lodepng/"
+"/lodepng.bc"              --TBAA --all-Versions
+
+//lib: micropather
+-p "../../../../bc_sources/slibextra/micropather/"
+"/micropather.bc"          --TBAA --all-Versions
+
+//lib: miniz
+-p "../../../../bc_sources/slibextra/miniz/"
+"/miniz.bc"                --TBAA --all-Versions
+
+//lib: mongoose
+-p "../../../../bc_sources/slibextra/mongoose/"
+"/mongoose.bc"             --TBAA --all-Versions
+
+//lib: objzero
+-p "../../../../bc_sources/slibextra/objzero/"
+"/objzero.bc"              --TBAA --all-Versions
+
+//lib: polypartition
+-p "../../../../bc_sources/slibextra/polypartition/"
+"/polypartition.bc"        --TBAA --all-Versions
+
+//lib: tigr
+-p "../../../../bc_sources/slibextra/tigr/"
+"/tigr.bc"                 --TBAA --all-Versions
+
+//lib: tinyexpr
+-p "../../../../bc_sources/slibextra/tinyexpr/"
+"/tinyexpr.bc"             --TBAA --all-Versions
+
+//lib: tinythread
+-p "../../../../bc_sources/slibextra/tinythread/"
+"/tinythread.bc"           --TBAA --all-Versions
+
+//lib: xatlas
+-p "../../../../bc_sources/slibextra/xatlas/"
+"/xatlas.bc"               --TBAA --all-Versions
+
+//lib: xxhash
+-p "../../../../bc_sources/slibextra/xxhash/"
+"/xxhash.bc"               --TBAA --all-Versions

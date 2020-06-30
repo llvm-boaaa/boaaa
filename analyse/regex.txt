@@ -1,0 +1,1 @@
+"llvm::TypeBasedAAWrapperPass->llvm::ScopedNoAliasAAWrapperPass->llvm::BasicAAWrapperPass": \{\n([ ]*".*": .*,\n)*[ ]*(".*": .*)\n[ ]*\},

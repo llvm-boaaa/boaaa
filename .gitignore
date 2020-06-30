@@ -36,3 +36,5 @@ mac_bc_build/config.conf
 *.eps
 *.pdf
 *.json
+!/analyse/*final.json
+!/analyse/*opt.json

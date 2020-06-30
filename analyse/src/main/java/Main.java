@@ -6,10 +6,7 @@ import java.lang.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Time;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -38,8 +35,8 @@ public class Main {
     public static boolean metadata = false;
     //*/
 
-    public static final String pathToJson = "./results_llvm.json";
-    public static final String pathToMetaJson = "./results_slib_seadsa.json";
+    public static final String pathToJson = "./results_llvm_final.json";
+    public static final String pathToMetaJson = "./results_slib_final.json";
 
     public static HashMap<Integer, Integer> colorid = new HashMap<>();
     public static HashMap<Integer, String> version_label = new HashMap<>();
@@ -57,7 +54,12 @@ public class Main {
     public static HashMap<Integer, Integer> mr_color_map = new HashMap<>();
 
     public static HashMap<Integer, String> time_label = new HashMap<>();
-    public static  HashMap<Integer, Integer> time_color_map = new HashMap<>();
+    public static HashMap<Integer, Integer> time_color_map = new HashMap<>();
+
+    public static LinkedList<String> NoAliasList = new LinkedList<>();
+    public static LinkedList<String> PartialAliasList = new LinkedList<>();
+    public static LinkedList<String> MustAliasList = new LinkedList<>();
+    public static LinkedList<String> MPNAliasList = new LinkedList<>();
 
     public static void main(String[] args) {
         init();
@@ -91,17 +93,11 @@ public class Main {
 
             diagrams.put("instructions", DiagrammGenerator.generateInstructionCount(obj));
 
-            if (metadata) {
-                //diagrams.put("AR_genann", DiagrammGenerator.generateAliasResultForFile(obj, "", "genann", 50));
-                //diagrams.put("AR_lodepng", DiagrammGenerator.generateAliasResultForFile(obj, "", "lodepng", 50));
-                for(String file : obj.keySet()) {
-                    String filename = "AR_" + file;
-                    diagrams.put(filename, DiagrammGenerator.generateAliasResultForFile(obj, "AR for " + file, file, 50));
-                }
-            } else {
-                diagrams.put("AR_libLLVMIRReader", DiagrammGenerator.generateAliasResultForFile(obj, "", "libLLVMIRReader.a", 50));
-                diagrams.put("AR_libLLVMMC.a", DiagrammGenerator.generateAliasResultForFile(obj, "", "libLLVMMC.a", 50));
+            for(String file : obj.keySet()) {
+                String filename = "AR_" + file;
+                diagrams.put(filename, DiagrammGenerator.generateAliasResultForFile(obj, "", file, 50));
             }
+
             //all possible ids: "sec_pm_time", "mil_pm_time", "mic_pm_time", "nan_pm_time",
             //                  "sec_function_time", "mil_function_time", "mic_function_time", "nan_function_time",
             //                  "sec_alias_time", "mil_alias_time", "mic_alias_time", "nan_alias_time",
@@ -112,7 +108,20 @@ public class Main {
             //                  "alias_sets", "no_alias_sets", "mean_alias_sets", "var_alias_sets", "mean_no_alias_sets", "var_no_alias_sets"
             String[] aa_keys = new String[]{"sec_pm_time", "alias_sum", "alias_sets", "ex_alias_sets", "no_alias_sets", "mean_alias_sets", "var_alias_sets", "mean_ex_alias_sets", "var_ex_alias_sets", "mean_no_alias_sets", "var_no_alias_sets"};
 
+            LinkedList<String> empty = new LinkedList<>();
+            LinkedList<String> NOSCEVAA = new LinkedList<>();
+            NOSCEVAA.add("llvm::SCEVAAWrapperPass");
+
             for (int ver : new int[]{40, 50, 60, 71, 80, 90}) {
+
+                diagrams.put("performance_no_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, NoAliasList, scale10h6, NOSCEVAA));
+                diagrams.put("performance_partial_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "",ver, PartialAliasList, scale10h3, empty));
+                diagrams.put("performance_must_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, MustAliasList, scale10h3, empty));
+                diagrams.put("performance_mpn_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, MPNAliasList, scale10h6, NOSCEVAA));
+
+                diagrams.put("alias_sum_relative_" + ver, DiagrammGenerator.generateRelativeAliasSet(obj, "", ver, "alias_sets"));
+                diagrams.put("ex_alias_sum_relative_" + ver, DiagrammGenerator.generateRelativeAliasSet(obj, "", ver, "ex_alias_sets"));
+
                 for (String key : aa_keys) {
                     String file = key.replace(" ", "-") + "_" + ver;
                     diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, ver, key, "LLVM_" + ver + " " + key + " for each Analysis", key, aa_label));
@@ -216,10 +225,10 @@ public class Main {
         aa_color_map.put(id, id);
         aa_id_map.put("llvm::TypeBasedAAWrapperPass", id++);
 
-        aa_key_map.put("llvm::TypeBasedAAWrapperPass->llvm::ScopedNoAliasAAWrapperPass->llvm::BasicAAWrapperPass", "clang");
+        aa_key_map.put("llvm::GlobalsAAWrapperPass->llvm::TypeBasedAAWrapperPass->llvm::ScopedNoAliasAAWrapperPass->llvm::BasicAAWrapperPass", "clang");
         aa_label.put(id, "clang");
         aa_color_map.put(id, id);
-        aa_id_map.put("llvm::TypeBasedAAWrapperPass->llvm::ScopedNoAliasAAWrapperPass->llvm::BasicAAWrapperPass", id++);
+        aa_id_map.put("llvm::GlobalsAAWrapperPass->llvm::TypeBasedAAWrapperPass->llvm::ScopedNoAliasAAWrapperPass->llvm::BasicAAWrapperPass", id++);
 
         aa_key_map.forEach(new BiConsumer<String, String>() {
             @Override
@@ -293,6 +302,12 @@ public class Main {
         time_color_map.put(TimeInfo.ALIAS_TIME.id, TimeInfo.ALIAS_TIME.id);
         time_color_map.put(TimeInfo.MODREF_TIME.id, TimeInfo.MODREF_TIME.id);
 
+        NoAliasList.add(NO_ALIAS_COUNT);
+        PartialAliasList.add(PARTIAL_ALIAS_COUNT);
+        MustAliasList.add(MUST_ALIAS_COUNT);
+        MPNAliasList.add(NO_ALIAS_COUNT);
+        MPNAliasList.add(PARTIAL_ALIAS_COUNT);
+        MPNAliasList.add(MUST_ALIAS_COUNT);
 
 
     }
@@ -339,4 +354,8 @@ public class Main {
     public static final String VAR_ALIAS_SETS = "var_alias_sets";
     public static final String MEAN_NO_ALIAS_SETS = "mean_no_alias_sets";
     public static final String VAR_NO_ALIAS_SETS = "var_no_alias_sets";
+
+    public static final double scale10h3 = 1_000;
+    public static final double scale10h6 = 1_000_000;
+    public static final double scale10h9 = 1_000_000_000;
 }

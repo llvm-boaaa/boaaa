@@ -1,6 +1,9 @@
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class DiagrammGenerator {
 
@@ -85,6 +88,58 @@ public class DiagrammGenerator {
         return seconds;
     }
 
+    public static Diagramm generatePerformanceChart(JSONObject obj, String headline, int version, List<String> ars, double scalar, List<String> skip) {
+        StringLineChart chart = new StringLineChart(4000, 2000);
+        if (!headline.isEmpty())
+            chart.addHeadline(headline);
+        chart.addColorIdMap(Main.aa_color_map);
+        chart.addSideboard(Main.aa_label);
+        chart.startAtZero();
+
+
+        for (String file : obj.keySet()) {
+            if (file.equals("libLLVMCore.a")) continue;
+            Object fileo = obj.get(file);
+            HashMap<Integer, Double> data = new HashMap<>();
+            int instructions = Integer.MAX_VALUE;
+            if (fileo instanceof JSONObject) {
+                JSONObject jo_file = (JSONObject) fileo;
+                if (jo_file.has("" + version)) {
+                    Object ver = jo_file.get("" + version);
+                    if (ver instanceof JSONObject) {
+                        JSONObject jo_ver = (JSONObject) ver;
+                        if (jo_ver.has("instruction_count")) {
+                            instructions = jo_ver.getInt("instruction_count");
+                        }
+                        for(String aa_id : jo_ver.keySet()) {
+                            if (skip.contains(aa_id)) continue;
+                            if (Main.aa_id_map.containsKey(aa_id)) {
+                                Object aao = jo_ver.get(aa_id);
+                                if (aao instanceof JSONObject) {
+                                    JSONObject jo_aa = (JSONObject) aao;
+                                    Integer id = Main.aa_id_map.get(aa_id);
+
+                                    double pmtime = scalar * getTimeInSeconds(jo_aa, "pm_time");
+                                    double count = 0;
+                                    for (String ar : ars) {
+                                        if (jo_aa.has(ar)) {
+                                            count += jo_aa.getDouble(ar);
+                                        }
+                                    }
+                                    if (count == 0) continue;
+                                    double res = pmtime / count;
+                                    data.put(id, res);
+                                }
+                            }
+                        }
+                    }
+                    chart.addData(instructions, file, data);
+                }
+            }
+        }
+        return chart;
+    }
+
     public static Diagramm generateAliasResultForFile(JSONObject obj, String headline, String file, int version) {
         RelationChart chart = new RelationChart(2000, 2000);
         chart.addColorIdMap(Main.ar_color_map);
@@ -136,6 +191,102 @@ public class DiagrammGenerator {
             }
         }
 
+        return chart;
+    }
+
+    public static Diagramm generateRelativeAliasSet(JSONObject obj, String headline, int version, String key) {
+        StringLineChart chart = new StringLineChart(4000, 2000);
+        chart.addColorIdMap(Main.aa_color_map);
+        chart.addSideboard(Main.aa_label);
+        LinkedList<String> ignore = new LinkedList<>();
+        ignore.add("llvm::ScopedNoAliasAAWrapperPass");
+        ignore.add("llvm::TypeBasedAAWrapperPass");
+
+        if (!headline.isEmpty())
+            chart.addHeadline(headline);
+        chart.startAtZero();
+        //chart.addColorIdMap(Main.colorid);
+        HashMap<Integer, Integer> color_id = new HashMap<>();
+        for (String file : obj.keySet()) {
+            if (file.equals("libLLVMCore.a")) continue;
+            Object cur = obj.get(file);
+            if (cur instanceof JSONObject) {
+                JSONObject jo_file = (JSONObject) cur;
+                long sum = 0;
+                int count = 0;
+                for (String id : jo_file.keySet()) {
+                    boolean error = false;
+                    Integer iid = 0;
+                    try {
+                        iid = Integer.parseInt(id);
+                    } catch (NumberFormatException nfe) {
+                        error = true;
+                    }
+                    if (!error) {
+                        Object o_ver = jo_file.get(id);
+                        if (o_ver instanceof JSONObject) {
+                            JSONObject jo_ver = (JSONObject) o_ver;
+                            if (jo_ver.has("instruction_count")) {
+                                long val = jo_ver.getLong("instruction_count");
+                                sum += val;
+                                count++;
+                            }
+                        }
+                    }
+                }
+
+                HashMap<Integer, Double> values = new HashMap<>();
+                if (jo_file.has("" + version)) {
+                    Object ver = jo_file.get("" + version);
+                    if (ver instanceof JSONObject) {
+                        JSONObject jo_ver = (JSONObject) ver;
+                        int instructions = 0;
+                        if (jo_ver.has("instruction_count"))
+                             instructions = jo_ver.getInt("instruction_count");
+                        else continue;
+
+                        for (String aa_id : jo_ver.keySet()) {
+                            //if (ignore.contains(aa_id)) continue;
+                            if (Main.aa_id_map.containsKey(aa_id)) {
+                                int iid = Main.aa_id_map.get(aa_id);
+                                Object aao = jo_ver.get(aa_id);
+                                if (aao instanceof JSONObject) {
+                                    JSONObject jo_aa = (JSONObject) aao;
+                                    addKeyToHashMap(jo_aa, values, iid, key);
+                                }
+                            }
+                        }
+                        if (values.size() <= 0) continue;
+                        double min = 0;
+                        double max = 0;
+                        boolean first = true;
+                        for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+                            double v = entry.getValue();
+                            if (v == 0) continue;
+                            if (first) {
+                                min = v;
+                                max = v;
+                                first = false;
+                            }
+                            if (min > v) {
+                                min = v;
+                            }
+                            if (max < v) {
+                                max = v;
+                            }
+                        }
+                        //System.out.println("min: " + min +",max: " + max);
+                        HashMap<Integer, Double> resized = new HashMap<>();
+                        for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+                            if (entry.getValue() == 0) continue;
+                            resized.put(entry.getKey(), Util.map(entry.getValue(), min, max, 0, 100));
+                            //System.out.println("v: " + entry.getValue() + " : " + Util.map(entry.getValue(), min, max, 0, 100));
+                        }
+                        chart.addData(instructions, file, resized);
+                    }
+                }
+            }
+        }
         return chart;
     }
 
