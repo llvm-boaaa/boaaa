@@ -590,7 +590,7 @@ public class DiagrammGenerator {
         HashMap<Integer, Double> m5 = new HashMap<>();
         m5.put(40, 50.0);
         m5.put(50, 100.0);
-        m5.put(60, 500.0);
+        m5.put(60, 5000.0);
 
 
         chart.addData(1, "file1", m1);

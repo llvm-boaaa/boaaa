@@ -94,7 +94,7 @@ public class StringLineChart extends Diagramm {
         }
 
         Rectangle2D canvas = vg.getClipBounds();
-        double top_y       = (PERCENT_5 + (headline.isEmpty() ? 0.0 : PERCENT_7))   * canvas.getHeight();
+        double top_y       = (PERCENT_5 + (headline.isEmpty() ? PERCENT_3 : PERCENT_7))   * canvas.getHeight();
         double down_y      = PERCENT_5                                              * canvas.getHeight() + maxWidth;
         double hight_y     = canvas.getHeight() - top_y - down_y;
 
@@ -126,48 +126,6 @@ public class StringLineChart extends Diagramm {
         PrintUtil.printYAxisScala(vg, dimension, con, minY, maxY);
 
         Rectangle2D printDimension = new Rectangle2D.Double(dimension.getX() * 1.5, dimension.getY(), dimension.getWidth() - dimension.getX(), dimension.getHeight());
-        /*
-        // old implementation
-        int i = 0;
-        int idnum = 0;
-        HashMap<Integer, Integer> idmap;
-        if (colorIdMap != null) {
-            idmap = new HashMap<>(colorIdMap);
-        } else {
-            idmap = new HashMap<>();
-        }
-        LinePrinter lp = new LinePrinter();
-        for(String s : ids) {
-            //print text
-            //first 0% last 100%
-            double percent = 1.0 - ((double) i /(double) (ids.size() - 1));
-            PrintUtil.printTextUnderXAxis(vg, printDimension, s, percent);
-
-            //print data
-
-            HashMap<Integer, Double> map = m_values.get(s);
-            assert(map != null);
-            for(Map.Entry<Integer, Double> entry : map.entrySet()) {
-                if (!idmap.containsKey(entry.getKey())) {
-                    if (i >= ColorUtil.COLORS.length || i >= IconUtil.IconType.values().length) {
-                        throw new IndexOutOfBoundsException("Maximal number of ids: " + Math.min(ColorUtil.COLORS.length, IconUtil.IconType.values().length));
-                    }
-                    idmap.put(entry.getKey(), idnum++);
-                }
-                int id = idmap.get(entry.getKey());
-
-
-
-                Point2D p = PrintUtil.printPosition(printDimension, percent, entry.getValue(), minY, maxY);
-                lp.addPoint(vg, id, p);
-                IconUtil.printIconColor(vg, PrintUtil.printPosition(printDimension, percent, entry.getValue(), minY, maxY), id);
-            }
-
-            //increment
-            i++;
-            lp.step();
-        }
-        /*/
 
         int i = 0;
         int idnum = 0;

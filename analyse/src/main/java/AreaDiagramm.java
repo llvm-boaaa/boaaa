@@ -95,7 +95,7 @@ public class AreaDiagramm extends Diagramm {
         }
 
         Rectangle2D canvas = vg.getClipBounds();
-        double top_y       = (PERCENT_5 + (headline.isEmpty() ? 0.0 : PERCENT_7))   * canvas.getHeight();
+        double top_y       = (PERCENT_5 + (headline.isEmpty() ? PERCENT_3 : PERCENT_7))   * canvas.getHeight();
         double down_y      = PERCENT_5                                              * canvas.getHeight() + maxWidth;
         double hight_y     = canvas.getHeight() - top_y - down_y;
 

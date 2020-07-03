@@ -68,12 +68,12 @@ public class PrintUtil {
         printArrow(vg, startY, Orientation.up);
 
         if (conX != null && !scalarString(conX.digits).isEmpty()) {
-            printTextOverPoint(vg, new Point2D.Double(dimension.getX() + dimension.getWidth(),
-                    dimension.getY() + dimension.getHeight()), "in " + scalarString(conX.digits), SCALA_SCALE_OFFSET);
+            printExponentOverPoint(vg, new Point2D.Double(dimension.getX() + dimension.getWidth(),
+                    dimension.getY() + dimension.getHeight()), "10", scalarString(conX.digits), SCALA_SCALE_OFFSET);
         }
         if (conY != null && !scalarString(conY.digits).isEmpty()) {
-            printTextOverPoint(vg, new Point2D.Double(dimension.getX() + (alignAxis == Align.left ? 0 : dimension.getWidth()),
-                    dimension.getY()), "in " + scalarString(conY.digits), -SCALA_SCALE_OFFSET / 2.f);
+            printExponentOverPoint(vg, new Point2D.Double(dimension.getX() + (alignAxis == Align.left ? 0 : dimension.getWidth()),
+                    dimension.getY()), "10", scalarString(conY.digits),SCALA_SCALE_OFFSET / 2);
         }
 
         if (!yAxis.isEmpty()) {
@@ -233,21 +233,27 @@ public class PrintUtil {
         printTextCenter(vg, center, text);
     }
 
+    private static void printExponentOverPoint(VectorGraphics2D vg, Point2D p, String base, String exponent, double offset) {
+        Rectangle2D bounds = Util.getTextDimension(vg, base);
+        Point2D center = new Point2D.Double(p.getX(), p.getY() - bounds.getHeight() - offset);
+        printExponentCenter(vg, center, base, exponent);
+    }
+
     private static String scalarString(int digits) {
         if      (digits <= 3)
             return "";
         else if (digits <= 6)
-            return "k";
+            return "3";
         else if (digits <= 9)
-            return "M";
+            return "6";
         else if (digits <= 12)
-            return "G";
+            return "9";
         else if (digits <= 15)
-            return "T";
+            return "12";
         else if (digits <= 18)
-            return "P";
+            return "15";
         else
-            return "E";
+            return "18";
     }
 
     private static long scalarFactor(int digits) {
@@ -289,6 +295,22 @@ public class PrintUtil {
         Rectangle2D dim = Util.getTextDimension(vg, text);
         //drawString prints to the string at the lower left corner.
         vg.drawString(text, (float) (p.getX() - dim.getWidth() / 2.0), (float) (p.getY() - dim.getHeight() / 2.0) + vg.getFontMetrics().getAscent());
+    }
+
+    public static void printExponentCenter(VectorGraphics2D vg, Point2D p, String base, String exponent) {
+        Rectangle2D dim = Util.getTextDimension(vg, base);
+        double ascent = vg.getFontMetrics().getAscent();
+        Font f = vg.getFont();
+        vg.setFont(FontUtil.Exponent);
+        Rectangle2D dimExp = Util.getTextDimension(vg, exponent);
+        double width = dim.getWidth() + dimExp.getWidth();
+
+        Point2D centerBase = new Point2D.Double(p.getX() - dimExp.getWidth() / 2.0, p.getY());
+        Point2D centerExp  = new Point2D.Double(centerBase.getX() + width / 2, p.getY() - dim.getHeight() / 2 - vg.getFontMetrics().getAscent() + ascent);
+
+        printTextCenter(vg, centerExp, exponent);
+        vg.setFont(f);
+        printTextCenter(vg, centerBase, base);
     }
 
     public static Point2D printPosition(Rectangle2D dimension, double percent, double y, double minY, double maxY) {

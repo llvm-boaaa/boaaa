@@ -29,7 +29,7 @@ public class Main {
 
 
     //add/remove "/" below to switch mode
-    //*
+    /*
     public static boolean metadata = true;
     /*/
     public static boolean metadata = false;
@@ -215,10 +215,12 @@ public class Main {
         aa_color_map.put(id, id);
         aa_id_map.put("llvm::SCEVAAWrapperPass", id++);
 
-        aa_key_map.put("llvm::ScopedNoAliasAAWrapperPass", "SNAAA");
-        aa_label.put(id, "SNAAA");
-        aa_color_map.put(id, id);
-        aa_id_map.put("llvm::ScopedNoAliasAAWrapperPass", id++);
+        //aa_key_map.put("llvm::ScopedNoAliasAAWrapperPass", "SNAAA");
+        //aa_label.put(id, "SNAAA");
+        //aa_color_map.put(id, id);
+        //aa_id_map.put("llvm::ScopedNoAliasAAWrapperPass", id++);
+        id++; //keep colors
+
 
         aa_key_map.put("llvm::TypeBasedAAWrapperPass", "TBAA");
         aa_label.put(id, "TBAA");
@@ -237,18 +239,18 @@ public class Main {
             }
         });
 
-        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::BottomUpSeaDsaWrapperPass", "SeaDsa-BU");
-        aa_label.put(id, "SeaDsa-BU");
+        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::BottomUpSeaDsaWrapperPass", "SeaDSA-BU");
+        aa_label.put(id, "SeaDSA-BU");
         aa_color_map.put(id, id);
         aa_id_map.put("sea_dsa::DsaAnalysis->llvm::BottomUpSeaDsaWrapperPass", id++);
 
-        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass", "SeaDsa-BUTD");
-        aa_label.put(id, "SeaDsa-BUTD");
+        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass", "SeaDSA-BUTD");
+        aa_label.put(id, "SeaDSA-BUTD");
         aa_color_map.put(id, id);
         aa_id_map.put("sea_dsa::DsaAnalysis->llvm::ContextSensitiveBottomUpTopDownSeaDsaWrapperPass", id++);
 
-        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::ContextInsensitiveSeaDsaWrapperPass", "SeaDsa-CIS");
-        aa_label.put(id, "SeaDsa-CIS");
+        aa_key_map_50.put("sea_dsa::DsaAnalysis->llvm::ContextInsensitiveSeaDsaWrapperPass", "SeaDSA-CIS");
+        aa_label.put(id, "SeaDSA-CIS");
         aa_color_map.put(id, id);
         aa_id_map.put("sea_dsa::DsaAnalysis->llvm::ContextInsensitiveSeaDsaWrapperPass", id++);
 
