@@ -18,3 +18,6 @@
 	url = https://github.com/Tencent/rapidjson.git
 [submodule ".\\analysis\\Sea-Dsa\\"]
 	url = ../SeaDSA.git
+[submodule "bc_sources"]
+	path = bc_sources
+	url = ../bc_sources.git
