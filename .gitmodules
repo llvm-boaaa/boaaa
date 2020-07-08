@@ -16,3 +16,5 @@
 [submodule "repos/rapidjson"]
 	path = repos/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
+[submodule ".\\analysis\\Sea-Dsa\\"]
+	url = ../SeaDSA.git
