@@ -1,23 +1,9 @@
-[submodule "cmake/nicemake"]
-	path = cmake/nicemake
-	url = https://github.com/fkutzner/NiceMake.git
-[submodule "llvm/current"]
-	path = llvm/current
-	url = https://github.com/llvm-mirror/llvm.git
-[submodule "repos/fmt"]
-	path = repos/fmt
-	url = https://github.com/fmtlib/fmt.git
-[submodule "cmake/cmake_git_clone"]
-	path = cmake/cmake_git_clone
-	url = https://github.com/tschuchortdev/cmake_git_clone.git
 [submodule "analysis/Sea-Dsa"]
 	path = analysis/Sea-Dsa
-	url = ../SeaDSA.git
-[submodule "repos/rapidjson"]
-	path = repos/rapidjson
-	url = https://github.com/Tencent/rapidjson.git
-[submodule ".\\analysis\\Sea-Dsa\\"]
 	url = ../SeaDSA.git
 [submodule "bc_sources"]
 	path = bc_sources
 	url = ../bc_sources.git
+[submodule "repos/rapidjson"]
+	path = repos/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
