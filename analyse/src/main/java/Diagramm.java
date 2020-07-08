@@ -33,12 +33,12 @@ public abstract class Diagramm {
         m_yAxisText = "";
     }
 
-    void addXAxisText(String s) {
-        m_xAxisText = s == null ? "" : s;
+    Diagramm addXAxisText(String s) {
+        m_xAxisText = s == null ? "" : s; return this;
     }
 
-    void addYAxisText(String s) {
-        m_yAxisText = s == null ? "" : s;
+    Diagramm addYAxisText(String s) {
+        m_yAxisText = s == null ? "" : s; return this;
     }
 
     abstract void printToVG(VectorGraphics2D vg);

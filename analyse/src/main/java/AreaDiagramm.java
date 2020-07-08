@@ -99,10 +99,22 @@ public class AreaDiagramm extends Diagramm {
         double down_y      = PERCENT_5                                              * canvas.getHeight() + maxWidth;
         double hight_y     = canvas.getHeight() - top_y - down_y;
 
-        double left_x      = PERCENT_7                                             * canvas.getWidth();
+        double left_x      = (m_yAxisText.isEmpty() ? 0 : (2 * Util.getTextDimension(vg, m_yAxisText).getHeight()))
+                              + 2 * PrintUtil.ICON_SIZE + Util.getTextDimension(vg, "888").getWidth();
         double right_x     = PERCENT_3                                             * canvas.getWidth();
         double right_axis_x= PERCENT_2                                             * canvas.getWidth();
-        double sideboard_x = (sideboard == null      ? 0.0       : PERCENT_10)     * canvas.getWidth();
+
+        double sideboard_x = 0.0;
+        if (sideboard != null && !sideboard.isEmpty()) {
+            for (Map.Entry<Integer, String> entry : sideboard.entrySet()) {
+                double width = Util.getTextDimension(vg, entry.getValue()).getWidth();
+                if (sideboard_x < width) {
+                    sideboard_x = width;
+                }
+            }
+            sideboard_x += 3 * PrintUtil.ICON_SIZE;
+        }
+        //double sideboard_x = (sideboard == null      ? 0.0       : PERCENT_10)     * canvas.getWidth();
         double width_x     = canvas.getWidth() - left_x - right_x - right_axis_x - sideboard_x;
 
         Rectangle2D dimension = new Rectangle2D.Double(left_x,  top_y, width_x, hight_y);
@@ -130,7 +142,9 @@ public class AreaDiagramm extends Diagramm {
         dimension = new Rectangle2D.Double(dimension.getX(), dimension.getY() + lower, dimension.getWidth(), dimension.getHeight() - lower);
         PrintUtil.printYAxisScala(vg, dimension, con, minY, maxY);
 
-        Rectangle2D printDimension = new Rectangle2D.Double(dimension.getX() * 1.5, dimension.getY(), dimension.getWidth() - dimension.getX(), dimension.getHeight());
+        double width = PrintUtil.ICON_SIZE * 6;
+
+        Rectangle2D printDimension = new Rectangle2D.Double(dimension.getX() + width / 2, dimension.getY(), dimension.getWidth() - width, dimension.getHeight());
         int i = 0;
 
         int idnum = 0;

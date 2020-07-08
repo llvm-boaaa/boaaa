@@ -9,7 +9,7 @@ public class DiagrammGenerator {
 
     public static Diagramm generateTimeResult(JSONObject obj, String headline, int version, String aa) {
         AreaDiagramm chart = new AreaDiagramm(4000, 2000);
-        //chart.addHeadline(headline);
+        if (!headline.isEmpty()) chart.addHeadline(headline);
         chart.addColorIdMap(Main.time_color_map);
         chart.addSideboard(Main.time_label);
         //chart.setTransparent(true);
@@ -61,6 +61,7 @@ public class DiagrammGenerator {
             }
             chart.addData(instructions, file, data);
         }
+        chart.addYAxisText("Zeit in Sekunden");
         return chart;
     }
 

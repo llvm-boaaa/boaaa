@@ -22,11 +22,11 @@ public class PrintUtil {
         left
     }
 
-    static final int ICON_SIZE = 25;
-    static final int DOUBLE_ICON_SIZE = ICON_SIZE * 2;
-    static final int HEXAGON_ICON_SIZE = ICON_SIZE / 5 * 6;
-    static final int SCALA_LINE_LENGTH = 15;
-    static final int SCALA_SCALE_OFFSET = FontUtil.Standart.getSize() / 4;
+    public static final int ICON_SIZE = 25;
+    public static final int DOUBLE_ICON_SIZE = ICON_SIZE * 2;
+    public static final int HEXAGON_ICON_SIZE = ICON_SIZE / 5 * 6;
+    public static final int SCALA_LINE_LENGTH = 15;
+    public static final int SCALA_SCALE_OFFSET = FontUtil.Standart.getSize() / 4;
 
     public static void printDiagrammLines(VectorGraphics2D vg, Rectangle2D dimension, StepContext conX, StepContext conY, Align alignAxis, String yAxis, String xAxis, Rectangle2D values) {
         printDiagrammLines(vg, dimension, conX, conY, alignAxis, yAxis, xAxis, values, true);
@@ -77,7 +77,7 @@ public class PrintUtil {
         }
 
         if (!yAxis.isEmpty()) {
-            Point2D centerY = new Point2D.Double(dimension.getX() / 4,
+            Point2D centerY = new Point2D.Double(Util.getTextDimension(vg, yAxis).getHeight(),
                     dimension.getY() + dimension.getHeight() / 2);
 
             AffineTransform at = vg.getTransform();
@@ -158,9 +158,9 @@ public class PrintUtil {
                 value = "" + scala[i];
             }
             if (align == Align.left) {
-                printTextLeftOfPoint(vg, lefts[i], value, dimension.getX() / 4);
+                printTextLeftOfPoint(vg, lefts[i], value, ICON_SIZE);
             } else {
-                printTextRightOfPoint(vg, rights[i], value, dimension.getX() / 4);
+                printTextRightOfPoint(vg, rights[i], value, ICON_SIZE);
             }
 
             if (printLine) {

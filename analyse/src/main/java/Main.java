@@ -35,8 +35,11 @@ public class Main {
     public static boolean metadata = false;
     //*/
 
+    public static boolean HEADLINE = false;
+
     public static final String pathToJson = "./results_llvm_final.json";
     public static final String pathToMetaJson = "./results_slib_final.json";
+    //public static final String pathToMetaJson = "./results_slib_opt.json";
 
     public static HashMap<Integer, Integer> colorid = new HashMap<>();
     public static HashMap<Integer, String> version_label = new HashMap<>();
@@ -55,6 +58,8 @@ public class Main {
 
     public static HashMap<Integer, String> time_label = new HashMap<>();
     public static HashMap<Integer, Integer> time_color_map = new HashMap<>();
+
+    public static HashMap<String, String> yAxis_map = new HashMap<>();
 
     public static LinkedList<String> NoAliasList = new LinkedList<>();
     public static LinkedList<String> PartialAliasList = new LinkedList<>();
@@ -91,11 +96,11 @@ public class Main {
 
         if (DATA) {
 
-            diagrams.put("instructions", DiagrammGenerator.generateInstructionCount(obj));
+            diagrams.put("instructions", DiagrammGenerator.generateInstructionCount(obj).addYAxisText("Operationen"));
 
             for(String file : obj.keySet()) {
                 String filename = "AR_" + file;
-                diagrams.put(filename, DiagrammGenerator.generateAliasResultForFile(obj, "", file, 50));
+                diagrams.put(filename, DiagrammGenerator.generateAliasResultForFile(obj, "", file, 50).addYAxisText("Alias Ergebnisse in Prozent"));
             }
 
             //all possible ids: "sec_pm_time", "mil_pm_time", "mic_pm_time", "nan_pm_time",
@@ -114,17 +119,19 @@ public class Main {
 
             for (int ver : new int[]{40, 50, 60, 71, 80, 90}) {
 
-                diagrams.put("performance_no_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, NoAliasList, scale10h6, NOSCEVAA));
-                diagrams.put("performance_partial_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "",ver, PartialAliasList, scale10h3, empty));
-                diagrams.put("performance_must_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, MustAliasList, scale10h3, empty));
-                diagrams.put("performance_mpn_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, MPNAliasList, scale10h6, NOSCEVAA));
+                diagrams.put("performance_no_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, NoAliasList, scale10h6, NOSCEVAA).addYAxisText("Zeit pro NoAlias in Mikrosekunden"));
+                diagrams.put("performance_partial_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "",ver, PartialAliasList, scale10h3, empty).addYAxisText("Zeit pro PartialAlias in Millisekunden"));
+                diagrams.put("performance_must_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, MustAliasList, scale10h3, empty).addYAxisText("Zeit pro MustAlias in Millisekunden"));
+                diagrams.put("performance_mpn_" + ver, DiagrammGenerator.generatePerformanceChart(obj, "", ver, MPNAliasList, scale10h6, NOSCEVAA).addYAxisText("Zeit pro MPNAlias in Mikrosekunden"));
 
-                diagrams.put("alias_sum_relative_" + ver, DiagrammGenerator.generateRelativeAliasSet(obj, "", ver, "alias_sets"));
-                diagrams.put("ex_alias_sum_relative_" + ver, DiagrammGenerator.generateRelativeAliasSet(obj, "", ver, "ex_alias_sets"));
+                diagrams.put("alias_sum_relative_" + ver, DiagrammGenerator.generateRelativeAliasSet(obj, "", ver, "alias_sets").addYAxisText("Prozent"));
+                diagrams.put("ex_alias_sum_relative_" + ver, DiagrammGenerator.generateRelativeAliasSet(obj, "", ver, "ex_alias_sets").addYAxisText("Prozent"));
 
                 for (String key : aa_keys) {
                     String file = key.replace(" ", "-") + "_" + ver;
-                    diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, ver, key, "LLVM_" + ver + " " + key + " for each Analysis", key, aa_label));
+                    String head = "";
+                    if (HEADLINE) head = "LLVM_" + ver + " " + key + " for each Analysis";
+                    diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, ver, key, head, key, aa_label).addYAxisText(yAxis_map.get(key)));
                 }
             }
 
@@ -132,7 +139,9 @@ public class Main {
                 String aa = entry.getKey();
                 for (String key : aa_keys) {
                     String file = key.replace(" ", "-") + "_" + entry.getValue();
-                    diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, aa, key, key + " for " + entry.getValue(), key, version_label));
+                    String head = "";
+                    if (HEADLINE) head = key + " for " + entry.getValue();
+                    diagrams.put(file, DiagrammGenerator.generateVersionAASpecificStringLineChart(obj, aa, key, head, key, version_label).addYAxisText(yAxis_map.get(key)));
                 }
             }
 
@@ -172,7 +181,7 @@ public class Main {
             DiagrammPrinter.printDiagramms(diagrams, "", DiagrammPrinter.EXPORT.SVG);
         } else {
             if (metadata) {
-                DiagrammPrinter.printDiagramms(diagrams, "slib", FORMAT);
+                DiagrammPrinter.printDiagramms(diagrams, "slib-opt", FORMAT);
             } else {
                 DiagrammPrinter.printDiagramms(diagrams, "llvm", FORMAT);
             }
@@ -312,6 +321,19 @@ public class Main {
         MPNAliasList.add(MUST_ALIAS_COUNT);
 
 
+
+
+        yAxis_map.put("sec_pm_time",         "Analysenlaufzeit in Sekunden");
+        yAxis_map.put("alias_sum",           "");
+        yAxis_map.put("alias_sets",          "");
+        yAxis_map.put("ex_alias_sets",       "");
+        yAxis_map.put("no_alias_sets",       "");
+        yAxis_map.put("mean_alias_sets",     "");
+        yAxis_map.put("var_alias_sets",      "");
+        yAxis_map.put("mean_ex_alias_sets",  "");
+        yAxis_map.put("var_ex_alias_sets",   "");
+        yAxis_map.put("mean_no_alias_sets",  "");
+        yAxis_map.put("var_no_alias_sets",   "");
     }
 
     public static final String SEC_PM_TIME = "sec_pm_time";
